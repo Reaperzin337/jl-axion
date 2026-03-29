@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JL AXION | Favoritos</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#ff8e43">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="favorites">
+  <div data-site-shell></div>
+
+  <main class="page">
+    <section class="page-hero page-hero--premium section">
+      <div>
+        <span class="eyebrow">Favoritos</span>
+        <h1>Uma wishlist com cara de showroom premium.</h1>
+        <p>Seus itens salvos ficam organizados como uma colecao pessoal, prontos para migrar ao carrinho quando o momento de compra chegar.</p>
+      </div>
+
+      <div class="hero-panel-grid">
+        <article class="micro-card">
+          <strong data-favorites-total>0 produtos</strong>
+          <span>Selecao salva com acesso rapido.</span>
+        </article>
+        <article class="micro-card">
+          <strong>Curadoria em andamento</strong>
+          <span>Volte sempre para comparar e decidir com calma.</span>
+        </article>
+        <article class="micro-card micro-card--accent">
+          <strong>Compra em um clique</strong>
+          <span>Envie todos os favoritos ao carrinho quando quiser.</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section page-banner-strip">
+      <article class="info-tile">
+        <span class="eyebrow">Selecao pessoal</span>
+        <h2>Uma area para guardar lampadas, carregadores e utilidades com mais intencao visual.</h2>
+      </article>
+      <article class="info-tile info-tile--accent">
+        <span class="eyebrow">Insight premium</span>
+        <p>Favoritos tambem comunicam valor de marca. Por isso o layout agora parece mais uma wishlist de design do que uma lista simples.</p>
+      </article>
+    </section>
+
+    <section class="section">
+      <div class="favorites-toolbar">
+        <div>
+          <span class="eyebrow">Lista salva</span>
+          <h2>Produtos que mais chamaram sua atencao</h2>
+        </div>
+
+        <button type="button" class="secondary-btn" data-action="move-all-favorites">Adicionar tudo ao carrinho</button>
+      </div>
+
+      <div class="product-grid" data-favorite-items></div>
+    </section>
+
+    <section class="section">
+      <div class="section-heading section-heading--stacked">
+        <div>
+          <span class="eyebrow">Sugestoes</span>
+          <h2>Outros itens para combinar com seus favoritos</h2>
+        </div>
+      </div>
+
+      <div class="product-grid product-grid--compact" data-favorite-recommendations></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

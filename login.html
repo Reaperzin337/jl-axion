@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JL AXION | Login</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#ff8e43">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="login">
+  <div data-site-shell></div>
+
+  <main class="page">
+    <section class="page-hero section">
+      <span class="eyebrow">Acesso do cliente</span>
+      <h1>Entrar na sua area AXION</h1>
+      <p>Interface de login moderna para apresentar o fluxo de acesso do e-commerce. Agora a base funciona com backend local, sessao e dados persistidos em banco.</p>
+    </section>
+
+    <section class="section split-layout">
+      <article class="content-card content-card--accent">
+        <span class="eyebrow">Vantagens da conta</span>
+        <h2>Uma jornada mais rapida para quem volta a comprar.</h2>
+        <ul class="feature-list">
+          <li>Produtos favoritos reunidos em um so lugar.</li>
+          <li>Historico, status de pedidos e atalhos de recompra.</li>
+          <li>Dados de perfil e endereco organizados.</li>
+          <li>Base pronta para integrar autenticacao real no futuro.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <div class="section-heading section-heading--stacked">
+          <div>
+            <span class="eyebrow">Login demonstrativo</span>
+            <h2>Entre para visualizar sua conta</h2>
+          </div>
+        </div>
+
+        <form class="form-grid" data-login-form>
+          <label class="field">
+            <span>Nome</span>
+            <input class="input" type="text" name="name" placeholder="Seu nome">
+          </label>
+
+          <label class="field">
+            <span>E-mail</span>
+            <input class="input" type="email" name="email" placeholder="voce@exemplo.com" required>
+          </label>
+
+          <label class="field">
+            <span>Senha</span>
+            <div class="input-row">
+              <input class="input" type="password" name="password" value="axion123" required>
+              <button type="button" class="ghost-btn" data-action="toggle-password">Mostrar</button>
+            </div>
+          </label>
+
+          <label class="checkbox-row">
+            <input type="checkbox" name="remember" checked>
+            <span>Manter sessao ativa neste dispositivo</span>
+          </label>
+
+          <button type="submit" class="primary-btn primary-btn--full">Entrar na JL AXION</button>
+          <p class="helper-text">Use o acesso padrao `cliente@jlaxion.com` com senha `axion123`, ou entre com outro e-mail para criar uma conta local.</p>
+        </form>
+      </article>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

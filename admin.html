@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JL AXION | Admin</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#ff8e43">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-body">
+  <main class="admin-page">
+    <header class="admin-shell">
+      <a class="brand" href="index.html" aria-label="Voltar para a loja JL AXION">
+        <img class="brand__logo" src="assets/jl-axion-lockup.svg" alt="JL AXION">
+      </a>
+
+      <div class="admin-shell__actions">
+        <a class="secondary-btn" href="index.html">Ver loja</a>
+        <button type="button" class="ghost-btn" data-admin-action="logout-admin" data-admin-logout hidden>Sair</button>
+      </div>
+    </header>
+
+    <section class="page-hero page-hero--premium section">
+      <div>
+        <span class="eyebrow">Painel administrativo</span>
+        <h1>Gerencie catalogo, pedidos e a operacao da JL AXION.</h1>
+        <p>Area preparada para controlar produtos, acompanhar pedidos e dar base para o deploy com uma estrutura mais profissional.</p>
+      </div>
+
+      <div class="hero-panel-grid">
+        <article class="micro-card">
+          <strong>Produtos</strong>
+          <span>Cadastro, edicao e remocao do catalogo com leitura rapida.</span>
+        </article>
+        <article class="micro-card">
+          <strong>Pedidos</strong>
+          <span>Status e historico comercial em um mesmo painel.</span>
+        </article>
+        <article class="micro-card micro-card--accent">
+          <strong>Deploy</strong>
+          <span>Base pronta para subir com variaveis de ambiente e container.</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section admin-feedback-shell">
+      <div class="summary-note admin-feedback" data-admin-feedback hidden></div>
+    </section>
+
+    <section class="section" data-admin-auth></section>
+
+    <section class="section admin-dashboard" data-admin-dashboard hidden>
+      <div class="stats-grid" data-admin-stats></div>
+
+      <div class="admin-grid">
+        <article class="content-card admin-panel">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Catalogo</span>
+              <h2>Editar ou criar produto</h2>
+            </div>
+          </div>
+
+          <form class="form-grid" data-admin-product-form>
+            <input type="hidden" name="currentId">
+
+            <label class="field">
+              <span>Nome</span>
+              <input class="input" type="text" name="name" placeholder="Nome do produto" required>
+            </label>
+
+            <label class="field">
+              <span>Categoria</span>
+              <input class="input" type="text" name="category" list="admin-category-list" placeholder="Utilidades" required>
+            </label>
+
+            <datalist id="admin-category-list" data-admin-categories></datalist>
+
+            <label class="field">
+              <span>Badge</span>
+              <input class="input" type="text" name="badge" placeholder="Novo">
+            </label>
+
+            <label class="field">
+              <span>Preco</span>
+              <input class="input" type="number" step="0.01" min="0" name="price" placeholder="189.90" required>
+            </label>
+
+            <label class="field">
+              <span>Preco antigo</span>
+              <input class="input" type="number" step="0.01" min="0" name="oldPrice" placeholder="239.90">
+            </label>
+
+            <label class="field">
+              <span>Avaliacao</span>
+              <input class="input" type="number" step="0.1" min="0" max="5" name="rating" placeholder="4.8">
+            </label>
+
+            <label class="field">
+              <span>Avaliacoes</span>
+              <input class="input" type="number" min="0" name="reviews" placeholder="120">
+            </label>
+
+            <label class="field">
+              <span>Entrega</span>
+              <input class="input" type="text" name="shipping" placeholder="Entrega amanha">
+            </label>
+
+            <label class="field">
+              <span>Imagem</span>
+              <input class="input" type="text" name="image" placeholder="assets/novo-produto.svg">
+            </label>
+
+            <label class="field field--full">
+              <span>Descricao</span>
+              <textarea class="input admin-textarea" name="description" placeholder="Descricao premium do produto"></textarea>
+            </label>
+
+            <div class="admin-inline-actions">
+              <button type="submit" class="primary-btn">Salvar produto</button>
+              <button type="button" class="secondary-btn" data-admin-action="clear-product-form">Limpar formulario</button>
+            </div>
+          </form>
+        </article>
+
+        <article class="content-card admin-panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Produtos</span>
+              <h2>Catalogo atual</h2>
+            </div>
+
+            <label class="search-shell">
+              <input type="search" class="input" placeholder="Buscar produto no painel" data-admin-product-search>
+            </label>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Categoria</th>
+                  <th>Preco</th>
+                  <th>Status</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody data-admin-products></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+
+      <article class="content-card admin-panel">
+        <div class="section-heading section-heading--stacked">
+          <div>
+            <span class="eyebrow">Pedidos</span>
+            <h2>Acompanhar e atualizar status</h2>
+          </div>
+        </div>
+
+        <div class="order-list admin-order-list" data-admin-orders></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>

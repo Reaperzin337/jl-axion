@@ -1,0 +1,60 @@
+# JL AXION
+
+Loja premium de utilidades e tecnologia com frontend multipagina, backend em Express + SQLite e painel administrativo.
+
+## O que ja esta pronto
+
+- Home, categorias, produto, favoritos, carrinho, conta e checkout
+- Backend com sessao, catalogo, favoritos, carrinho, perfil e pedidos
+- Painel admin em `/admin.html` para gerenciar produtos e pedidos
+- Projeto preparado para deploy com Docker e variaveis de ambiente
+
+## Rodando localmente
+
+```bash
+npm install
+npm start
+```
+
+Depois abra:
+
+- Loja: `http://localhost:3000`
+- Admin: `http://localhost:3000/admin.html`
+
+## Acessos seed
+
+- Cliente: `cliente@jlaxion.com` / `axion123`
+- Admin: `admin@jlaxion.com` / `axionadmin`
+
+## Deploy com Docker
+
+1. Copie `.env.example` para `.env`
+2. Ajuste principalmente `SESSION_SECRET` e a senha admin
+3. Suba o projeto:
+
+```bash
+docker compose up --build -d
+```
+
+O banco SQLite fica persistido na pasta local `server-data/`, montada no container em `/data`.
+
+## Variaveis de ambiente
+
+- `PORT`: porta HTTP do servidor
+- `SESSION_SECRET`: chave da sessao
+- `DATA_DIR`: pasta onde o banco SQLite sera salvo
+- `DB_PATH`: caminho completo do banco, se quiser sobrescrever `DATA_DIR`
+- `SESSION_DB_PATH`: caminho completo do banco de sessoes SQLite
+- `SESSION_COOKIE_NAME`: nome do cookie de sessao
+- `ADMIN_NAME`: nome exibido para a conta admin seed
+- `ADMIN_EMAIL`: e-mail da conta admin seed
+- `ADMIN_PASSWORD`: senha da conta admin seed
+
+## Estrutura principal
+
+- `server.js`: backend e API
+- `app.js`: frontend da loja
+- `admin.js`: frontend do painel admin
+- `styles.css`: identidade visual e responsividade
+- `docker-compose.yml`: subida local para deploy/container
+- `Dockerfile`: imagem da aplicacao

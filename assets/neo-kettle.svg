@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 300" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="28" y1="26" x2="388" y2="276" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101318"/>
+      <stop offset="1" stop-color="#151018"/>
+    </linearGradient>
+    <linearGradient id="kettle" x1="144" y1="78" x2="292" y2="216" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC857"/>
+      <stop offset="1" stop-color="#FF7B6A"/>
+    </linearGradient>
+  </defs>
+  <rect width="420" height="300" rx="28" fill="url(#bg)"/>
+  <circle cx="102" cy="86" r="72" fill="#FFC857" fill-opacity=".10"/>
+  <ellipse cx="210" cy="236" rx="116" ry="24" fill="#06080C"/>
+  <ellipse cx="210" cy="228" rx="106" ry="18" fill="#111822"/>
+  <path d="M160 92c0-20 16-36 36-36h28c20 0 36 16 36 36v18c20 7 34 24 34 46v18c0 38-31 68-68 68h-32c-38 0-68-30-68-68v-18c0-22 14-39 34-46V92Z" fill="url(#kettle)"/>
+  <path d="M274 114h30c18 0 32 14 32 32s-14 32-32 32h-10" stroke="#FFE4A6" stroke-width="12" stroke-linecap="round"/>
+  <rect x="178" y="128" width="64" height="56" rx="20" fill="#FFF7E7" fill-opacity=".28"/>
+  <circle cx="210" cy="156" r="12" fill="#FFF7E7" fill-opacity=".75"/>
+</svg>

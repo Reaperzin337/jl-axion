@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" fill="none">
+  <defs>
+    <linearGradient id="bgA" x1="62" y1="34" x2="836" y2="486" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A141B"/>
+      <stop offset="1" stop-color="#151018"/>
+    </linearGradient>
+    <linearGradient id="lamp" x1="532" y1="124" x2="640" y2="328" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2CE6CF"/>
+      <stop offset="1" stop-color="#FF5D8F"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="520" rx="32" fill="url(#bgA)"/>
+  <circle cx="210" cy="128" r="120" fill="#2CE6CF" fill-opacity=".08"/>
+  <circle cx="736" cy="88" r="96" fill="#FF5D8F" fill-opacity=".08"/>
+  <rect x="0" y="372" width="900" height="148" fill="#0A0D12"/>
+  <rect x="86" y="254" width="240" height="118" rx="20" fill="#131A23"/>
+  <rect x="116" y="234" width="180" height="36" rx="16" fill="#181F29"/>
+  <ellipse cx="580" cy="386" rx="150" ry="28" fill="#05080B"/>
+  <rect x="534" y="116" width="82" height="184" rx="40" fill="url(#lamp)"/>
+  <rect x="565" y="288" width="20" height="60" rx="10" fill="#EFF7FB"/>
+  <rect x="516" y="340" width="118" height="18" rx="9" fill="#F4F7FB"/>
+  <rect x="414" y="396" width="292" height="18" rx="9" fill="#101722"/>
+</svg>

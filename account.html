@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JL AXION | Minha Conta</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#ff8e43">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="account">
+  <div data-site-shell></div>
+
+  <main class="page">
+    <section class="page-hero page-hero--premium section">
+      <div>
+        <span class="eyebrow">Minha conta</span>
+        <h1>Bem-vindo, <span data-profile-name>Cliente</span></h1>
+        <p>Painel com aparencia mais premium para perfil, pedidos, dados salvos e acompanhamento do relacionamento com a marca.</p>
+      </div>
+
+      <div class="membership-card">
+        <img class="membership-card__logo" src="assets/jl-axion-mark.svg" alt="Marca JL AXION">
+        <div>
+          <span class="eyebrow">Member access</span>
+          <h2>AXION SELECT</h2>
+        </div>
+        <p>Area demonstrativa para beneficios, historico de compra e acesso rapido a colecoes salvas.</p>
+        <div class="membership-card__meta">
+          <strong data-profile-email>cliente@jlaxion.com</strong>
+          <span>Cliente desde 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section stats-grid">
+      <article class="benefit-card">
+        <span class="benefit-icon" data-cart-total-items>0</span>
+        <h3>Itens no carrinho</h3>
+        <p>Contagem sincronizada com a experiencia de compra.</p>
+      </article>
+
+      <article class="benefit-card">
+        <span class="benefit-icon" data-saved-count>0</span>
+        <h3>Favoritos salvos</h3>
+        <p>Produtos preferidos prontos para retornar ao checkout.</p>
+      </article>
+
+      <article class="benefit-card">
+        <span class="benefit-icon" data-order-count>0</span>
+        <h3>Pedidos recentes</h3>
+        <p>Historico demonstrativo para visualizar a estrutura da conta.</p>
+      </article>
+    </section>
+
+    <section class="section page-banner-strip">
+      <article class="info-tile info-tile--accent">
+        <span class="eyebrow">Atendimento</span>
+        <h2>Conta pensada para parecer area de cliente premium, nao apenas formulario.</h2>
+      </article>
+      <article class="info-tile">
+        <span class="eyebrow">Relacionamento</span>
+        <p>Historico de pedidos, perfil salvo e indicadores de compra ficam distribuídos com mais presença e conforto visual.</p>
+      </article>
+    </section>
+
+    <section class="section account-grid">
+      <article class="content-card">
+        <div class="section-heading section-heading--stacked">
+          <div>
+            <span class="eyebrow">Perfil</span>
+            <h2>Dados do cliente</h2>
+          </div>
+        </div>
+
+        <form class="form-grid" data-account-form>
+          <label class="field">
+            <span>Nome completo</span>
+            <input class="input" type="text" name="name" placeholder="Cliente JL AXION">
+          </label>
+
+          <label class="field">
+            <span>E-mail</span>
+            <input class="input" type="email" name="email" placeholder="cliente@jlaxion.com">
+          </label>
+
+          <label class="field">
+            <span>Telefone</span>
+            <input class="input" type="tel" name="phone" placeholder="(11) 99999-0000">
+          </label>
+
+          <label class="field">
+            <span>Cidade</span>
+            <input class="input" type="text" name="city" placeholder="Sao Paulo, SP">
+          </label>
+
+          <button type="submit" class="primary-btn primary-btn--full">Salvar ajustes</button>
+        </form>
+      </article>
+
+      <article class="content-card">
+        <div class="section-heading section-heading--stacked">
+          <div>
+            <span class="eyebrow">Pedidos</span>
+            <h2>Ultimos movimentos da conta</h2>
+          </div>
+        </div>
+
+        <div class="order-list" data-order-list></div>
+      </article>
+    </section>
+
+    <section class="section dual-grid">
+      <article class="content-card">
+        <div class="section-heading section-heading--stacked">
+          <div>
+            <span class="eyebrow">Enderecos</span>
+            <h2>Locais salvos</h2>
+          </div>
+        </div>
+
+        <div class="order-list">
+          <article class="order-item">
+            <div>
+              <strong>Casa</strong>
+              <p>Rua Axion Prime, 120 - Sao Paulo, SP</p>
+            </div>
+            <span class="status-chip status-chip--success">Padrao</span>
+          </article>
+          <article class="order-item">
+            <div>
+              <strong>Trabalho</strong>
+              <p>Av. Central Tech, 455 - Sao Paulo, SP</p>
+            </div>
+            <span class="status-chip">Secundario</span>
+          </article>
+        </div>
+      </article>
+
+      <article class="content-card content-card--accent">
+        <span class="eyebrow">Resumo da conta</span>
+        <h2>Um painel mais sofisticado para dados recorrentes do cliente.</h2>
+        <ul class="feature-list">
+          <li>Historico de compras com status claros.</li>
+          <li>Perfil salvo para acelerar futuras compras.</li>
+          <li>Indicadores conectados com carrinho e favoritos.</li>
+          <li>Base pronta para integrar pedidos reais depois.</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

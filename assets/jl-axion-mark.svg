@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 116" fill="none">
+  <defs>
+    <linearGradient id="panel" x1="12" y1="10" x2="108" y2="106" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#112238"/>
+      <stop offset=".52" stop-color="#0B1420"/>
+      <stop offset="1" stop-color="#251404"/>
+    </linearGradient>
+    <linearGradient id="outline" x1="14" y1="12" x2="102" y2="102" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7DC8FF"/>
+      <stop offset=".48" stop-color="#D1ECFF"/>
+      <stop offset="1" stop-color="#FF9A3D"/>
+    </linearGradient>
+    <linearGradient id="beamLeft" x1="34" y1="28" x2="60" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC17A"/>
+      <stop offset="1" stop-color="#FF9A3D"/>
+    </linearGradient>
+    <linearGradient id="beamRight" x1="58" y1="30" x2="90" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7DC8FF"/>
+      <stop offset="1" stop-color="#D6EEFF"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="10" y="10" width="96" height="96" rx="28" fill="url(#panel)" stroke="url(#outline)" stroke-width="2.4"/>
+  <circle cx="76" cy="29" r="6" fill="#FF9A3D" fill-opacity=".78"/>
+  <path d="M32 84 50 28h11L43 84H32Z" fill="url(#beamLeft)"/>
+  <path d="M73 30 91 84H79L61 30h12Z" fill="url(#beamRight)"/>
+  <rect x="46" y="52" width="24" height="8" rx="4" fill="#F4F7FB"/>
+  <path d="M24 92 92 24" stroke="url(#outline)" stroke-opacity=".18" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

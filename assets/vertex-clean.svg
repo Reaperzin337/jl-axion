@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 300" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="26" y1="18" x2="392" y2="286" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0E141B"/>
+      <stop offset="1" stop-color="#111821"/>
+    </linearGradient>
+    <linearGradient id="bot" x1="132" y1="88" x2="288" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5D8F"/>
+      <stop offset="1" stop-color="#7EAEFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="420" height="300" rx="28" fill="url(#bg)"/>
+  <circle cx="314" cy="72" r="66" fill="#2CE6CF" fill-opacity=".10"/>
+  <ellipse cx="210" cy="236" rx="122" ry="24" fill="#06080C"/>
+  <ellipse cx="210" cy="228" rx="108" ry="18" fill="#111822"/>
+  <circle cx="210" cy="152" r="90" fill="#202A35"/>
+  <circle cx="210" cy="152" r="72" fill="url(#bot)"/>
+  <circle cx="210" cy="152" r="44" fill="#0C1319"/>
+  <circle cx="210" cy="152" r="11" fill="#F4F7FB"/>
+  <path d="M172 126c12-10 24-14 38-14 14 0 26 4 38 14" stroke="#F4F7FB" stroke-opacity=".28" stroke-width="6" stroke-linecap="round"/>
+</svg>

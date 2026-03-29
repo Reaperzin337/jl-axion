@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JL AXION | Produto</title>
+  <meta name="description" content="Detalhes dos produtos premium da JL AXION com foco em tecnologia, setup e utilidades modernas.">
+  <meta name="theme-color" content="#ff8e43">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="product">
+  <div data-site-shell></div>
+
+  <main class="page">
+    <section class="page-hero page-hero--premium section">
+      <div>
+        <span class="eyebrow">Produto</span>
+        <p class="breadcrumbs"><a href="index.html">Inicio</a><span>/</span><a data-product-category-link href="category.html">Categoria</a></p>
+        <h1 data-product-name>Produto JL AXION</h1>
+        <p data-product-description>Descricao premium do item selecionado.</p>
+      </div>
+
+      <div class="membership-card">
+        <img class="membership-card__logo" src="assets/jl-axion-mark.svg" alt="Marca JL AXION">
+        <div>
+          <span class="eyebrow">Selecao premium</span>
+          <h2>AXION DETAIL</h2>
+        </div>
+        <div class="membership-card__meta">
+          <strong data-product-rating>4,8 / 5</strong>
+          <span data-product-shipping>Frete rapido</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section product-detail-grid">
+      <article class="product-gallery-card" data-product-gallery></article>
+      <article class="product-detail-card" data-product-detail></article>
+    </section>
+
+    <section class="section dual-grid">
+      <article class="content-card" data-product-highlights></article>
+      <article class="content-card" data-product-specs></article>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Relacionados</span>
+          <h2>Outros itens da mesma colecao</h2>
+        </div>
+      </div>
+
+      <div class="product-grid product-grid--compact" data-related-products></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

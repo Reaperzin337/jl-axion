@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 300" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="34" y1="20" x2="390" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F1419"/>
+      <stop offset="1" stop-color="#161119"/>
+    </linearGradient>
+    <linearGradient id="strip" x1="112" y1="132" x2="308" y2="172" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8CA4FF"/>
+      <stop offset="1" stop-color="#2CE6CF"/>
+    </linearGradient>
+  </defs>
+  <rect width="420" height="300" rx="28" fill="url(#bg)"/>
+  <circle cx="302" cy="70" r="58" fill="#8CA4FF" fill-opacity=".08"/>
+  <ellipse cx="210" cy="236" rx="118" ry="24" fill="#06080C"/>
+  <ellipse cx="210" cy="228" rx="106" ry="18" fill="#101722"/>
+  <rect x="96" y="118" width="228" height="68" rx="24" fill="#212734"/>
+  <rect x="112" y="132" width="196" height="40" rx="18" fill="url(#strip)"/>
+  <circle cx="150" cy="152" r="10" fill="#0F1419"/>
+  <circle cx="184" cy="152" r="10" fill="#0F1419"/>
+  <circle cx="236" cy="152" r="10" fill="#0F1419"/>
+  <circle cx="270" cy="152" r="10" fill="#0F1419"/>
+  <rect x="292" y="143" width="20" height="18" rx="9" fill="#0F1419"/>
+</svg>

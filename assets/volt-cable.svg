@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 300" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="32" y1="20" x2="388" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10141A"/>
+      <stop offset="1" stop-color="#171018"/>
+    </linearGradient>
+    <linearGradient id="cable" x1="106" y1="86" x2="324" y2="206" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC857"/>
+      <stop offset="1" stop-color="#FF5D8F"/>
+    </linearGradient>
+  </defs>
+  <rect width="420" height="300" rx="28" fill="url(#bg)"/>
+  <circle cx="320" cy="74" r="64" fill="#FFC857" fill-opacity=".08"/>
+  <ellipse cx="210" cy="238" rx="122" ry="24" fill="#06080C"/>
+  <path d="M108 194c32-48 60-70 96-70h70c18 0 30-14 30-32V76" stroke="url(#cable)" stroke-width="22" stroke-linecap="round"/>
+  <rect x="290" y="54" width="46" height="38" rx="12" fill="#F4F7FB"/>
+  <rect x="106" y="176" width="40" height="40" rx="14" fill="#2CE6CF"/>
+  <rect x="122" y="156" width="8" height="20" rx="4" fill="#2CE6CF"/>
+  <path d="M106 194c18 10 38 14 58 14" stroke="#F4F7FB" stroke-opacity=".16" stroke-width="4" stroke-linecap="round"/>
+</svg>

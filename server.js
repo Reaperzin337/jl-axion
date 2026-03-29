@@ -1022,8 +1022,8 @@ async function startServer() {
     res.status(500).send("Erro interno do servidor.");
   });
 
-  app.listen(PORT, () => {
-    console.log(`JL AXION backend online em http://localhost:${PORT}`);
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`JL AXION backend online na porta ${PORT}`);
     console.log(`Login padrao: ${SEED_PROFILE.email} / ${SEED_PROFILE.password}`);
     console.log(`Login admin: ${ADMIN_SEED.email} / ${ADMIN_SEED.password}`);
   });

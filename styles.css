@@ -2539,6 +2539,12 @@ body.menu-open .drawer {
     width: min(100vw - 20px, 1180px);
   }
 
+  .top-strip__inner {
+    gap: 8px;
+    padding: 10px 0;
+    font-size: 0.8rem;
+  }
+
   .hero-copy,
   .store-banner,
   .content-card,
@@ -2560,45 +2566,112 @@ body.menu-open .drawer {
 
   .site-header__inner {
     width: min(100vw - 20px, 1180px);
-    gap: 12px;
-    padding: 14px 0;
+    gap: 10px;
+    padding: 12px 0;
   }
 
   .site-header__top {
     grid-template-columns: auto 1fr auto;
-    gap: 12px;
+    gap: 10px;
+    align-items: start;
   }
 
   .site-header__search {
     grid-column: 1 / -1;
     grid-template-columns: minmax(0, 1fr);
     gap: 10px;
+    margin-top: 2px;
+  }
+
+  .site-search {
+    padding: 0 14px 0 12px;
+  }
+
+  .site-search__input {
+    padding: 14px 0;
+    font-size: 0.98rem;
   }
 
   .site-search__submit {
     width: 100%;
+    min-height: 50px;
   }
 
   .brand-cluster {
-    gap: 12px;
+    gap: 10px;
   }
 
   .brand__logo {
-    height: 58px;
+    height: 54px;
+  }
+
+  .menu-toggle {
+    width: 44px;
+    height: 44px;
   }
 
   .header-actions {
     width: auto;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 6px;
   }
 
   .header-actions .action-link {
-    padding: 11px 12px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
   }
 
   .header-actions .action-link > span:first-of-type {
     display: none;
+  }
+
+  .store-banner h1 {
+    font-size: clamp(2.15rem, 10vw, 3rem);
+    max-width: none;
+  }
+
+  .store-banner p,
+  .promo-banner__content p,
+  .service-card p,
+  .department-card p {
+    font-size: 0.94rem;
+  }
+
+  .hero-badges {
+    gap: 10px;
+  }
+
+  .deal-card--featured {
+    gap: 12px;
+  }
+
+  .promo-banner__content {
+    max-width: none;
+    padding: 22px;
+    background:
+      linear-gradient(180deg, rgba(7, 11, 15, 0.08) 0%, rgba(7, 11, 15, 0.74) 48%, rgba(7, 11, 15, 0.96) 100%);
+  }
+
+  .primary-btn,
+  .secondary-btn,
+  .ghost-btn {
+    min-height: 48px;
+  }
+
+  .product-card {
+    gap: 12px;
+  }
+
+  .product-actions {
+    flex-direction: column;
+  }
+
+  .product-actions .primary-btn,
+  .product-actions .secondary-btn,
+  .detail-actions .primary-btn,
+  .detail-actions .secondary-btn {
+    width: 100%;
   }
 
   .admin-page {
@@ -2681,5 +2754,133 @@ body.menu-open .drawer {
 
   .order-item__side {
     justify-items: start;
+  }
+}
+
+@media (max-width: 560px) {
+  .top-strip {
+    display: none;
+  }
+
+  .page,
+  .admin-page {
+    width: min(100vw - 16px, 1180px);
+  }
+
+  .site-header__inner {
+    width: min(100vw - 16px, 1180px);
+    gap: 8px;
+    padding: 10px 0;
+  }
+
+  .site-header__top {
+    gap: 8px;
+  }
+
+  .brand__logo {
+    height: 48px;
+  }
+
+  .site-search {
+    gap: 10px;
+    min-height: 52px;
+  }
+
+  .site-search__input {
+    padding: 13px 0;
+    font-size: 16px;
+  }
+
+  .site-search__submit {
+    min-height: 48px;
+    font-size: 0.95rem;
+  }
+
+  .hero-copy,
+  .store-banner,
+  .content-card,
+  .benefit-card,
+  .deal-card,
+  .service-card,
+  .department-card,
+  .shelf-panel,
+  .info-tile,
+  .catalog-shell,
+  .coupon-card,
+  .summary-card,
+  .checkout-form-card,
+  .checkout-summary-card,
+  .page-hero,
+  .promo-band {
+    padding: 18px;
+  }
+
+  .store-hero,
+  .service-bar,
+  .department-grid,
+  .product-grid,
+  .product-grid--compact,
+  .banner-footer {
+    gap: 12px;
+  }
+
+  .store-banner {
+    gap: 16px;
+  }
+
+  .store-banner h1 {
+    font-size: clamp(1.95rem, 11vw, 2.55rem);
+    line-height: 1.02;
+  }
+
+  .banner-stat {
+    padding: 14px;
+  }
+
+  .banner-stat strong {
+    font-size: 1.04rem;
+  }
+
+  .department-card {
+    gap: 10px;
+  }
+
+  .department-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 0.9rem;
+  }
+
+  .product-card {
+    padding: 14px;
+  }
+
+  .product-media {
+    aspect-ratio: 1 / 0.92;
+    border-radius: 18px;
+  }
+
+  .product-top h3 {
+    font-size: 1.04rem;
+  }
+
+  .product-description,
+  .product-top span,
+  .product-installment,
+  .checkout-step small {
+    font-size: 0.9rem;
+  }
+
+  .checkout-step {
+    padding: 14px;
+  }
+
+  .checkout-item__media,
+  .cart-item__media {
+    height: 160px;
+  }
+
+  .product-stage-media {
+    min-height: 260px;
   }
 }

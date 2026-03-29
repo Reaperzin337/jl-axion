@@ -877,7 +877,8 @@ body.menu-open .drawer {
   font-size: 1rem;
 }
 
-.service-card span {
+.service-card span,
+.service-card p {
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.5;
@@ -1033,6 +1034,11 @@ body.menu-open .drawer {
   box-shadow: 0 0 16px rgba(var(--glow-blue), 0.05);
 }
 
+.mini-pill--accent {
+  background: linear-gradient(135deg, rgba(var(--glow-orange), 0.2), rgba(var(--glow-blue), 0.08));
+  border-color: rgba(var(--glow-orange), 0.2);
+}
+
 .hero-showcase {
   display: grid;
   gap: 14px;
@@ -1109,6 +1115,12 @@ body.menu-open .drawer {
 
 .section-heading h2 {
   font-size: clamp(1.6rem, 2.6vw, 2.5rem);
+}
+
+.section-caption {
+  margin-top: 10px;
+  max-width: 58ch;
+  font-size: 0.96rem;
 }
 
 .section-heading--stacked {
@@ -1534,6 +1546,12 @@ body.menu-open .drawer {
   color: #778193;
 }
 
+.detail-promo-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .detail-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1768,6 +1786,13 @@ body.menu-open .drawer {
   line-height: 1.55;
 }
 
+.product-stage-grid,
+.detail-assurance-grid,
+.checkout-assurance-grid,
+.checkout-summary-metrics {
+  margin-top: 4px;
+}
+
 .category-feature-grid,
 .checkout-grid {
   display: grid;
@@ -1847,6 +1872,49 @@ body.menu-open .drawer {
 .checkout-section {
   display: grid;
   gap: 16px;
+}
+
+.checkout-step-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.checkout-step {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 8px;
+}
+
+.checkout-step span {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  font-weight: 700;
+  color: var(--primary-ink);
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  box-shadow: 0 0 18px rgba(var(--glow-orange), 0.16);
+}
+
+.checkout-step strong {
+  font-size: 0.98rem;
+}
+
+.checkout-step small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.checkout-step.is-active {
+  background:
+    radial-gradient(circle at top right, rgba(var(--glow-blue), 0.12), transparent 38%),
+    linear-gradient(150deg, rgba(var(--glow-orange), 0.14), rgba(255, 255, 255, 0.04));
+  border-color: rgba(var(--glow-blue), 0.16);
 }
 
 .checkout-fields {
@@ -2561,6 +2629,7 @@ body.menu-open .drawer {
   .quick-links,
   .hero-panel-grid,
   .page-banner-strip,
+  .checkout-step-strip,
   .spec-grid,
   .checkout-fields,
   .checkout-radio-grid {

@@ -1112,6 +1112,7 @@ function scrollToCatalog() {
 
 function renderHomeProducts() {
   const container = document.querySelector("[data-featured-products]");
+  const meta = document.querySelector("[data-catalog-meta]");
 
   if (!container) {
     return;
@@ -1127,6 +1128,10 @@ function renderHomeProducts() {
   updateCategoryButtons();
 
   if (!results.length) {
+    if (meta) {
+      meta.textContent = "Nenhum item combinou com os filtros atuais. Ajuste a busca para voltar a explorar a vitrine.";
+    }
+
     container.innerHTML = emptyState(
       "Nenhum produto encontrado",
       "Ajuste a pesquisa ou volte para todos os itens da vitrine.",
@@ -1138,6 +1143,10 @@ function renderHomeProducts() {
   const visibleResults = !state.search && state.category === "Todos"
     ? results.slice(0, 8)
     : results;
+
+  if (meta) {
+    meta.textContent = buildCatalogMeta(results.length, visibleResults.length);
+  }
 
   container.innerHTML = visibleResults.map((product) => productCard(product)).join("");
 }
@@ -1442,6 +1451,24 @@ function renderCheckoutPage() {
   const { subtotal, shipping, discount, total } = getCartTotals(cartProducts);
 
   form.innerHTML = `
+    <div class="checkout-step-strip">
+      <article class="checkout-step is-active">
+        <span>1</span>
+        <strong>Contato</strong>
+        <small>Identificacao e acesso do comprador.</small>
+      </article>
+      <article class="checkout-step is-active">
+        <span>2</span>
+        <strong>Entrega</strong>
+        <small>Endereco, prazo e modalidade.</small>
+      </article>
+      <article class="checkout-step is-active">
+        <span>3</span>
+        <strong>Pagamento</strong>
+        <small>Finalizacao com leitura clara e segura.</small>
+      </article>
+    </div>
+
     <section class="checkout-section">
       <div class="section-heading section-heading--stacked">
         <div>
@@ -1542,6 +1569,17 @@ function renderCheckoutPage() {
       </div>
     </section>
 
+    <div class="mini-metric-grid checkout-assurance-grid">
+      <article class="mini-metric">
+        <strong>Protecao de dados</strong>
+        <span>Dados do comprador ficam salvos apenas para agilizar a experiencia local da loja.</span>
+      </article>
+      <article class="mini-metric">
+        <strong>Entrega acompanhada</strong>
+        <span>Resumo, frete e status do pedido continuam visiveis em Minha Conta apos a compra.</span>
+      </article>
+    </div>
+
     <div class="summary-note">Ao finalizar, os dados ficam salvos para acelerar a proxima compra e o pedido aparece em Minha Conta.</div>
     <button type="submit" class="primary-btn primary-btn--full">Finalizar pedido</button>
   `;
@@ -1549,6 +1587,16 @@ function renderCheckoutPage() {
   summary.innerHTML = `
     <span class="eyebrow">Resumo do pedido</span>
     <h2>Sua selecao JL AXION</h2>
+    <div class="mini-metric-grid checkout-summary-metrics">
+      <article class="mini-metric">
+        <strong>Entrega a partir de 24h</strong>
+        <span>Despacho agil para pedidos com itens em estoque.</span>
+      </article>
+      <article class="mini-metric">
+        <strong>Checkout assistido</strong>
+        <span>Resumo com frete, cupom e total sempre visiveis.</span>
+      </article>
+    </div>
     <div class="checkout-list">
       ${cartProducts.map((item) => `
         <article class="checkout-item">
@@ -1567,6 +1615,7 @@ function renderCheckoutPage() {
     <div class="summary-line"><span>Subtotal</span><strong>${money.format(subtotal)}</strong></div>
     <div class="summary-line"><span>Frete</span><strong>${shipping === 0 ? "Gratis" : money.format(shipping)}</strong></div>
     <div class="summary-line"><span>Cupom AXION15</span><strong>- ${money.format(discount)}</strong></div>
+    <div class="summary-line"><span>Entrega estimada</span><strong>${shipping === 0 ? "24h a 48h" : "1 a 3 dias uteis"}</strong></div>
     <hr>
     <div class="summary-line checkout-total-line"><span>Total final</span><strong>${money.format(total)}</strong></div>
     <div class="summary-note">Checkout demonstrativo com dados locais. Depois a gente pode plugar pagamento e pedido reais.</div>
@@ -1658,6 +1707,8 @@ function renderProductPage() {
   const highlights = getProductHighlights(product);
   const relatedProducts = PRODUCTS.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 3);
   const categoryLink = document.querySelector("[data-product-category-link]");
+  const savings = typeof product.oldPrice === "number" ? product.oldPrice - product.price : 0;
+  const savingsLabel = savings > 0 ? money.format(savings) : "";
 
   document.title = `JL AXION | ${product.name}`;
   document.querySelectorAll("[data-product-name]").forEach((element) => {
@@ -1690,12 +1741,26 @@ function renderProductPage() {
         <span class="mini-pill">${product.badge}</span>
         <span class="mini-pill">${product.category}</span>
       </div>
+      <div class="mini-metric-grid product-stage-grid">
+        <article class="mini-metric">
+          <strong>${product.shipping || "Frete rapido"}</strong>
+          <span>Previsao pensada para compras mais ageis e sem atrito.</span>
+        </article>
+        <article class="mini-metric">
+          <strong>${product.reviews} avaliacoes</strong>
+          <span>Leitura social para reforcar decisao e confianca na vitrine.</span>
+        </article>
+      </div>
     </div>
   `;
 
   detailContainer.innerHTML = `
     <span class="eyebrow">Detalhes do produto</span>
     <h2>${product.name}</h2>
+    <div class="detail-promo-line">
+      <span class="mini-pill">${product.badge}</span>
+      ${savings > 0 ? `<span class="mini-pill mini-pill--accent">Economize ${savingsLabel}</span>` : `<span class="mini-pill mini-pill--accent">Curadoria premium</span>`}
+    </div>
     <div class="product-meta-row">
       <span class="rating-pill">${String(product.rating || 4.8).replace(".", ",")} &#9733;</span>
       <span class="shipping-pill">${product.shipping || "Frete rapido"}</span>
@@ -1706,6 +1771,16 @@ function renderProductPage() {
       ${product.oldPrice ? `<del>${money.format(product.oldPrice)}</del>` : ""}
     </div>
     <p class="product-installment">ou ${installmentCount}x de ${installmentValue} sem juros</p>
+    <div class="mini-metric-grid detail-assurance-grid">
+      <article class="mini-metric">
+        <strong>Compra assistida</strong>
+        <span>Resumo claro de preco, entrega e parcelamento antes de finalizar.</span>
+      </article>
+      <article class="mini-metric">
+        <strong>Pos-venda organizado</strong>
+        <span>Pedido e historico ficam concentrados em Minha Conta.</span>
+      </article>
+    </div>
     <div class="detail-actions">
       <button type="button" class="primary-btn" data-action="add-to-cart" data-id="${product.id}">Adicionar ao carrinho</button>
       <button type="button" class="secondary-btn" data-action="toggle-favorite" data-id="${product.id}">${isFavorite ? "Remover dos favoritos" : "Salvar nos favoritos"}</button>
@@ -1871,6 +1946,28 @@ function getCategoryNames() {
   });
 
   return names;
+}
+
+function buildCatalogMeta(totalResults, visibleResults) {
+  const itemLabel = totalResults === 1 ? "item" : "itens";
+
+  if (state.search && state.category !== "Todos") {
+    return `${totalResults} ${itemLabel} em ${state.category} para "${state.searchLabel}".`;
+  }
+
+  if (state.search) {
+    return `${totalResults} ${itemLabel} encontrados para "${state.searchLabel}".`;
+  }
+
+  if (state.category !== "Todos") {
+    return `${totalResults} ${itemLabel} disponiveis em ${state.category}.`;
+  }
+
+  if (visibleResults < totalResults) {
+    return `${visibleResults} itens em destaque de ${totalResults} na curadoria principal da loja.`;
+  }
+
+  return `${totalResults} itens com curadoria premium na vitrine principal.`;
 }
 
 function buildCategoryHref(category) {

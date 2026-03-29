@@ -273,10 +273,26 @@ async function startServer() {
 
   const app = express();
   const isProduction = process.env.NODE_ENV === "production";
-  const sessionStore = new SQLiteStore({
-    db: path.basename(SESSION_DB_PATH),
-    dir: path.dirname(SESSION_DB_PATH),
-    table: "sessions"
+  const useSQLiteSessionStore = !isProduction || process.env.USE_SQLITE_SESSION_STORE === "true";
+  const sessionStore = useSQLiteSessionStore
+    ? new SQLiteStore({
+      db: path.basename(SESSION_DB_PATH),
+      dir: path.dirname(SESSION_DB_PATH),
+      table: "sessions"
+    })
+    : undefined;
+  const sessionMiddleware = session({
+    name: SESSION_COOKIE_NAME,
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    unset: "destroy",
+    ...(sessionStore ? { store: sessionStore } : {}),
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: isProduction
+    }
   });
   const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -319,25 +335,31 @@ async function startServer() {
   }));
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: false, limit: "1mb" }));
-  app.use(session({
-    name: SESSION_COOKIE_NAME,
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    unset: "destroy",
-    store: sessionStore,
-    cookie: {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: isProduction
-    }
-  }));
 
   app.use("/assets", express.static(path.join(ROOT_DIR, "assets"), {
     etag: true,
     immutable: isProduction,
     maxAge: isProduction ? "7d" : 0
   }));
+  app.get("/api/health", (_req, res) => {
+    res.json({ ok: true });
+  });
+  app.get("/", (_req, res) => {
+    res.sendFile(path.join(ROOT_DIR, "index.html"));
+  });
+
+  app.get("/:file", (req, res, next) => {
+    const file = req.params.file;
+
+    if (!HTML_FILES.has(file)) {
+      next();
+      return;
+    }
+
+    res.sendFile(path.join(ROOT_DIR, file));
+  });
+
+  app.use("/api", sessionMiddleware);
   app.use("/api/auth/login", loginLimiter);
   app.use("/api/admin", adminLimiter);
   app.use("/api", (_req, res, next) => {
@@ -365,10 +387,6 @@ async function startServer() {
 
     req.currentUserId = req.session.userId;
     next();
-  });
-
-  app.get("/api/health", (_req, res) => {
-    res.json({ ok: true });
   });
 
   app.get("/api/bootstrap", async (req, res, next) => {
@@ -995,21 +1013,6 @@ async function startServer() {
       await db.exec("ROLLBACK").catch(() => {});
       next(error);
     }
-  });
-
-  app.get("/", (_req, res) => {
-    res.sendFile(path.join(ROOT_DIR, "index.html"));
-  });
-
-  app.get("/:file", (req, res, next) => {
-    const file = req.params.file;
-
-    if (!HTML_FILES.has(file)) {
-      next();
-      return;
-    }
-
-    res.sendFile(path.join(ROOT_DIR, file));
   });
 
   app.use((req, res) => {

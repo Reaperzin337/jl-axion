@@ -475,9 +475,12 @@ async function hydrateFromBackend() {
 }
 
 async function apiRequest(url, options = {}) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 8000);
   const nextOptions = {
     method: options.method || "GET",
     credentials: "same-origin",
+    signal: controller.signal,
     headers: {
       ...(options.body ? { "Content-Type": "application/json" } : {}),
       ...(options.headers || {})
@@ -488,16 +491,25 @@ async function apiRequest(url, options = {}) {
     nextOptions.body = JSON.stringify(options.body);
   }
 
-  const response = await window.fetch(url, nextOptions);
-  const isJson = response.headers.get("content-type")?.includes("application/json");
-  const payload = isJson ? await response.json() : null;
+  try {
+    const response = await window.fetch(url, nextOptions);
+    const isJson = response.headers.get("content-type")?.includes("application/json");
+    const payload = isJson ? await response.json() : null;
 
-  if (!response.ok) {
-    const message = payload?.message || "Nao foi possivel concluir a operacao.";
-    throw new Error(message);
+    if (!response.ok) {
+      const message = payload?.message || "Nao foi possivel concluir a operacao.";
+      throw new Error(message);
+    }
+
+    return payload;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("A API demorou demais para responder.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
-
-  return payload;
 }
 
 function applyRuntimePatch(payload) {

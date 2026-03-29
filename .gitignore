@@ -2,3 +2,9 @@ node_modules/
 server-data/
 npm-debug.log*
 .env
+mobile-web/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+.gradle/

@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "mobile:build": "node scripts/build-mobile-shell.mjs",
+    "mobile:copy": "npm run mobile:build && npx cap copy",
+    "mobile:sync": "npm run mobile:build && npx cap sync",
+    "mobile:android": "npm run mobile:build && npx cap open android"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +18,9 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^7.6.1",
+    "@capacitor/core": "^8.3.0",
     "bcryptjs": "^3.0.3",
     "connect-sqlite3": "^0.9.16",
     "express": "^5.2.1",

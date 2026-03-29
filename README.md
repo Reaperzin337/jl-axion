@@ -38,6 +38,30 @@ docker compose up --build -d
 
 O banco SQLite fica persistido na pasta local `server-data/`, montada no container em `/data`.
 
+## App Android
+
+O projeto mobile foi preparado com Capacitor e plataforma Android nativa.
+
+Scripts principais:
+
+```bash
+npm run mobile:build
+npm run mobile:sync
+npm run mobile:android
+```
+
+Arquivos principais do app:
+
+- `capacitor.config.json`: configuracao do app e URL da loja carregada no mobile
+- `android/`: projeto Android nativo
+- `scripts/build-mobile-shell.mjs`: shell local usado pelo Capacitor
+
+Observacoes:
+
+- O app esta apontado para `https://jlaxion.com.br`
+- Se quiser testar antes do dominio principal responder, troque a `server.url` em `capacitor.config.json` para a URL da Railway e rode `npm run mobile:sync`
+- Para gerar APK ou AAB, ainda e necessario instalar Java/JDK e Android Studio nesta maquina
+
 ## Variaveis de ambiente
 
 - `PORT`: porta HTTP do servidor

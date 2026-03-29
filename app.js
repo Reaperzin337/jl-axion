@@ -2,6 +2,7 @@ const STORAGE_KEYS = {
   cart: "jlaxion-cart",
   favorites: "jlaxion-favorites",
   profile: "jlaxion-profile",
+  auth: "jlaxion-auth",
   orders: "jlaxion-orders",
   pendingCategory: "jlaxion-pending-category"
 };
@@ -10,157 +11,157 @@ let PRODUCTS = [
   {
     id: "pulse-lamp",
     name: "PulseBeam Lamp",
-    category: "Casa inteligente",
-    badge: "Novo",
+    category: "Lampadas",
+    badge: "Luz premium",
     price: 249.9,
     oldPrice: 299.9,
     rating: 4.9,
     reviews: 124,
-    shipping: "Entrega amanha",
-    description: "Luminaria RGB com sensor de presenca e toque lateral.",
+    shipping: "Envio expresso",
+    description: "Luminaria de mesa com luz ambiente regulavel, leitura elegante e acabamento para setups premium.",
     image: "assets/pulse-lamp.svg"
   },
   {
     id: "orbit-hub",
     name: "Orbit Power Hub",
     category: "Escritorio",
-    badge: "Best seller",
+    badge: "Mais vendido",
     price: 179.9,
     oldPrice: 229.9,
     rating: 4.8,
     reviews: 211,
-    shipping: "Frete rapido",
-    description: "Dock compacto com energia, USB-C e organizacao de cabos.",
+    shipping: "Pronta entrega",
+    description: "Hub compacto com energia, USB-C e organizacao para mesas que pedem praticidade sem bagunca visual.",
     image: "assets/orbit-hub.svg"
   },
   {
     id: "neo-kettle",
     name: "NeoKettle Heat",
     category: "Utilidades",
-    badge: "Pratico",
+    badge: "Casa premium",
     price: 219.9,
     oldPrice: 259.9,
     rating: 4.7,
     reviews: 89,
-    shipping: "Sai hoje",
-    description: "Chaleira premium com controle de temperatura e visor LED.",
+    shipping: "Postagem em 24h",
+    description: "Chaleira com controle de temperatura, visor iluminado e presenca discreta para cozinhas modernas.",
     image: "assets/neo-kettle.svg"
   },
   {
     id: "wave-mini",
     name: "WaveSound Mini",
-    category: "Audio",
-    badge: "Compacto",
+    category: "Som",
+    badge: "Som ambiente",
     price: 329.9,
     oldPrice: 399.9,
     rating: 4.8,
     reviews: 173,
-    shipping: "Entrega amanha",
-    description: "Caixa de som portatil com graves encorpados e visual clean.",
+    shipping: "Entrega prioritaria",
+    description: "Caixa de som compacta para mesa, quarto ou studio, com presenca premium e graves bem definidos.",
     image: "assets/wave-mini.svg"
   },
   {
     id: "vertex-clean",
     name: "Vertex CleanBot",
     category: "Casa inteligente",
-    badge: "Smart home",
+    badge: "Automacao",
     price: 899.9,
     oldPrice: 999.9,
     rating: 4.9,
     reviews: 58,
     shipping: "Frete premium",
-    description: "Robo de limpeza com mapeamento, sensores e carga rapida.",
+    description: "Robo de limpeza com mapeamento inteligente e rotina automatizada para casas conectadas.",
     image: "assets/vertex-clean.svg"
   },
   {
     id: "prism-air",
     name: "Prism Air Crisp",
     category: "Utilidades",
-    badge: "Cozinha",
+    badge: "Oferta da semana",
     price: 469.9,
     oldPrice: 569.9,
     rating: 4.8,
     reviews: 145,
-    shipping: "Sai hoje",
-    description: "Air fryer de design premium para receitas rapidas no dia a dia.",
+    shipping: "Envio rapido",
+    description: "Air fryer com visual premium, painel limpo e capacidade ideal para uma rotina mais pratica.",
     image: "assets/prism-air.svg"
   },
   {
     id: "nova-desk",
     name: "NovaDesk Station",
     category: "Escritorio",
-    badge: "Setup",
+    badge: "Desk setup",
     price: 289.9,
     oldPrice: 349.9,
     rating: 4.7,
     reviews: 96,
-    shipping: "Entrega amanha",
-    description: "Base modular para monitor, headset e itens de produtividade.",
+    shipping: "Entrega agil",
+    description: "Base modular para monitor, headset e acessorios com visual limpo para home office premium.",
     image: "assets/nova-desk.svg"
   },
   {
     id: "arc-mug",
     name: "ArcMug Thermal",
-    category: "Mobilidade",
-    badge: "Mobilidade",
+    category: "Utilidades",
+    badge: "Dia a dia",
     price: 129.9,
     oldPrice: 159.9,
     rating: 4.6,
     reviews: 132,
-    shipping: "Frete rapido",
-    description: "Caneca termica com tampa magnetica e acabamento premium.",
+    shipping: "Postagem rapida",
+    description: "Caneca termica com tampa magnetica e acabamento sofisticado para rotina, escritorio ou viagem.",
     image: "assets/arc-mug.svg"
   },
   {
     id: "halo-charge",
     name: "HaloCharge Pad",
-    category: "Mobilidade",
+    category: "Carregadores",
     badge: "Carregador",
     price: 189.9,
     oldPrice: 239.9,
     rating: 4.8,
     reviews: 207,
-    shipping: "Entrega amanha",
-    description: "Base 3 em 1 para celular, relogio e fones sem ocupar espaco.",
+    shipping: "Entrega expressa",
+    description: "Base 3 em 1 para celular, relogio e fones com leitura premium e organizacao imediata.",
     image: "assets/halo-charge.svg"
   },
   {
     id: "volt-cable",
     name: "VoltCable Max 100W",
-    category: "Mobilidade",
+    category: "Cabos",
     badge: "Cabo",
     price: 79.9,
     oldPrice: 99.9,
     rating: 4.7,
     reviews: 318,
-    shipping: "Frete rapido",
-    description: "Cabo reforcado USB-C para carga rapida e uso intenso.",
+    shipping: "Pronta expedicao",
+    description: "Cabo USB-C reforcado para carga rapida, uso intenso e composicao mais premium no setup.",
     image: "assets/volt-cable.svg"
   },
   {
     id: "aura-bulb",
     name: "AuraBulb Wi-Fi",
-    category: "Casa inteligente",
+    category: "Lampadas",
     badge: "Lampada",
     price: 99.9,
     oldPrice: 129.9,
     rating: 4.8,
     reviews: 261,
     shipping: "Sai hoje",
-    description: "Lampada inteligente com cenas, app e controle por voz.",
+    description: "Lampada inteligente com cenas, app e controle por voz para criar atmosferas mais elegantes em casa.",
     image: "assets/aura-bulb.svg"
   },
   {
     id: "grid-strip",
     name: "GridStrip Power",
-    category: "Escritorio",
-    badge: "Energia",
+    category: "Carregadores",
+    badge: "Energia smart",
     price: 149.9,
     oldPrice: 189.9,
     rating: 4.7,
     reviews: 184,
     shipping: "Entrega amanha",
-    description: "Regua premium com tomadas, USB e visual limpo para setup.",
+    description: "Regua premium com tomadas e USB para manter energia, carga e organizacao no mesmo ponto.",
     image: "assets/grid-strip.svg"
   }
 ];
@@ -174,7 +175,7 @@ const DEFAULT_FAVORITES = ["pulse-lamp", "wave-mini", "arc-mug"];
 
 const DEFAULT_PROFILE = {
   name: "Cliente JL AXION",
-  email: "cliente@jlaxion.com",
+  email: "cliente@jlaxion.com.br",
   phone: "(11) 99999-0000",
   city: "Sao Paulo, SP",
   address: "Rua Axion Prime, 120",
@@ -206,88 +207,122 @@ const DEFAULT_ORDERS = [
 
 const CATEGORY_META = {
   "Casa inteligente": {
-    code: "LT",
-    title: "Lampadas, automacao e casa inteligente",
-    description: "Uma selecao premium para iluminar, automatizar e organizar ambientes com mais estilo e praticidade.",
-    badge: "SMART EDIT",
-    shipping: "Entrega agil para itens de iluminacao e automacao",
-    subtitle: "Curadoria para ambientes conectados e mais elegantes",
-    editorialTitle: "Casa inteligente com visual limpo e foco no uso real",
-    editorialText: "Esta categoria combina luminarias, automacao e itens de rotina para criar uma sensacao mais moderna dentro de casa, sem exagero visual.",
-    highlightTitle: "O que guia esta selecao",
-    highlightText: "Produtos pensados para rotina, atmosfera e tecnologia discreta em um catalogo facil de navegar.",
+    code: "CI",
+    title: "Automacao e rotina inteligente para a casa",
+    description: "Produtos para casa conectada, limpeza automatizada e mais praticidade no dia a dia, com visual premium e leitura simples.",
+    badge: "SMART HOME",
+    shipping: "Envio agil para automacao, rotina e conforto",
+    subtitle: "Tecnologia pensada para deixar a casa mais leve, organizada e funcional",
+    editorialTitle: "Casa inteligente com apelo real de uso",
+    editorialText: "Aqui entram os itens que trazem conveniencia para o ambiente, sem cara de produto tecnico demais. A ideia e vender conforto, rotina e praticidade.",
+    highlightTitle: "Por que esta categoria importa",
+    highlightText: "Ela posiciona a JL AXION como uma loja que mistura tecnologia util com produtos que fazem sentido no cotidiano.",
     bullets: [
-      "Lampadas, sensores e energia para ambientes mais inteligentes.",
-      "Pecas com linguagem visual mais limpa e contemporanea.",
-      "Boa combinacao com setup, escritorio e utilidades do dia a dia."
+      "Automacao com linguagem visual mais leve e comercial.",
+      "Boa entrada para kits com lampadas e carregadores.",
+      "Categoria com forte sensacao de conveniencia e presente."
+    ]
+  },
+  "Lampadas": {
+    code: "LP",
+    title: "Lampadas e luz ambiente para setups e ambientes",
+    description: "Selecao de luminarias e lampadas com foco em atmosfera, leitura visual forte e ambientacao premium para casa ou escritorio.",
+    badge: "LIGHTING",
+    shipping: "Entrega rapida para itens de iluminacao",
+    subtitle: "Luz decorativa, funcional e facil de combinar com a identidade da casa",
+    editorialTitle: "Iluminacao que vende sensacao, nao apenas produto",
+    editorialText: "Esta categoria ajuda a loja a parecer mais desejada e menos tecnica. A proposta e mostrar luz como elemento de atmosfera, conforto e estilo.",
+    highlightTitle: "O que o cliente encontra aqui",
+    highlightText: "Itens que funcionam bem em fotos, em vitrines e no uso diario, com linguagem premium e facil compreensao de valor.",
+    bullets: [
+      "Luminarias de mesa, lampadas Wi-Fi e luz ambiente.",
+      "Produtos com alto apelo visual para home page e banners.",
+      "Boa combinacao com casa inteligente e escritorio."
+    ]
+  },
+  "Carregadores": {
+    code: "CG",
+    title: "Carregadores, bases e energia para todos os dias",
+    description: "Bases sem fio, reguas com USB e acessorios para quem quer carregar melhor, organizar a mesa e manter tudo pronto para uso.",
+    badge: "POWER PICK",
+    shipping: "Entrega expressa em itens selecionados de energia",
+    subtitle: "Energia organizada para mesa, cabeceira, home office e rotina mobile",
+    editorialTitle: "Uma categoria com leitura comercial imediata",
+    editorialText: "Carregadores costumam ser compra rapida. Por isso a pagina precisa ser direta, forte e bem explicada, com foco em conveniencia e valor percebido.",
+    highlightTitle: "Como trabalhamos esta selecao",
+    highlightText: "Produtos que resolvem energia, organizacao e recarga em um unico gesto, com boa vitrine para impulso e recompra.",
+    bullets: [
+      "Bases 3 em 1, reguas USB e pontos de carga centralizados.",
+      "Categoria excelente para kits com cabos e escritorio.",
+      "Boa conversao em promocoes, combos e carrinho."
+    ]
+  },
+  "Cabos": {
+    code: "CB",
+    title: "Cabos resistentes para carga rapida e rotina intensa",
+    description: "Cabos reforcados para celular, notebook e setup, com foco em durabilidade, velocidade e uma apresentacao mais premium.",
+    badge: "FAST CABLES",
+    shipping: "Pronta expedicao para itens de alto giro",
+    subtitle: "Cabos com boa leitura de valor para venda recorrente e reposicao",
+    editorialTitle: "Categoria pensada para giro rapido e recompra",
+    editorialText: "Aqui a loja ganha profundidade comercial. Cabos funcionam bem como compra de entrada, complemento e upsell no checkout.",
+    highlightTitle: "O diferencial desta pagina",
+    highlightText: "Produtos simples, mas com argumento claro: resistencia, velocidade e melhor acabamento para acompanhar o resto da loja.",
+    bullets: [
+      "Carga rapida, reforco estrutural e uso intenso.",
+      "Excelente para cross-sell com carregadores e som.",
+      "Categoria pequena, objetiva e facil de decidir."
     ]
   },
   "Utilidades": {
     code: "UT",
-    title: "Utilidades premium para cozinha e rotina",
-    description: "Itens praticos para o dia a dia com acabamento mais sofisticado, leitura clara de preco e foco em conveniencia.",
+    title: "Utilidades para cozinha, rotina e pequenos rituais",
+    description: "Itens para casa e dia a dia com linguagem premium, praticidade real e leitura comercial mais clara para compra sem duvida.",
     badge: "HOME ESSENTIALS",
-    shipping: "Saida rapida com selecao pensada para uso diario",
-    subtitle: "Objetos uteis que elevam a rotina sem pesar no visual",
-    editorialTitle: "Funcionalidade com apresentacao mais refinada",
-    editorialText: "A proposta aqui e mostrar produtos uteis com cara de loja premium, equilibrando praticidade, textura e acabamento em uma mesma linguagem.",
-    highlightTitle: "O que voce encontra aqui",
-    highlightText: "Curadoria de bancada, cozinha e rotina com itens pensados para aparecer bem na vitrine e funcionar bem no cotidiano.",
+    shipping: "Postagem agil em itens de rotina e cozinha",
+    subtitle: "Objetos uteis que deixam a rotina mais bonita, simples e organizada",
+    editorialTitle: "Utilidade com mais apelo de loja premium",
+    editorialText: "Aqui entram os produtos de rotina que fazem a JL AXION parecer uma marca de estilo de vida, e nao apenas tecnologia.",
+    highlightTitle: "Como esta categoria foi pensada",
+    highlightText: "Produtos para casa, cozinha e uso diario com boa apresentacao visual e excelente potencial para presente e recompra.",
     bullets: [
-      "Produtos praticos com leitura comercial mais forte.",
-      "Curadoria ideal para presentes e compras recorrentes.",
-      "Visual consistente com a assinatura premium da JL AXION."
+      "Categoria forte para presente, casa e rotina pessoal.",
+      "Boa combinacao com lampadas, escritorio e casa inteligente.",
+      "Apelo visual e funcional no mesmo nivel."
     ]
   },
   "Escritorio": {
     code: "DK",
-    title: "Setup, energia e organizacao para escritorio",
-    description: "Hubs, bases, energia e acessorios para mesa com um clima mais premium, pensado para produtividade e presenca visual.",
-    badge: "DESK EDIT",
-    shipping: "Frete rapido para setup e organizacao",
-    subtitle: "Categoria para produtividade, mesa limpa e energia centralizada",
-    editorialTitle: "Pecas para compor um setup mais sofisticado",
-    editorialText: "O foco desta pagina e vender escritorio como experiencia: cabos organizados, energia centralizada e itens que valorizam a composicao da mesa.",
-    highlightTitle: "Direcao da categoria",
-    highlightText: "Produtos para quem quer produtividade e acabamento melhor, com menos ruino visual e mais sensacao de loja real.",
+    title: "Escritorio, setup e organizacao para mesa premium",
+    description: "Hubs, bases e acessorios que deixam a mesa mais limpa, produtiva e visualmente bem resolvida para trabalho ou estudo.",
+    badge: "DESK SETUP",
+    shipping: "Frete rapido para mesa, hub e organizacao",
+    subtitle: "Produtos para produtividade com cara de setup premium e leitura comercial forte",
+    editorialTitle: "Escritorio como experiencia de uso e composicao",
+    editorialText: "Mais do que vender acessorios, esta categoria mostra como a mesa pode ficar melhor organizada, mais funcional e mais bonita.",
+    highlightTitle: "O foco da curadoria",
+    highlightText: "Produtos que ajudam no trabalho diario e ao mesmo tempo valorizam a foto, o banner e a percepcao de marca.",
     bullets: [
-      "Hubs, reguas e bases para uma mesa mais funcional.",
-      "Itens com visual discreto e mais presenca comercial.",
-      "Curadoria facil de combinar com audio e mobilidade."
+      "Hubs, bases e acessorios de produtividade com boa presenca.",
+      "Categoria ideal para kits com cabos, som e carregadores.",
+      "Leitura limpa para home office e setups modernos."
     ]
   },
-  "Mobilidade": {
-    code: "CG",
-    title: "Carregadores, cabos e energia para mobilidade",
-    description: "Bases sem fio, cabos reforcados e itens de energia para rotina agil, viagens e uso continuo com cara de linha premium.",
-    badge: "POWER EDIT",
-    shipping: "Entrega amanha em itens selecionados de energia",
-    subtitle: "Energia pratica para levar, apoiar e carregar melhor",
-    editorialTitle: "Mobilidade com foco em energia e organizacao",
-    editorialText: "Esta categoria concentra os itens mais comerciais da loja: carregadores, cabos e acessorios para rotina rapida, com leitura direta e premium.",
-    highlightTitle: "Porque essa categoria vende bem",
-    highlightText: "Produtos de alta recorrencia, boa margem visual de oferta e uso imediato no dia a dia do cliente.",
+  "Som": {
+    code: "SM",
+    title: "Som compacto para ambiente, setup e rotina",
+    description: "Caixas e acessorios de audio com leitura premium, design limpo e boa presenca em mesas, quartos e ambientes criativos.",
+    badge: "AUDIO EDIT",
+    shipping: "Entrega prioritaria para itens de som",
+    subtitle: "Audio com visual forte para compor estilo, mesa e atmosfera",
+    editorialTitle: "Som como categoria de desejo dentro da loja",
+    editorialText: "Ela ajuda a JL AXION a parecer mais completa e aspiracional. E uma categoria que vende experiencia, presente e lifestyle.",
+    highlightTitle: "O que faz esta pagina funcionar",
+    highlightText: "Poucos itens, boa leitura de valor e presenca visual suficiente para diferenciar a loja sem poluir o catalogo.",
     bullets: [
-      "Bases 3 em 1, cabos e acessorios de carga rapida.",
-      "Produtos com appeal forte para vitrine e checkout.",
-      "Perfeitos para upsell junto com escritorio e audio."
-    ]
-  },
-  "Audio": {
-    code: "AU",
-    title: "Audio portatil e pecas para setup sonoro",
-    description: "Selecao enxuta de audio com aparencia premium, boa presenca em mesa e portabilidade para acompanhar diferentes ambientes.",
-    badge: "AUDIO CURATION",
-    shipping: "Frete premium para itens de audio e lifestyle",
-    subtitle: "Audio com design limpo e foco em presenca",
-    editorialTitle: "Som com mais identidade visual",
-    editorialText: "Aqui a categoria trabalha mais atmosfera e lifestyle, ajudando a loja a parecer completa sem perder o tom premium e organizado.",
-    highlightTitle: "Como a linha foi pensada",
-    highlightText: "Pecas compactas, boa leitura de valor e integracao natural com mobilidade, escritorio e casa inteligente.",
-    bullets: [
-      "Visual forte para compor vitrines e banners.",
-      "Produtos compactos com boa leitura de valor.",
-      "Complemento premium para mesas, quartos e rotinas moveis."
+      "Categoria de desejo para presente e decoracao de setup.",
+      "Boa combinacao com escritorio, lampadas e carregadores.",
+      "Poucos produtos, decisao mais simples e mais premium."
     ]
   }
 };
@@ -344,6 +379,12 @@ function seedData() {
   if (!readStorage(STORAGE_KEYS.orders)) {
     writeStorage(STORAGE_KEYS.orders, DEFAULT_ORDERS);
   }
+
+  if (!readStorage(STORAGE_KEYS.auth)) {
+    writeStorage(STORAGE_KEYS.auth, { isAuthenticated: false });
+  }
+
+  runtimeData.isAuthenticated = getIsAuthenticated();
 }
 
 function readStorage(key) {
@@ -535,6 +576,26 @@ function setOrders(orders) {
   return writeStorage(STORAGE_KEYS.orders, orders);
 }
 
+function getIsAuthenticated() {
+  if (runtimeData.useBackend) {
+    return runtimeData.isAuthenticated;
+  }
+
+  return Boolean(readStorage(STORAGE_KEYS.auth)?.isAuthenticated);
+}
+
+function setLocalAuthState(isAuthenticated) {
+  runtimeData.isAuthenticated = Boolean(isAuthenticated);
+
+  if (runtimeData.useBackend) {
+    return runtimeData.isAuthenticated;
+  }
+
+  return writeStorage(STORAGE_KEYS.auth, {
+    isAuthenticated: Boolean(isAuthenticated)
+  });
+}
+
 function readSession(key) {
   try {
     return window.sessionStorage.getItem(key);
@@ -568,10 +629,18 @@ function renderShell() {
     return;
   }
 
+  const isAuthenticated = getIsAuthenticated();
+  const greetingName = getGreetingName();
+  const accountHref = isAuthenticated ? "account.html" : "login.html";
+  const accountLabel = isAuthenticated ? `Ola, ${greetingName}` : "Login";
+  const authDrawerEntry = isAuthenticated
+    ? drawerLink("account", "account.html", `Ola, ${greetingName}`, "Perfil, pedidos e dados salvos")
+    : drawerLink("login", "login.html", "Login", "Acesse ou crie sua conta");
+
   shell.innerHTML = `
     <div class="top-strip">
       <div class="top-strip__inner">
-        <span>Frete gratis acima de R$ 600 | Cupom AXION15 em ofertas selecionadas</span>
+        <span>Frete gratis acima de R$ 600 | Ate 10x sem juros | Casa, setup, energia e utilidades em uma so curadoria</span>
       </div>
     </div>
 
@@ -599,7 +668,7 @@ function renderShell() {
                 id="site-search-input"
                 type="search"
                 class="site-search__input"
-                placeholder="Buscar carregadores, lampadas, utilidades..."
+                placeholder="Buscar carregadores, lampadas, cabos, som..."
                 autocomplete="off"
                 enterkeyhint="search"
                 value="${escapeAttribute(state.searchLabel)}"
@@ -620,9 +689,9 @@ function renderShell() {
               <span>Carrinho</span>
               <span class="count-badge" data-cart-count>0</span>
             </a>
-            <a class="action-link" href="login.html">
+            <a class="action-link action-link--account" href="${accountHref}" data-account-entry>
               ${icon("user")}
-              <span>Login</span>
+              <span data-account-entry-label>${accountLabel}</span>
             </a>
           </div>
         </div>
@@ -655,37 +724,26 @@ function renderShell() {
         <h2>Paginas</h2>
         <div class="drawer__group">
           ${drawerLink("home", "index.html", "Inicio", "Vitrine e categorias")}
-          ${drawerLink("promotions", "promotions.html", "Promocoes", "Cupons e ofertas")}
+          ${drawerLink("promotions", "promotions.html", "Promocoes", "Cupons, frete e combos")}
           ${drawerLink("favorites", "favorites.html", "Favoritos", "Lista de desejos")}
           ${drawerLink("cart", "cart.html", "Carrinho", "Resumo da compra")}
           ${drawerLink("account", "account.html", "Minha conta", "Perfil e pedidos")}
-          ${drawerLink("login", "login.html", "Login", "Acesso demonstrativo")}
+          ${authDrawerEntry}
           ${drawerLink("admin", "admin.html", "Admin", "Painel da loja")}
         </div>
       </div>
 
       <div class="drawer__section">
-        <h2>Atalhos</h2>
-        <div class="drawer__group">
-          <button type="button" class="drawer-link" data-action="open-category" data-category="Casa inteligente">
-            <span>Casa inteligente</span>
-            <small>luzes e automacao</small>
-          </button>
-          <button type="button" class="drawer-link" data-action="open-category" data-category="Utilidades">
-            <span>Utilidades</span>
-            <small>cozinha e rotina</small>
-          </button>
-          <button type="button" class="drawer-link" data-action="open-category" data-category="Escritorio">
-            <span>Escritorio</span>
-            <small>setup e produtividade</small>
-          </button>
+        <h2>Categorias</h2>
+        <div class="drawer-category-grid">
+          ${getCategoryNames().map((category) => drawerCategoryCard(category)).join("")}
         </div>
       </div>
 
       <div class="drawer-promo">
-        <span class="eyebrow">Campanha ativa</span>
+        <span class="eyebrow">Oferta em destaque</span>
         <h2>AXION15</h2>
-        <p>Use o menu lateral para navegar pelas paginas e testar a experiencia base da loja.</p>
+        <p>Use o cupom em utilidades e iluminacao selecionadas para compor pedidos mais completos com melhor custo.</p>
       </div>
     </aside>
 
@@ -693,15 +751,15 @@ function renderShell() {
       <div class="site-footer__inner">
         <div>
           <strong>JL AXION</strong>
-          <span>Loja demonstrativa de utilidades, energia, setup e casa inteligente.</span>
+          <span>Utilidades e tecnologia com foco em casa, setup, energia, iluminacao e rotina premium.</span>
         </div>
         <div>
-          <strong>Fluxo de compra</strong>
-          <span>Inicio, categorias, produto, checkout, favoritos e conta do cliente.</span>
+          <strong>Compra simples</strong>
+          <span>Escolha a categoria, explore os produtos, salve favoritos e finalize com clareza.</span>
         </div>
         <div>
-          <strong>Experiencia</strong>
-          <span>Visual escuro premium, vitrine de produtos e navegacao responsiva.</span>
+          <strong>Entrega e ofertas</strong>
+          <span>Promocoes, frete vantajoso e textos pensados para guiar sem poluir a experiencia.</span>
         </div>
       </div>
     </footer>
@@ -723,6 +781,20 @@ function drawerLink(page, href, label, subtitle) {
       <span>${label}</span>
       <small>${subtitle}</small>
     </a>
+  `;
+}
+
+function drawerCategoryCard(category) {
+  const meta = getCategoryMeta(category);
+  const productCount = getCategoryProducts(category).length;
+
+  return `
+    <button type="button" class="drawer-category-card" data-action="open-category" data-category="${category}">
+      <span class="drawer-category-card__code">${meta.code}</span>
+      <strong>${category}</strong>
+      <small>${productCount} ${productCount === 1 ? "item" : "itens"}</small>
+      <p>${meta.subtitle}</p>
+    </button>
   `;
 }
 
@@ -841,8 +913,9 @@ function bindForms() {
           };
 
           setProfile(nextProfile);
+          setLocalAuthState(true);
           updateProfileText();
-          showToast("Login demonstrativo concluido. Redirecionando para Minha Conta.");
+          showToast("Conta criada com sucesso. Redirecionando para Minha Conta.");
         }
 
         window.setTimeout(() => {
@@ -990,6 +1063,7 @@ function bindActions() {
 function renderAll() {
   updateCounts();
   updateProfileText();
+  renderHomeCollections();
   renderHomeProducts();
   renderPromotionProducts();
   renderCartPage();
@@ -1036,7 +1110,8 @@ function updateCounts() {
 
 function updateProfileText() {
   const profile = getProfile();
-  const firstName = (profile.name || DEFAULT_PROFILE.name).split(" ")[0];
+  const firstName = getGreetingName();
+  const isAuthenticated = getIsAuthenticated();
 
   document.querySelectorAll("[data-profile-name]").forEach((element) => {
     element.textContent = firstName;
@@ -1045,6 +1120,20 @@ function updateProfileText() {
   document.querySelectorAll("[data-profile-email]").forEach((element) => {
     element.textContent = profile.email || DEFAULT_PROFILE.email;
   });
+
+  document.querySelectorAll("[data-account-entry-label]").forEach((element) => {
+    element.textContent = isAuthenticated ? `Ola, ${firstName}` : "Login";
+  });
+
+  document.querySelectorAll("[data-account-entry]").forEach((element) => {
+    element.setAttribute("href", isAuthenticated ? "account.html" : "login.html");
+  });
+}
+
+function getGreetingName() {
+  const profile = getProfile();
+  const baseName = (profile.name || DEFAULT_PROFILE.name).trim();
+  return baseName.split(" ")[0] || "Cliente";
 }
 
 function restorePendingCategory() {
@@ -1485,7 +1574,7 @@ function renderCheckoutPage() {
 
         <label class="field">
           <span>E-mail</span>
-          <input class="input" type="email" name="email" value="${escapeAttribute(profile.email || DEFAULT_PROFILE.email)}" placeholder="cliente@jlaxion.com" required>
+          <input class="input" type="email" name="email" value="${escapeAttribute(profile.email || DEFAULT_PROFILE.email)}" placeholder="cliente@jlaxion.com.br" required>
         </label>
 
         <label class="field">
@@ -1823,29 +1912,39 @@ function renderProductPage() {
 function getProductHighlights(product) {
   const byCategory = {
     "Casa inteligente": [
-      "Linguagem visual limpa para ambientes modernos.",
-      "Uso intuitivo no dia a dia com foco em praticidade.",
-      "Combinacao ideal com lampadas, energia e automacao."
+      "Tecnologia util para uma rotina mais organizada e automatizada.",
+      "Leitura comercial mais simples para quem busca praticidade real.",
+      "Boa combinacao com lampadas e utilidades da casa."
     ],
-    "Mobilidade": [
-      "Formato pensado para rotina agil e deslocamento.",
-      "Energia e desempenho sem ocupar espaco demais.",
-      "Acabamento premium para acompanhar setups contemporaneos."
+    "Lampadas": [
+      "Categoria forte para atmosfera, setup e decoracao com luz.",
+      "Visual premium para home office, quarto e ambiente social.",
+      "Funciona muito bem em kits com escritorio e casa inteligente."
+    ],
+    "Carregadores": [
+      "Resolve energia e organizacao em um unico produto.",
+      "Boa leitura de valor para compra rapida e reposicao.",
+      "Categoria perfeita para combinar com cabos e setup."
+    ],
+    "Cabos": [
+      "Produto de alta recorrencia com decisao simples de compra.",
+      "Reforco estrutural e carga rapida como argumento principal.",
+      "Excelente item de complemento para carrinho e checkout."
     ],
     "Escritorio": [
-      "Visual discreto para compor mesas mais sofisticadas.",
-      "Mais organizacao e funcionalidade para produtividade.",
-      "Facil de combinar com hubs, fontes e acessorios de setup."
+      "Ajuda a compor uma mesa mais limpa e funcional.",
+      "Boa presenca visual para home office e estudo.",
+      "Categoria que conversa bem com som, cabos e carregadores."
     ],
     "Utilidades": [
-      "Ajuda a elevar a rotina com mais praticidade.",
-      "Design pensado para ficar bem na bancada ou na cozinha.",
-      "Equilibrio entre funcionalidade e apresentacao premium."
+      "Produtos para rotina com linguagem premium e simples de entender.",
+      "Boa categoria para presente, casa e recompra.",
+      "Combina praticidade com acabamento mais bem resolvido."
     ],
-    "Audio": [
-      "Presenca visual forte sem perder simplicidade.",
-      "Boa integracao com setups, escritorio e mobilidade.",
-      "Experiencia de uso direta, com foco no essencial."
+    "Som": [
+      "Produto com apelo de presente, lifestyle e setup.",
+      "Acabamento que valoriza fotos, banners e vitrines.",
+      "Boa combinacao com escritorio, lampadas e carregadores."
     ]
   };
 
@@ -1858,11 +1957,13 @@ function getProductHighlights(product) {
 
 function getProductSpecs(product, installmentCount, installmentValue) {
   const finishByCategory = {
-    "Casa inteligente": "Soft touch premium",
-    "Mobilidade": "Acabamento fosco resistente",
-    "Escritorio": "Design clean para setup",
+    "Casa inteligente": "Acabamento clean para rotina conectada",
+    "Lampadas": "Textura premium para iluminacao de ambiente",
+    "Carregadores": "Construido para uso diario e carga constante",
+    "Cabos": "Reforco extra para rotina intensa",
+    "Escritorio": "Design clean para mesa e setup",
     "Utilidades": "Superficie facil de limpar",
-    "Audio": "Estrutura compacta premium"
+    "Som": "Estrutura compacta de presenca premium"
   };
 
   return [
@@ -1948,6 +2049,22 @@ function getCategoryNames() {
   return names;
 }
 
+function renderHomeCollections() {
+  const categoryContainer = document.querySelector("[data-home-categories]");
+  const filterContainer = document.querySelector("[data-home-filters]");
+
+  if (categoryContainer) {
+    categoryContainer.innerHTML = getCategoryNames().map((category) => homeCategoryCard(category)).join("");
+  }
+
+  if (filterContainer) {
+    filterContainer.innerHTML = [
+      '<button type="button" class="filter-chip" data-action="set-category" data-category="Todos">Todos</button>',
+      ...getCategoryNames().map((category) => `<button type="button" class="filter-chip" data-action="set-category" data-category="${category}">${category}</button>`)
+    ].join("");
+  }
+}
+
 function buildCatalogMeta(totalResults, visibleResults) {
   const itemLabel = totalResults === 1 ? "item" : "itens";
 
@@ -1985,6 +2102,20 @@ function categoryLinkCard(category) {
       <p>${productCount} itens com curadoria premium para ${category.toLowerCase()}.</p>
       <span class="department-link">Abrir categoria</span>
     </a>
+  `;
+}
+
+function homeCategoryCard(category) {
+  const meta = getCategoryMeta(category);
+  const productCount = getCategoryProducts(category).length;
+
+  return `
+    <button type="button" class="department-card" data-action="open-category" data-category="${category}">
+      <span class="department-icon">${meta.code}</span>
+      <strong>${category}</strong>
+      <p>${meta.subtitle}</p>
+      <span class="department-link">Ver ${productCount} ${productCount === 1 ? "item" : "itens"}</span>
+    </button>
   `;
 }
 

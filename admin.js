@@ -137,7 +137,7 @@ function renderLoggedOut() {
       <form class="form-grid" data-admin-login-form>
         <label class="field">
           <span>E-mail</span>
-          <input class="input" type="email" name="email" placeholder="admin@jlaxion.com" required>
+          <input class="input" type="email" name="email" placeholder="admin@jlaxion.com.br" required>
         </label>
 
         <label class="field">
@@ -151,7 +151,7 @@ function renderLoggedOut() {
       <div class="admin-auth-card__hint">
         <strong>Acesso seed</strong>
         <div class="admin-auth-card__credentials">
-          <span>admin@jlaxion.com</span>
+          <span>admin@jlaxion.com.br</span>
           <span>axionadmin</span>
         </div>
       </div>
@@ -295,7 +295,7 @@ function renderOrders() {
         <div class="stack-gap">
           <span class="eyebrow">Pedido ${escapeHtml(order.id)}</span>
           <h3>${escapeHtml(order.customerName || "Cliente JL AXION")}</h3>
-          <p>${escapeHtml(order.customerEmail || "cliente@jlaxion.com")}</p>
+          <p>${escapeHtml(order.customerEmail || "cliente@jlaxion.com.br")}</p>
         </div>
 
         <span class="${getToneClass(order.statusTone)}">${escapeHtml(order.status)}</span>

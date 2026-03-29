@@ -23,8 +23,8 @@ Depois abra:
 
 ## Acessos seed
 
-- Cliente: `cliente@jlaxion.com` / `axion123`
-- Admin: `admin@jlaxion.com` / `axionadmin`
+- Cliente: `cliente@jlaxion.com.br` / `axion123`
+- Admin: `admin@jlaxion.com.br` / `axionadmin`
 
 ## Deploy com Docker
 

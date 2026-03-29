@@ -7,7 +7,9 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+ENV npm_config_build_from_source=true
+RUN npm ci --omit=dev --build-from-source \
+  && npm rebuild sqlite3 --build-from-source
 
 COPY . .
 

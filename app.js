@@ -182,6 +182,15 @@ const DEFAULT_PROFILE = {
   zip: "01000-000"
 };
 
+const GUEST_PROFILE = {
+  name: "",
+  email: "",
+  phone: "",
+  city: "",
+  address: "",
+  zip: ""
+};
+
 const DEFAULT_ORDERS = [
   {
     id: "AX-240318",
@@ -364,6 +373,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function seedData() {
+  removeStorage(STORAGE_KEYS.auth);
+
   if (!readStorage(STORAGE_KEYS.cart)) {
     writeStorage(STORAGE_KEYS.cart, DEFAULT_CART);
   }
@@ -399,6 +410,35 @@ function readStorage(key) {
 function writeStorage(key, value) {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    return null;
+  }
+
+  return value;
+}
+
+function removeStorage(key) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    return null;
+  }
+
+  return true;
+}
+
+function readTransientState(key) {
+  try {
+    const value = window.sessionStorage.getItem(key);
+    return value ? JSON.parse(value) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function writeTransientState(key, value) {
+  try {
+    window.sessionStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
     return null;
   }
@@ -471,27 +511,35 @@ function applyRuntimePatch(payload) {
 
   if (payload.session) {
     runtimeData.isAuthenticated = Boolean(payload.session.isAuthenticated);
-    runtimeData.userId = payload.session.userId || runtimeData.userId;
+    runtimeData.userId = runtimeData.isAuthenticated ? (payload.session.userId || runtimeData.userId) : null;
   }
 
-  if (Array.isArray(payload.cart)) {
+  if (Array.isArray(payload.cart) && runtimeData.isAuthenticated) {
     runtimeData.cart = payload.cart;
   }
 
-  if (Array.isArray(payload.favorites)) {
+  if (Array.isArray(payload.favorites) && runtimeData.isAuthenticated) {
     runtimeData.favorites = payload.favorites;
   }
 
   if (payload.profile) {
-    runtimeData.profile = { ...DEFAULT_PROFILE, ...payload.profile };
+    runtimeData.profile = runtimeData.isAuthenticated
+      ? { ...DEFAULT_PROFILE, ...payload.profile }
+      : { ...GUEST_PROFILE };
   }
 
   if (payload.user) {
     runtimeData.profile = { ...DEFAULT_PROFILE, ...payload.user };
   }
 
-  if (Array.isArray(payload.orders)) {
+  if (Array.isArray(payload.orders) && runtimeData.isAuthenticated) {
     runtimeData.orders = payload.orders;
+  }
+
+  if (!runtimeData.isAuthenticated) {
+    runtimeData.cart = [];
+    runtimeData.favorites = [];
+    runtimeData.orders = [];
   }
 }
 
@@ -502,6 +550,32 @@ async function refreshRuntimeData() {
 
   const payload = await apiRequest("/api/bootstrap");
   applyRuntimePatch(payload);
+}
+
+async function signOut() {
+  try {
+    if (runtimeData.useBackend) {
+      const payload = await apiRequest("/api/auth/logout", {
+        method: "POST"
+      });
+      applyRuntimePatch(payload);
+      await refreshRuntimeData();
+    } else {
+      setLocalAuthState(false);
+      setProfile({ ...GUEST_PROFILE });
+      setOrders([]);
+    }
+
+    runtimeData.isAuthenticated = false;
+    runtimeData.userId = null;
+    refreshShellUi();
+    showToast("Sessao encerrada.");
+    window.setTimeout(() => {
+      window.location.href = "login.html";
+    }, 350);
+  } catch (error) {
+    showToast(error.message);
+  }
 }
 
 function getCart() {
@@ -581,7 +655,7 @@ function getIsAuthenticated() {
     return runtimeData.isAuthenticated;
   }
 
-  return Boolean(readStorage(STORAGE_KEYS.auth)?.isAuthenticated);
+  return Boolean(readTransientState(STORAGE_KEYS.auth)?.isAuthenticated);
 }
 
 function setLocalAuthState(isAuthenticated) {
@@ -591,9 +665,13 @@ function setLocalAuthState(isAuthenticated) {
     return runtimeData.isAuthenticated;
   }
 
-  return writeStorage(STORAGE_KEYS.auth, {
+  return writeTransientState(STORAGE_KEYS.auth, {
     isAuthenticated: Boolean(isAuthenticated)
   });
+}
+
+function getViewerProfile() {
+  return getIsAuthenticated() ? getProfile() : { ...GUEST_PROFILE };
 }
 
 function readSession(key) {
@@ -633,9 +711,13 @@ function renderShell() {
   const greetingName = getGreetingName();
   const accountHref = isAuthenticated ? "account.html" : "login.html";
   const accountLabel = isAuthenticated ? `Ola, ${greetingName}` : "Login";
+  const accountNavPage = isAuthenticated ? "account" : "login";
+  const drawerAccountEntry = isAuthenticated
+    ? drawerLink("account", "account.html", "Minha conta", "Perfil e pedidos")
+    : drawerLink("login", "login.html", "Minha conta", "Entre para acessar seus dados");
   const authDrawerEntry = isAuthenticated
     ? drawerLink("account", "account.html", `Ola, ${greetingName}`, "Perfil, pedidos e dados salvos")
-    : drawerLink("login", "login.html", "Login", "Acesse ou crie sua conta");
+    : "";
 
   shell.innerHTML = `
     <div class="top-strip">
@@ -702,7 +784,7 @@ function renderShell() {
             ${navLink("promotions", "promotions.html", "Promocoes")}
             ${navLink("favorites", "favorites.html", "Favoritos")}
             ${navLink("cart", "cart.html", "Carrinho")}
-            ${navLink("account", "account.html", "Minha conta")}
+            ${navLink(accountNavPage, accountHref, "Minha conta")}
           </nav>
         </div>
       </div>
@@ -727,7 +809,7 @@ function renderShell() {
           ${drawerLink("promotions", "promotions.html", "Promocoes", "Cupons, frete e combos")}
           ${drawerLink("favorites", "favorites.html", "Favoritos", "Lista de desejos")}
           ${drawerLink("cart", "cart.html", "Carrinho", "Resumo da compra")}
-          ${drawerLink("account", "account.html", "Minha conta", "Perfil e pedidos")}
+          ${drawerAccountEntry}
           ${authDrawerEntry}
           ${drawerLink("admin", "admin.html", "Admin", "Painel da loja")}
         </div>
@@ -791,9 +873,10 @@ function drawerCategoryCard(category) {
   return `
     <button type="button" class="drawer-category-card" data-action="open-category" data-category="${category}">
       <span class="drawer-category-card__code">${meta.code}</span>
-      <strong>${category}</strong>
-      <small>${productCount} ${productCount === 1 ? "item" : "itens"}</small>
-      <p>${meta.subtitle}</p>
+      <div class="drawer-category-card__meta">
+        <strong>${category}</strong>
+        <small>${productCount} ${productCount === 1 ? "item" : "itens"}</small>
+      </div>
     </button>
   `;
 }
@@ -888,33 +971,46 @@ function bindForms() {
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const formData = new FormData(loginForm);
+      const name = String(formData.get("name") || "").trim();
+      const email = String(formData.get("email") || "").trim();
+      const password = String(formData.get("password") || "").trim();
+
+      if (!email || !password) {
+        showToast("Preencha e-mail e senha para continuar.");
+        return;
+      }
+
+      if (password.length < 6) {
+        showToast("Sua senha precisa ter pelo menos 6 caracteres.");
+        return;
+      }
 
       try {
         if (runtimeData.useBackend) {
           const payload = await apiRequest("/api/auth/login", {
             method: "POST",
             body: {
-              name: String(formData.get("name") || "").trim(),
-              email: String(formData.get("email") || "").trim(),
-              password: String(formData.get("password") || "").trim()
+              name,
+              email,
+              password
             }
           });
 
           applyRuntimePatch(payload);
           await refreshRuntimeData();
-          updateProfileText();
+          refreshShellUi();
           showToast(payload.message || "Login concluido. Redirecionando para Minha Conta.");
         } else {
-          const current = getProfile();
+          const current = getViewerProfile();
           const nextProfile = {
             ...current,
-            name: String(formData.get("name") || "").trim() || current.name,
-            email: String(formData.get("email") || "").trim() || current.email
+            name: name || current.name,
+            email: email || current.email
           };
 
           setProfile(nextProfile);
           setLocalAuthState(true);
-          updateProfileText();
+          refreshShellUi();
           showToast("Conta criada com sucesso. Redirecionando para Minha Conta.");
         }
 
@@ -928,6 +1024,10 @@ function bindForms() {
   }
 
   if (accountForm) {
+    if (!getIsAuthenticated()) {
+      return;
+    }
+
     const profile = getProfile();
     accountForm.elements.name.value = profile.name || "";
     accountForm.elements.email.value = profile.email || "";
@@ -958,7 +1058,7 @@ function bindForms() {
           setProfile(nextProfile);
         }
 
-        updateProfileText();
+        refreshShellUi();
         showToast(runtimeData.useBackend ? "Perfil atualizado no backend." : "Perfil atualizado nesta demonstracao.");
       } catch (error) {
         showToast(error.message);
@@ -983,6 +1083,11 @@ function bindActions() {
       const isPassword = input.type === "password";
       input.type = isPassword ? "text" : "password";
       target.textContent = isPassword ? "Ocultar" : "Mostrar";
+      return;
+    }
+
+    if (action === "logout") {
+      await signOut();
       return;
     }
 
@@ -1074,6 +1179,13 @@ function renderAll() {
   renderProductPage();
 }
 
+function refreshShellUi() {
+  renderShell();
+  bindSearch();
+  bindMenu();
+  renderAll();
+}
+
 function updateCounts() {
   const cartCount = getCart().reduce((total, item) => total + item.quantity, 0);
   const favoritesCount = getFavorites().length;
@@ -1109,7 +1221,7 @@ function updateCounts() {
 }
 
 function updateProfileText() {
-  const profile = getProfile();
+  const profile = getViewerProfile();
   const firstName = getGreetingName();
   const isAuthenticated = getIsAuthenticated();
 
@@ -1118,7 +1230,7 @@ function updateProfileText() {
   });
 
   document.querySelectorAll("[data-profile-email]").forEach((element) => {
-    element.textContent = profile.email || DEFAULT_PROFILE.email;
+    element.textContent = isAuthenticated ? (profile.email || DEFAULT_PROFILE.email) : "Entre para acompanhar seus pedidos";
   });
 
   document.querySelectorAll("[data-account-entry-label]").forEach((element) => {
@@ -1131,6 +1243,10 @@ function updateProfileText() {
 }
 
 function getGreetingName() {
+  if (!getIsAuthenticated()) {
+    return "Cliente";
+  }
+
   const profile = getProfile();
   const baseName = (profile.name || DEFAULT_PROFILE.name).trim();
   return baseName.split(" ")[0] || "Cliente";
@@ -1363,9 +1479,34 @@ function renderFavoritePage() {
 
 function renderAccountPage() {
   const orderList = document.querySelector("[data-order-list]");
+  const accountForm = document.querySelector("[data-account-form]");
+  const authActions = document.querySelector("[data-account-auth-actions]");
 
   if (!orderList) {
     return;
+  }
+
+  if (!getIsAuthenticated()) {
+    if (authActions) {
+      authActions.innerHTML = "";
+    }
+
+    if (accountForm) {
+      accountForm.querySelectorAll("input, button").forEach((element) => {
+        element.disabled = true;
+      });
+    }
+
+    orderList.innerHTML = emptyState(
+      "Sua conta ainda nao foi acessada",
+      "Entre com seu e-mail e senha para acompanhar pedidos, editar seus dados e ver sua area pessoal.",
+      '<a class="primary-btn" href="login.html">Entrar agora</a>'
+    );
+    return;
+  }
+
+  if (authActions) {
+    authActions.innerHTML = '<button type="button" class="ghost-btn primary-btn--full" data-action="logout">Sair da conta</button>';
   }
 
   const orders = getOrders();
@@ -1518,7 +1659,7 @@ function renderCheckoutPage() {
     return;
   }
 
-  const profile = getProfile();
+  const profile = getViewerProfile();
   const cartProducts = getCartProducts();
 
   if (!cartProducts.length) {
@@ -1569,17 +1710,17 @@ function renderCheckoutPage() {
       <div class="checkout-fields">
         <label class="field field--full">
           <span>Nome completo</span>
-          <input class="input" type="text" name="name" value="${escapeAttribute(profile.name || DEFAULT_PROFILE.name)}" placeholder="Cliente JL AXION" required>
+          <input class="input" type="text" name="name" value="${escapeAttribute(profile.name || "")}" placeholder="Seu nome completo" required>
         </label>
 
         <label class="field">
           <span>E-mail</span>
-          <input class="input" type="email" name="email" value="${escapeAttribute(profile.email || DEFAULT_PROFILE.email)}" placeholder="cliente@jlaxion.com.br" required>
+          <input class="input" type="email" name="email" value="${escapeAttribute(profile.email || "")}" placeholder="voce@exemplo.com" required>
         </label>
 
         <label class="field">
           <span>Telefone</span>
-          <input class="input" type="tel" name="phone" value="${escapeAttribute(profile.phone || DEFAULT_PROFILE.phone)}" placeholder="(11) 99999-0000" required>
+          <input class="input" type="tel" name="phone" value="${escapeAttribute(profile.phone || "")}" placeholder="(11) 99999-0000" required>
         </label>
       </div>
     </section>
@@ -1595,17 +1736,17 @@ function renderCheckoutPage() {
       <div class="checkout-fields">
         <label class="field field--full">
           <span>Endereco</span>
-          <input class="input" type="text" name="address" value="${escapeAttribute(profile.address || DEFAULT_PROFILE.address)}" placeholder="Rua Axion Prime, 120" required>
+          <input class="input" type="text" name="address" value="${escapeAttribute(profile.address || "")}" placeholder="Rua Axion Prime, 120" required>
         </label>
 
         <label class="field">
           <span>Cidade</span>
-          <input class="input" type="text" name="city" value="${escapeAttribute(profile.city || DEFAULT_PROFILE.city)}" placeholder="Sao Paulo, SP" required>
+          <input class="input" type="text" name="city" value="${escapeAttribute(profile.city || "")}" placeholder="Sao Paulo, SP" required>
         </label>
 
         <label class="field">
           <span>CEP</span>
-          <input class="input" type="text" name="zip" value="${escapeAttribute(profile.zip || DEFAULT_PROFILE.zip)}" placeholder="01000-000" required>
+          <input class="input" type="text" name="zip" value="${escapeAttribute(profile.zip || "")}" placeholder="01000-000" required>
         </label>
       </div>
 
@@ -1661,7 +1802,7 @@ function renderCheckoutPage() {
     <div class="mini-metric-grid checkout-assurance-grid">
       <article class="mini-metric">
         <strong>Protecao de dados</strong>
-        <span>Dados do comprador ficam salvos apenas para agilizar a experiencia local da loja.</span>
+        <span>Dados usados apenas para concluir o pedido com mais clareza e seguranca.</span>
       </article>
       <article class="mini-metric">
         <strong>Entrega acompanhada</strong>
@@ -1669,7 +1810,7 @@ function renderCheckoutPage() {
       </article>
     </div>
 
-    <div class="summary-note">Ao finalizar, os dados ficam salvos para acelerar a proxima compra e o pedido aparece em Minha Conta.</div>
+    <div class="summary-note">Ao finalizar, o pedido e confirmado e o resumo segue para a area da conta quando houver login ativo.</div>
     <button type="submit" class="primary-btn primary-btn--full">Finalizar pedido</button>
   `;
 
@@ -1707,7 +1848,7 @@ function renderCheckoutPage() {
     <div class="summary-line"><span>Entrega estimada</span><strong>${shipping === 0 ? "24h a 48h" : "1 a 3 dias uteis"}</strong></div>
     <hr>
     <div class="summary-line checkout-total-line"><span>Total final</span><strong>${money.format(total)}</strong></div>
-    <div class="summary-note">Checkout demonstrativo com dados locais. Depois a gente pode plugar pagamento e pedido reais.</div>
+    <div class="summary-note">Checkout pronto para evoluir depois com gateway de pagamento e status reais.</div>
   `;
 
   form.onsubmit = async (event) => {
@@ -1715,7 +1856,7 @@ function renderCheckoutPage() {
 
     const formData = new FormData(form);
     const nextProfile = {
-      ...getProfile(),
+      ...getViewerProfile(),
       name: String(formData.get("name") || "").trim() || DEFAULT_PROFILE.name,
       email: String(formData.get("email") || "").trim() || DEFAULT_PROFILE.email,
       phone: String(formData.get("phone") || "").trim() || DEFAULT_PROFILE.phone,

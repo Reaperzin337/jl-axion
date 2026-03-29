@@ -22,6 +22,7 @@ const SESSION_DB_PATH = process.env.SESSION_DB_PATH
   ? path.resolve(process.env.SESSION_DB_PATH)
   : path.join(DATA_DIR, "sessions.sqlite");
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "jlaxion.sid";
+const SESSION_REVISION = 2;
 
 const HTML_FILES = new Set([
   "index.html",
@@ -327,7 +328,6 @@ async function startServer() {
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
       sameSite: "lax",
       secure: isProduction
     }
@@ -351,9 +351,16 @@ async function startServer() {
       return;
     }
 
+    if (req.session.revision !== SESSION_REVISION) {
+      req.session.userId = defaultUserId;
+      req.session.isAuthenticated = false;
+      req.session.revision = SESSION_REVISION;
+    }
+
     if (!req.session.userId) {
       req.session.userId = defaultUserId;
       req.session.isAuthenticated = false;
+      req.session.revision = SESSION_REVISION;
     }
 
     req.currentUserId = req.session.userId;
@@ -442,6 +449,11 @@ async function startServer() {
 
       if (!email || !password) {
         res.status(400).json({ message: "Informe e-mail e senha." });
+        return;
+      }
+
+      if (password.length < 6) {
+        res.status(400).json({ message: "A senha precisa ter pelo menos 6 caracteres." });
         return;
       }
 
@@ -1418,6 +1430,7 @@ async function establishSession(req, userId, isAuthenticated) {
 
   req.session.userId = userId;
   req.session.isAuthenticated = isAuthenticated;
+  req.session.revision = SESSION_REVISION;
 }
 
 function normalizeProductInput(input, existing = {}) {

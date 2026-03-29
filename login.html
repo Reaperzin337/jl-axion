@@ -14,58 +14,41 @@
   <div data-site-shell></div>
 
   <main class="page">
-    <section class="page-hero section">
+    <section class="page-hero section page-hero--compact">
       <span class="eyebrow">Acesso do cliente</span>
-      <h1>Entre ou crie sua conta JL AXION</h1>
-      <p>Salve favoritos, acompanhe pedidos e deixe seus dados prontos para uma compra mais rapida nas proximas visitas.</p>
+      <h1>Entre na sua conta</h1>
+      <p>Use seu e-mail e sua senha. No primeiro acesso, informe tambem o seu nome para criar a conta.</p>
     </section>
 
-    <section class="section split-layout">
-      <article class="content-card content-card--accent">
-        <span class="eyebrow">Vantagens da conta</span>
-        <h2>Uma conta feita para comprar melhor e voltar com facilidade.</h2>
-        <ul class="feature-list">
-          <li>Favoritos salvos para comparar com calma antes de decidir.</li>
-          <li>Historico, status de pedidos e atalhos de recompra.</li>
-          <li>Perfil, cidade e contato prontos para acelerar o checkout.</li>
-          <li>Fluxo simples para login e criacao de conta no mesmo formulario.</li>
-        </ul>
-      </article>
-
-      <article class="content-card">
-        <div class="section-heading section-heading--stacked">
-          <div>
-            <span class="eyebrow">Entrar</span>
-            <h2>Acesse sua conta ou crie uma em segundos</h2>
-          </div>
+    <section class="section login-shell">
+      <article class="content-card login-card">
+        <div class="login-card__header">
+          <span class="eyebrow">Login</span>
+          <h2>Acesse ou crie sua conta em um so passo</h2>
+          <p>Seu nome so e necessario no primeiro acesso.</p>
         </div>
 
         <form class="form-grid" data-login-form>
           <label class="field">
             <span>Nome</span>
-            <input class="input" type="text" name="name" placeholder="Seu nome">
+            <input class="input" type="text" name="name" placeholder="Preencha apenas no primeiro acesso">
           </label>
 
           <label class="field">
             <span>E-mail</span>
-            <input class="input" type="email" name="email" placeholder="voce@exemplo.com" required>
+            <input class="input" type="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required>
           </label>
 
           <label class="field">
             <span>Senha</span>
             <div class="input-row">
-              <input class="input" type="password" name="password" value="axion123" required>
+              <input class="input" type="password" name="password" placeholder="Sua senha" autocomplete="current-password" minlength="6" required>
               <button type="button" class="ghost-btn" data-action="toggle-password">Mostrar</button>
             </div>
           </label>
 
-          <label class="checkbox-row">
-            <input type="checkbox" name="remember" checked>
-            <span>Manter sessao ativa neste dispositivo</span>
-          </label>
-
-          <button type="submit" class="primary-btn primary-btn--full">Entrar ou criar conta</button>
-          <p class="helper-text">Para testar a base, use o acesso padrao <strong>cliente@jlaxion.com.br</strong> com senha <strong>axion123</strong>, ou preencha outro e-mail para criar sua conta.</p>
+          <button type="submit" class="primary-btn primary-btn--full">Continuar</button>
+          <p class="helper-text">Ao continuar, voce entra na conta existente ou cria uma nova com os dados informados.</p>
         </form>
       </article>
     </section>

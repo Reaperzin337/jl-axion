@@ -5,7 +5,8 @@ const STORAGE_KEYS = {
   auth: "jlaxion-auth",
   accounts: "jlaxion-accounts",
   orders: "jlaxion-orders",
-  pendingCategory: "jlaxion-pending-category"
+  pendingCategory: "jlaxion-pending-category",
+  flashToast: "jlaxion-flash-toast"
 };
 
 let PRODUCTS = [
@@ -379,6 +380,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await hydrateFromBackend();
   renderShell();
   ensureToastHost();
+  drainFlashToast();
   bindSearch();
   bindForms();
   bindMenu();
@@ -522,6 +524,16 @@ function writeTransientState(key, value) {
   }
 
   return value;
+}
+
+function removeTransientState(key) {
+  try {
+    window.sessionStorage.removeItem(key);
+  } catch (error) {
+    return null;
+  }
+
+  return null;
 }
 
 async function hydrateFromBackend() {
@@ -788,6 +800,24 @@ function removeSession(key) {
   } catch (error) {
     return null;
   }
+}
+
+function queueFlashToast(message, options = {}) {
+  writeTransientState(STORAGE_KEYS.flashToast, {
+    message,
+    ...options
+  });
+}
+
+function drainFlashToast() {
+  const payload = readTransientState(STORAGE_KEYS.flashToast);
+
+  if (!payload?.message) {
+    return;
+  }
+
+  removeTransientState(STORAGE_KEYS.flashToast);
+  showToast(payload.message, payload);
 }
 
 function renderShell() {
@@ -1136,7 +1166,13 @@ function bindForms() {
           applyRuntimePatch(payload);
           await refreshRuntimeData();
           refreshShellUi();
-          showToast(payload.message || "Login concluido. Redirecionando para Minha Conta.");
+          queueFlashToast("Login efetuado com sucesso", {
+            title: "Login efetuado com sucesso",
+            description: "Sua conta JL AXION ja esta pronta para pedidos, favoritos e acompanhamento.",
+            tone: "auth-success",
+            duration: 4000,
+            dismissible: true
+          });
           setFormSubmitting(submitButton, false);
         } else {
           const localAccount = findLocalAccountByEmail(email);
@@ -1152,12 +1188,18 @@ function bindForms() {
           setProfile(buildProfileFromAccount(localAccount));
           setLocalAuthState(true);
           refreshShellUi();
-          showToast("Login concluido com sucesso.");
+          queueFlashToast("Login efetuado com sucesso", {
+            title: "Login efetuado com sucesso",
+            description: "Sua conta JL AXION ja esta pronta para pedidos, favoritos e acompanhamento.",
+            tone: "auth-success",
+            duration: 4000,
+            dismissible: true
+          });
         }
 
         window.setTimeout(() => {
           window.location.href = "account.html";
-        }, 700);
+        }, 220);
       } catch (error) {
         const submitButton = loginForm.querySelector('button[type="submit"]');
         setFormSubmitting(submitButton, false);
@@ -1212,7 +1254,13 @@ function bindForms() {
           applyRuntimePatch(payload);
           await refreshRuntimeData();
           refreshShellUi();
-          showToast(payload.message || "Conta criada com sucesso.");
+          queueFlashToast("Conta criada com sucesso", {
+            title: "Conta criada com sucesso",
+            description: "Seu acesso foi liberado e a sua area do cliente ja esta ativa.",
+            tone: "auth-success",
+            duration: 4000,
+            dismissible: true
+          });
         } else {
           const normalizedEmail = email.toLowerCase();
 
@@ -1231,13 +1279,19 @@ function bindForms() {
           setLocalAuthState(true);
           setOrders([]);
           refreshShellUi();
-          showToast("Conta criada com sucesso.");
+          queueFlashToast("Conta criada com sucesso", {
+            title: "Conta criada com sucesso",
+            description: "Seu acesso foi liberado e a sua area do cliente ja esta ativa.",
+            tone: "auth-success",
+            duration: 4000,
+            dismissible: true
+          });
         }
 
         registerForm.reset();
         window.setTimeout(() => {
           window.location.href = "account.html";
-        }, 700);
+        }, 220);
       } catch (error) {
         showToast(error.message);
       } finally {
@@ -1256,6 +1310,12 @@ function bindForms() {
     accountForm.elements.email.value = profile.email || "";
     accountForm.elements.phone.value = profile.phone || "";
     accountForm.elements.city.value = profile.city || "";
+    if (accountForm.elements.address) {
+      accountForm.elements.address.value = profile.address || "";
+    }
+    if (accountForm.elements.zip) {
+      accountForm.elements.zip.value = profile.zip || "";
+    }
 
     accountForm.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -1264,7 +1324,9 @@ function bindForms() {
         name: String(formData.get("name") || "").trim() || DEFAULT_PROFILE.name,
         email: String(formData.get("email") || "").trim() || DEFAULT_PROFILE.email,
         phone: String(formData.get("phone") || "").trim() || DEFAULT_PROFILE.phone,
-        city: String(formData.get("city") || "").trim() || DEFAULT_PROFILE.city
+        city: String(formData.get("city") || "").trim() || DEFAULT_PROFILE.city,
+        address: String(formData.get("address") || "").trim() || DEFAULT_PROFILE.address,
+        zip: String(formData.get("zip") || "").trim() || DEFAULT_PROFILE.zip
       };
 
       try {
@@ -1293,6 +1355,13 @@ function bindForms() {
 
 function bindActions() {
   document.addEventListener("click", async (event) => {
+    const openAccountMenu = document.querySelector("[data-account-menu].is-open");
+
+    if (openAccountMenu && !event.target.closest("[data-account-menu]")) {
+      openAccountMenu.classList.remove("is-open");
+      openAccountMenu.querySelector('[data-action="toggle-account-menu"]')?.setAttribute("aria-expanded", "false");
+    }
+
     const target = event.target.closest("[data-action]");
 
     if (!target) {
@@ -1320,6 +1389,25 @@ function bindActions() {
 
     if (action === "switch-auth-mode") {
       setAuthMode(target.dataset.authMode || "login");
+      return;
+    }
+
+    if (action === "toggle-account-menu") {
+      event.preventDefault();
+
+      if (window.matchMedia("(max-width: 900px)").matches) {
+        window.location.href = "account.html";
+        return;
+      }
+
+      const menu = target.closest("[data-account-menu]");
+
+      if (!menu) {
+        return;
+      }
+
+      const isOpen = menu.classList.toggle("is-open");
+      target.setAttribute("aria-expanded", String(isOpen));
       return;
     }
 
@@ -1564,10 +1652,15 @@ function bindWhatsappFloat() {
 function updateProfileText() {
   const profile = getViewerProfile();
   const firstName = getGreetingName();
+  const fullName = getFullProfileName();
   const isAuthenticated = getIsAuthenticated();
 
   document.querySelectorAll("[data-profile-name]").forEach((element) => {
     element.textContent = firstName;
+  });
+
+  document.querySelectorAll("[data-profile-full-name]").forEach((element) => {
+    element.textContent = fullName;
   });
 
   document.querySelectorAll("[data-profile-email]").forEach((element) => {
@@ -1575,11 +1668,15 @@ function updateProfileText() {
   });
 
   document.querySelectorAll("[data-account-entry-label]").forEach((element) => {
-    element.textContent = isAuthenticated ? `Ola, ${firstName}` : "Login";
+    element.textContent = isAuthenticated ? `Olá, ${firstName}` : "Login";
   });
 
   document.querySelectorAll("[data-account-entry]").forEach((element) => {
     element.setAttribute("href", isAuthenticated ? "account.html" : "login.html");
+  });
+
+  document.querySelectorAll("[data-profile-initial]").forEach((element) => {
+    element.textContent = firstName.charAt(0).toUpperCase();
   });
 }
 
@@ -1591,6 +1688,14 @@ function getGreetingName() {
   const profile = getProfile();
   const baseName = (profile.name || DEFAULT_PROFILE.name).trim();
   return baseName.split(" ")[0] || "Cliente";
+}
+
+function getFullProfileName() {
+  if (!getIsAuthenticated()) {
+    return DEFAULT_PROFILE.name;
+  }
+
+  return (getProfile().name || DEFAULT_PROFILE.name).trim() || DEFAULT_PROFILE.name;
 }
 
 function restorePendingCategory() {
@@ -2725,6 +2830,13 @@ function escapeAttribute(value) {
     .replace(/>/g, "&gt;");
 }
 
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 async function toggleFavorite(productId) {
   const favorites = getFavorites();
   const exists = favorites.includes(productId);
@@ -2907,16 +3019,69 @@ function ensureToastHost() {
   document.body.appendChild(host);
 }
 
-function showToast(message) {
+function showToast(message, options = {}) {
   const host = document.querySelector(".toast-host");
 
   if (!host) {
     return;
   }
 
+  const {
+    title = "",
+    description = "",
+    tone = "default",
+    duration = 2400,
+    dismissible = false
+  } = options;
+
   const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.textContent = message;
+  toast.className = `toast${tone === "auth-success" ? " toast--auth-success" : ""}`;
+
+  const body = document.createElement("div");
+  body.className = "toast__body";
+
+  if (title || description) {
+    const heading = document.createElement("strong");
+    heading.className = "toast__title";
+    heading.textContent = title || message;
+    body.appendChild(heading);
+
+    if (description) {
+      const copy = document.createElement("span");
+      copy.className = "toast__description";
+      copy.textContent = description;
+      body.appendChild(copy);
+    }
+  } else {
+    const copy = document.createElement("span");
+    copy.className = "toast__message";
+    copy.textContent = message;
+    body.appendChild(copy);
+  }
+
+  toast.appendChild(body);
+
+  let removed = false;
+  const removeToast = () => {
+    if (removed) {
+      return;
+    }
+
+    removed = true;
+    toast.classList.remove("is-visible");
+    window.setTimeout(() => toast.remove(), 220);
+  };
+
+  if (dismissible) {
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "toast__close";
+    closeButton.setAttribute("aria-label", "Fechar aviso");
+    closeButton.textContent = "×";
+    closeButton.addEventListener("click", removeToast);
+    toast.appendChild(closeButton);
+  }
+
   host.appendChild(toast);
 
   requestAnimationFrame(() => {
@@ -2924,9 +3089,8 @@ function showToast(message) {
   });
 
   window.setTimeout(() => {
-    toast.classList.remove("is-visible");
-    window.setTimeout(() => toast.remove(), 200);
-  }, 2400);
+    removeToast();
+  }, duration);
 }
 
 function closeDrawer() {
@@ -3007,19 +3171,68 @@ function renderShell() {
 
   const isAuthenticated = getIsAuthenticated();
   const greetingName = getGreetingName();
+  const viewerProfile = getViewerProfile();
   const accountHref = isAuthenticated ? "account.html" : "login.html";
-  const accountLabel = isAuthenticated ? `Ola, ${greetingName}` : "Login";
+  const accountLabel = isAuthenticated ? `Olá, ${greetingName}` : "Login";
   const useCompactSearchCopy = runtimeData.isNativeApp || window.matchMedia("(max-width: 780px)").matches;
   const searchPlaceholder = useCompactSearchCopy
     ? "Buscar produtos"
     : "Buscar carregadores, lampadas, cabos, som...";
   const headerDepartments = getCategoryNames().slice(0, 5);
+  const accountEmail = isAuthenticated ? (viewerProfile.email || DEFAULT_PROFILE.email) : "";
+  const accountInitial = greetingName.charAt(0).toUpperCase();
   const drawerAccountEntry = isAuthenticated
     ? drawerLink("account", "account.html", "Minha conta", "Perfil, pedidos e dados")
     : drawerLink("login", "login.html", "Minha conta", "Entre para acompanhar seus pedidos");
   const authDrawerEntry = isAuthenticated
-    ? drawerLink("account", "account.html", `Ola, ${greetingName}`, "Voltar para sua area")
+    ? drawerLink("account", "account.html", `Olá, ${greetingName}`, "Voltar para sua area")
     : "";
+  const accountActionMarkup = isAuthenticated
+    ? `
+      <div class="account-menu" data-account-menu>
+        <button
+          type="button"
+          class="action-link action-link--account action-link--account-menu"
+          data-action="toggle-account-menu"
+          aria-expanded="false"
+        >
+          <span class="account-avatar" data-profile-initial>${escapeHtml(accountInitial)}</span>
+          <span class="account-trigger__copy">
+            <span class="account-trigger__label" data-account-entry-label>${escapeHtml(accountLabel)}</span>
+            <span class="account-trigger__sub">Minha conta</span>
+          </span>
+          <span class="account-trigger__caret" aria-hidden="true">▾</span>
+        </button>
+
+        <div class="account-menu__panel" data-account-menu-panel>
+          <div class="account-menu__profile">
+            <span class="account-avatar account-avatar--panel" data-profile-initial>${escapeHtml(accountInitial)}</span>
+            <div class="account-menu__profile-copy">
+              <strong data-profile-full-name>${escapeHtml(getFullProfileName())}</strong>
+              <span data-profile-email>${escapeHtml(accountEmail)}</span>
+            </div>
+          </div>
+
+          <div class="account-menu__links">
+            <a class="account-menu__link account-menu__link--strong" href="account.html#overview">Central Minha Conta</a>
+            <a class="account-menu__link" href="account.html#orders">Meus pedidos</a>
+            <a class="account-menu__link" href="account.html#profile">Meus dados</a>
+            <a class="account-menu__link" href="account.html#addresses">Endereco</a>
+            <a class="account-menu__link" href="account.html#wallet">Carteira</a>
+            <a class="account-menu__link" href="account.html#protocols">Protocolos</a>
+            <a class="account-menu__link" href="account.html#reviews">Avaliacoes</a>
+            <a class="account-menu__link" href="account.html#draws">Sorteios</a>
+            <button type="button" class="account-menu__link account-menu__link--button" data-action="logout">Sair</button>
+          </div>
+        </div>
+      </div>
+    `
+    : `
+      <a class="action-link action-link--account" href="${accountHref}" data-account-entry>
+        ${icon("user")}
+        <span data-account-entry-label>${escapeHtml(accountLabel)}</span>
+      </a>
+    `;
   const footerMarkup = `
     <footer class="site-footer" data-global-footer>
       <div class="site-footer__inner">
@@ -3102,10 +3315,7 @@ function renderShell() {
               <span>Carrinho</span>
               <span class="count-badge" data-cart-count>0</span>
             </a>
-            <a class="action-link action-link--account" href="${accountHref}" data-account-entry>
-              ${icon("user")}
-              <span data-account-entry-label>${accountLabel}</span>
-            </a>
+            ${accountActionMarkup}
           </div>
         </div>
 
@@ -3421,9 +3631,222 @@ function buildCatalogMeta(totalResults, visibleResults) {
   return `${totalResults} ${itemLabel} organizados por preco, envio e oportunidade.`;
 }
 
+function renderLoginPage() {
+  const authShell = document.querySelector(".auth-shell");
+  const guestStage = document.querySelector("[data-auth-guest-stage]");
+  const guestCard = document.querySelector("[data-auth-guest-card]");
+  const loggedCard = document.querySelector("[data-auth-logged-card]");
+
+  if (!authShell || !guestCard || !loggedCard) {
+    return;
+  }
+
+  const isAuthenticated = getIsAuthenticated();
+  authShell.classList.toggle("is-authenticated", isAuthenticated);
+
+  if (guestStage) {
+    guestStage.hidden = isAuthenticated;
+  }
+
+  guestCard.hidden = isAuthenticated;
+  loggedCard.hidden = !isAuthenticated;
+}
+
+function renderAccountPage() {
+  const root = document.querySelector("[data-account-root]");
+  const orderList = document.querySelector("[data-order-list]");
+  const accountForm = document.querySelector("[data-account-form]");
+  const authActions = document.querySelector("[data-account-auth-actions]");
+  const latestOrder = document.querySelector("[data-account-latest-order]");
+  const addressCard = document.querySelector("[data-account-address-card]");
+  const walletCard = document.querySelector("[data-account-wallet]");
+  const protocolsCard = document.querySelector("[data-account-protocols]");
+  const reviewsCard = document.querySelector("[data-account-reviews]");
+  const drawsCard = document.querySelector("[data-account-draws]");
+
+  if (!root || !orderList) {
+    return;
+  }
+
+  const isAuthenticated = getIsAuthenticated();
+
+  if (!isAuthenticated) {
+    if (authActions) {
+      authActions.innerHTML = '<a class="primary-btn" href="login.html">Entrar agora</a>';
+    }
+
+    if (accountForm) {
+      accountForm.querySelectorAll("input, button").forEach((element) => {
+        element.disabled = true;
+      });
+    }
+
+    if (latestOrder) {
+      latestOrder.innerHTML = emptyState(
+        "Sua central ainda nao foi ativada",
+        "Entre com seu e-mail e senha para liberar pedidos, atalhos e dados do cliente.",
+        '<a class="primary-btn" href="login.html">Entrar para liberar a conta</a>'
+      );
+    }
+
+    orderList.innerHTML = emptyState(
+      "Sem historico visivel",
+      "Quando voce acessar sua conta, seus pedidos recentes vao aparecer aqui com status, resumo e valor total.",
+      '<a class="secondary-btn" href="login.html">Fazer login</a>'
+    );
+
+    if (addressCard) {
+      addressCard.innerHTML = emptyState(
+        "Endereco bloqueado",
+        "Entre na conta para editar seu endereco principal e acelerar futuras compras.",
+        ""
+      );
+    }
+
+    if (walletCard) {
+      walletCard.innerHTML = emptyState(
+        "Carteira indisponivel",
+        "Sua area de cupons e saldo aparece depois do acesso.",
+        ""
+      );
+    }
+
+    if (protocolsCard) {
+      protocolsCard.innerHTML = emptyState(
+        "Sem protocolos ativos",
+        "Use sua conta para acompanhar chamados e atendimento.",
+        ""
+      );
+    }
+
+    if (reviewsCard) {
+      reviewsCard.innerHTML = emptyState(
+        "Sem avaliacoes no momento",
+        "Depois das compras, suas opinioes ficam reunidas aqui.",
+        ""
+      );
+    }
+
+    if (drawsCard) {
+      drawsCard.innerHTML = emptyState(
+        "Sorteios indisponiveis",
+        "Campanhas e beneficios aparecem quando sua conta estiver ativa.",
+        ""
+      );
+    }
+
+    return;
+  }
+
+  if (authActions) {
+    authActions.innerHTML = '<button type="button" class="ghost-btn" data-action="logout">Sair</button>';
+  }
+
+  const profile = getProfile();
+  const orders = getOrders();
+  const latest = orders[0] || null;
+
+  if (latestOrder) {
+    latestOrder.innerHTML = latest
+      ? `
+        <article class="account-order-highlight">
+          <div class="account-order-highlight__head">
+            <div>
+              <strong>Pedido: ${latest.id}</strong>
+              <span>${latest.placedAt} • ${latest.itemCount} ${latest.itemCount === 1 ? "item" : "itens"}</span>
+            </div>
+            <span class="status-chip${latest.statusTone === "success" ? " status-chip--success" : ""}${latest.statusTone === "warning" ? " status-chip--warning" : ""}">${latest.status}</span>
+          </div>
+          <div class="account-order-highlight__body">
+            <p>${latest.summary}</p>
+            <div class="account-order-highlight__meta">
+              <strong>${money.format(latest.total)}</strong>
+              <span>${latest.payment || "Pagamento em analise"}</span>
+            </div>
+          </div>
+          <div class="account-order-highlight__actions">
+            <a class="secondary-btn" href="#orders">Ver historico completo</a>
+          </div>
+        </article>
+      `
+      : emptyState(
+        "Nenhum pedido por enquanto",
+        "Quando voce finalizar a compra no checkout, o resumo do pedido mais recente aparecera aqui.",
+        '<a class="primary-btn" href="index.html">Explorar a vitrine</a>'
+      );
+  }
+
+  orderList.innerHTML = orders.length
+    ? orders.slice(0, 5).map((order) => `
+        <article class="order-item">
+          <div>
+            <strong>${order.id}</strong>
+            <p>${order.placedAt} • ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
+            <p>${order.summary}</p>
+          </div>
+          <div class="order-item__side">
+            <strong>${money.format(order.total)}</strong>
+            <span class="status-chip${order.statusTone === "success" ? " status-chip--success" : ""}${order.statusTone === "warning" ? " status-chip--warning" : ""}">${order.status}</span>
+          </div>
+        </article>
+      `).join("")
+    : emptyState(
+        "Nenhum pedido por enquanto",
+        "Quando voce finalizar a compra no checkout, o historico completo vai aparecer aqui automaticamente.",
+        '<a class="secondary-btn" href="index.html">Voltar para a vitrine</a>'
+      );
+
+  if (addressCard) {
+    addressCard.innerHTML = `
+      <article class="account-mini-panel">
+        <strong>${profile.address || DEFAULT_PROFILE.address}</strong>
+        <span>${profile.city || DEFAULT_PROFILE.city}</span>
+        <span>CEP ${profile.zip || DEFAULT_PROFILE.zip}</span>
+      </article>
+    `;
+  }
+
+  if (walletCard) {
+    walletCard.innerHTML = `
+      <article class="account-mini-panel">
+        <strong>AXION15 disponivel</strong>
+        <span>Use em campanhas selecionadas enquanto a oferta estiver ativa.</span>
+      </article>
+    `;
+  }
+
+  if (protocolsCard) {
+    protocolsCard.innerHTML = `
+      <article class="account-mini-panel">
+        <strong>Nenhum protocolo aberto</strong>
+        <span>Seu atendimento fica organizado aqui quando houver suporte ou troca.</span>
+      </article>
+    `;
+  }
+
+  if (reviewsCard) {
+    reviewsCard.innerHTML = `
+      <article class="account-mini-panel">
+        <strong>Ainda sem avaliacoes publicadas</strong>
+        <span>Depois das compras, voce podera avaliar produtos e acompanhar suas opinioes.</span>
+      </article>
+    `;
+  }
+
+  if (drawsCard) {
+    drawsCard.innerHTML = `
+      <article class="account-mini-panel">
+        <strong>Campanhas em preparacao</strong>
+        <span>Sorteios e beneficios sazonais vao aparecer aqui quando estiverem ativos.</span>
+      </article>
+    `;
+  }
+}
+
 function renderAll() {
   updateCounts();
   updateProfileText();
+  renderLoginPage();
   renderHomeCollections();
   renderHomeProducts();
   renderHomeShelves();

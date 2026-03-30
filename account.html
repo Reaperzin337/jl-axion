@@ -6,153 +6,240 @@
   <title>JL AXION | Minha Conta</title>
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#2ea0ff">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260330i">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260330j">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260330i">
+  <link rel="stylesheet" href="styles.css?v=20260330j">
 </head>
 <body data-page="account">
   <div data-site-shell></div>
 
   <main class="page">
-    <section class="page-hero page-hero--premium section">
-      <div>
-        <span class="eyebrow">Minha conta</span>
-        <h1>Bem-vindo, <span data-profile-name>Cliente</span></h1>
-        <p>Acompanhe pedidos, atualize seus dados e volte aos itens salvos em uma area do cliente mais clara, mais comercial e mais confiavel.</p>
+    <section class="section account-center" data-account-root>
+      <div class="account-center__intro">
+        <span class="eyebrow">Central Minha Conta</span>
+        <h1>Seu painel para pedidos, dados e recompra.</h1>
+        <p>Uma area mais organizada para acompanhar pedidos, revisar dados e voltar rapido para os itens certos.</p>
       </div>
 
-      <div class="membership-card">
-        <img class="membership-card__logo" src="assets/jl-axion-mark.svg" alt="Marca JL AXION">
-        <div>
-          <span class="eyebrow">Area do cliente</span>
-          <h2>AXION SELECT</h2>
-        </div>
-        <p>Sua area reune historico, preferencias e atalhos de recompra com visual mais solido e leitura direta.</p>
-        <div class="membership-card__meta">
-          <strong data-profile-email>cliente@jlaxion.com.br</strong>
-          <span>Cliente desde 2026</span>
-        </div>
-        <div class="membership-card__actions" data-account-auth-actions></div>
-      </div>
-    </section>
-
-    <section class="section stats-grid">
-      <article class="benefit-card">
-        <span class="benefit-icon" data-cart-total-items>0</span>
-        <h3>Itens no carrinho</h3>
-        <p>Contagem sincronizada com a experiencia de compra.</p>
-      </article>
-
-      <article class="benefit-card">
-        <span class="benefit-icon" data-saved-count>0</span>
-        <h3>Favoritos salvos</h3>
-        <p>Produtos preferidos prontos para retornar ao checkout.</p>
-      </article>
-
-      <article class="benefit-card">
-        <span class="benefit-icon" data-order-count>0</span>
-        <h3>Pedidos recentes</h3>
-        <p>Historico reunido para acompanhar entrega, recompra e status em um so lugar.</p>
-      </article>
-    </section>
-
-    <section class="section page-banner-strip">
-      <article class="info-tile info-tile--accent">
-        <span class="eyebrow">Conta e atendimento</span>
-        <h2>Uma area do cliente pensada para recompra, organizacao e confianca visual.</h2>
-      </article>
-      <article class="info-tile">
-        <span class="eyebrow">Relacionamento</span>
-        <p>Historico, perfil salvo e indicadores de compra reunidos em uma pagina com mais cara de loja real.</p>
-      </article>
-    </section>
-
-    <section class="section account-grid">
-      <article class="content-card">
-        <div class="section-heading section-heading--stacked">
-          <div>
-            <span class="eyebrow">Perfil</span>
-            <h2>Dados do cliente</h2>
+      <article class="account-overview-card content-card" id="overview">
+        <div class="account-overview-card__profile">
+          <span class="account-overview-card__avatar" data-profile-initial>C</span>
+          <div class="account-overview-card__copy">
+            <strong>Bem-vindo, <span data-profile-full-name>Cliente JL AXION</span></strong>
+            <span data-profile-email>cliente@jlaxion.com.br</span>
           </div>
         </div>
 
-        <form class="form-grid" data-account-form>
-          <label class="field">
-            <span>Nome completo</span>
-            <input class="input" type="text" name="name" placeholder="Cliente JL AXION">
-          </label>
-
-          <label class="field">
-            <span>E-mail</span>
-            <input class="input" type="email" name="email" placeholder="cliente@jlaxion.com.br">
-          </label>
-
-          <label class="field">
-            <span>Telefone</span>
-            <input class="input" type="tel" name="phone" placeholder="(11) 99999-0000">
-          </label>
-
-          <label class="field">
-            <span>Cidade</span>
-            <input class="input" type="text" name="city" placeholder="Sao Paulo, SP">
-          </label>
-
-          <button type="submit" class="primary-btn primary-btn--full">Salvar ajustes</button>
-        </form>
+        <div class="account-overview-card__actions">
+          <a class="secondary-btn" href="#profile">Editar dados</a>
+          <div data-account-auth-actions></div>
+        </div>
       </article>
 
-      <article class="content-card">
+      <section class="account-shortcuts" aria-label="Atalhos da conta">
         <div class="section-heading section-heading--stacked">
           <div>
-            <span class="eyebrow">Pedidos</span>
-            <h2>Ultimos movimentos da conta</h2>
+            <span class="eyebrow">Atalhos</span>
+            <h2>Central Minha Conta</h2>
           </div>
         </div>
 
-        <div class="order-list" data-order-list></div>
-      </article>
-    </section>
-
-    <section class="section dual-grid">
-      <article class="content-card">
-        <div class="section-heading section-heading--stacked">
-          <div>
-            <span class="eyebrow">Enderecos</span>
-            <h2>Locais salvos</h2>
-          </div>
-        </div>
-
-        <div class="order-list">
-          <article class="order-item">
+        <div class="account-shortcuts__grid">
+          <a class="account-shortcut-card" href="#orders">
+            <span class="account-shortcut-card__icon">MP</span>
             <div>
-              <strong>Casa</strong>
-              <p>Rua Axion Prime, 120 - Sao Paulo, SP</p>
+              <strong>Meus pedidos</strong>
+              <span>Resumo e andamento</span>
             </div>
-            <span class="status-chip status-chip--success">Padrao</span>
-          </article>
-          <article class="order-item">
+          </a>
+          <a class="account-shortcut-card" href="#profile">
+            <span class="account-shortcut-card__icon">MD</span>
             <div>
-              <strong>Trabalho</strong>
-              <p>Av. Central Tech, 455 - Sao Paulo, SP</p>
+              <strong>Meus dados</strong>
+              <span>Cadastro e contato</span>
             </div>
-            <span class="status-chip">Secundario</span>
-          </article>
+          </a>
+          <a class="account-shortcut-card" href="#addresses">
+            <span class="account-shortcut-card__icon">EN</span>
+            <div>
+              <strong>Endereco</strong>
+              <span>Entrega e CEP</span>
+            </div>
+          </a>
+          <a class="account-shortcut-card" href="#wallet">
+            <span class="account-shortcut-card__icon">CT</span>
+            <div>
+              <strong>Carteira</strong>
+              <span>Cupons e saldo</span>
+            </div>
+          </a>
+          <a class="account-shortcut-card" href="#protocols">
+            <span class="account-shortcut-card__icon">PR</span>
+            <div>
+              <strong>Protocolos</strong>
+              <span>Solicitacoes e suporte</span>
+            </div>
+          </a>
+          <a class="account-shortcut-card" href="#reviews">
+            <span class="account-shortcut-card__icon">AV</span>
+            <div>
+              <strong>Avaliacoes</strong>
+              <span>Opiniao e notas</span>
+            </div>
+          </a>
+          <a class="account-shortcut-card" href="favorites.html">
+            <span class="account-shortcut-card__icon">FV</span>
+            <div>
+              <strong>Favoritos</strong>
+              <span>Itens salvos</span>
+            </div>
+          </a>
+          <a class="account-shortcut-card" href="https://wa.me/5519989994528?text=Ol%C3%A1%2C%20Preciso%20de%20ajuda%20%21" target="_blank" rel="noopener noreferrer">
+            <span class="account-shortcut-card__icon">AT</span>
+            <div>
+              <strong>Atendimento</strong>
+              <span>Ajuda rapida</span>
+            </div>
+          </a>
+          <a class="account-shortcut-card" href="#draws">
+            <span class="account-shortcut-card__icon">SO</span>
+            <div>
+              <strong>Sorteios</strong>
+              <span>Campanhas e brindes</span>
+            </div>
+          </a>
         </div>
-      </article>
+      </section>
 
-      <article class="content-card content-card--accent">
-        <span class="eyebrow">Resumo da conta</span>
-        <h2>Seu centro de controle para compras, perfil e proximos pedidos.</h2>
-        <ul class="feature-list">
-          <li>Historico de compras com status claros.</li>
-          <li>Perfil salvo para acelerar futuras compras.</li>
-          <li>Indicadores conectados com carrinho e favoritos.</li>
-          <li>Base pronta para crescer com pedidos, cupons e notificacoes reais.</li>
-        </ul>
-      </article>
+      <section class="account-center__grid">
+        <article class="content-card account-panel" id="orders">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Resumo do ultimo pedido</span>
+              <h2>Seu pedido mais recente</h2>
+            </div>
+          </div>
+
+          <div data-account-latest-order></div>
+
+          <div class="section-heading section-heading--stacked account-panel__subhead">
+            <div>
+              <span class="eyebrow">Historico</span>
+              <h2>Ultimos movimentos</h2>
+            </div>
+          </div>
+          <div class="order-list" data-order-list></div>
+        </article>
+
+        <article class="content-card account-panel" id="profile">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Perfil</span>
+              <h2>Meus dados</h2>
+            </div>
+          </div>
+
+          <form class="form-grid" data-account-form>
+            <label class="field">
+              <span>Nome completo</span>
+              <input class="input" type="text" name="name" placeholder="Cliente JL AXION">
+            </label>
+
+            <label class="field">
+              <span>E-mail</span>
+              <input class="input" type="email" name="email" placeholder="cliente@jlaxion.com.br">
+            </label>
+
+            <label class="field">
+              <span>Telefone</span>
+              <input class="input" type="tel" name="phone" placeholder="(11) 99999-0000">
+            </label>
+
+            <label class="field">
+              <span>Cidade</span>
+              <input class="input" type="text" name="city" placeholder="Sao Paulo, SP">
+            </label>
+
+            <label class="field field--full">
+              <span>Endereco</span>
+              <input class="input" type="text" name="address" placeholder="Rua, numero e complemento">
+            </label>
+
+            <label class="field">
+              <span>CEP</span>
+              <input class="input" type="text" name="zip" placeholder="00000-000">
+            </label>
+
+            <button type="submit" class="primary-btn primary-btn--full">Salvar ajustes</button>
+          </form>
+        </article>
+      </section>
+
+      <section class="account-center__grid account-center__grid--secondary">
+        <article class="content-card account-panel" id="addresses">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Entrega</span>
+              <h2>Endereco principal</h2>
+            </div>
+          </div>
+          <div data-account-address-card></div>
+        </article>
+
+        <article class="content-card account-panel" id="wallet">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Carteira</span>
+              <h2>Cupons e saldo</h2>
+            </div>
+          </div>
+          <div data-account-wallet></div>
+        </article>
+
+        <article class="content-card account-panel" id="protocols">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Protocolos</span>
+              <h2>Atendimento e solicitacoes</h2>
+            </div>
+          </div>
+          <div data-account-protocols></div>
+        </article>
+
+        <article class="content-card account-panel" id="reviews">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Avaliacoes</span>
+              <h2>Sua opiniao na loja</h2>
+            </div>
+          </div>
+          <div data-account-reviews></div>
+        </article>
+
+        <article class="content-card account-panel" id="draws">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Sorteios</span>
+              <h2>Campanhas e beneficios</h2>
+            </div>
+          </div>
+          <div data-account-draws></div>
+        </article>
+
+        <article class="content-card content-card--accent account-panel">
+          <span class="eyebrow">Resumo da conta</span>
+          <h2>Uma area pensada para recompra, organizacao e suporte rapido.</h2>
+          <ul class="feature-list">
+            <li>Pedidos, dados e enderecos em uma leitura mais clara.</li>
+            <li>Atalhos de recompra, favoritos e atendimento em um unico painel.</li>
+            <li>Base pronta para cupons, carteira e campanhas da JL AXION.</li>
+          </ul>
+        </article>
+      </section>
     </section>
   </main>
 
-  <script src="app.js?v=20260330i"></script>
+  <script src="app.js?v=20260330j"></script>
 </body>
 </html>
+

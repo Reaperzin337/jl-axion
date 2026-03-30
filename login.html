@@ -7,16 +7,16 @@
   <meta name="description" content="Entre na sua conta JL AXION ou crie seu acesso para acompanhar pedidos, salvar favoritos e comprar com mais rapidez.">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#58c2ff">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260330i">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260330j">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260330i">
+  <link rel="stylesheet" href="styles.css?v=20260330j">
 </head>
 <body data-page="login">
   <div data-site-shell></div>
 
   <main class="page">
     <section class="section auth-shell auth-shell--page">
-      <article class="content-card content-card--accent auth-stage">
+      <article class="content-card content-card--accent auth-stage" data-auth-guest-stage>
         <span class="eyebrow">Conta JL AXION</span>
         <h1>Entre para comprar com mais agilidade e acompanhar tudo em um so lugar.</h1>
         <p>Com a sua conta, voce salva favoritos, acompanha pedidos, finaliza mais rapido e centraliza seus dados com uma experiencia mais limpa e mais confiavel.</p>
@@ -52,7 +52,7 @@
         </div>
       </article>
 
-      <article class="content-card auth-card" data-auth-root data-auth-mode="login">
+      <article class="content-card auth-card" data-auth-root data-auth-guest-card data-auth-mode="login">
         <div class="auth-card__header">
           <span class="eyebrow">Acesso do cliente</span>
           <h2>Entrar ou criar conta</h2>
@@ -151,9 +151,50 @@
           <span>Seu acesso existe para deixar carrinho, favoritos, checkout e pos-compra mais organizados dentro da JL AXION.</span>
         </div>
       </article>
+
+      <article class="content-card auth-card auth-card--logged" data-auth-logged-card hidden>
+        <div class="auth-card__header">
+          <span class="eyebrow">Conta ativa</span>
+          <h2>Voce ja esta logado</h2>
+          <p>Seu acesso JL AXION ja esta validado. Use sua area do cliente para acompanhar pedidos, revisar dados e seguir para a compra com mais rapidez.</p>
+        </div>
+
+        <div class="auth-logged-card__summary">
+          <span class="auth-logged-card__avatar" data-profile-initial>C</span>
+          <div>
+            <strong data-profile-full-name>Cliente JL AXION</strong>
+            <span data-profile-email>cliente@jlaxion.com.br</span>
+          </div>
+        </div>
+
+        <div class="auth-logged-card__actions">
+          <a class="primary-btn" href="account.html">Ir para Minha conta</a>
+          <button type="button" class="secondary-btn" data-action="logout">Sair da conta</button>
+        </div>
+
+        <div class="auth-logged-card__grid">
+          <a class="auth-logged-card__link" href="account.html#orders">
+            <strong>Meus pedidos</strong>
+            <span>Acompanhe status e historico.</span>
+          </a>
+          <a class="auth-logged-card__link" href="favorites.html">
+            <strong>Favoritos</strong>
+            <span>Volte para os itens salvos.</span>
+          </a>
+          <a class="auth-logged-card__link" href="cart.html">
+            <strong>Carrinho</strong>
+            <span>Continue a compra de onde parou.</span>
+          </a>
+          <a class="auth-logged-card__link" href="account.html#profile">
+            <strong>Meus dados</strong>
+            <span>Atualize cadastro e endereco.</span>
+          </a>
+        </div>
+      </article>
     </section>
   </main>
 
-  <script src="app.js?v=20260330i"></script>
+  <script src="app.js?v=20260330j"></script>
 </body>
 </html>
+

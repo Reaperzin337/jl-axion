@@ -737,6 +737,10 @@ function renderShell() {
   const accountHref = isAuthenticated ? "account.html" : "login.html";
   const accountLabel = isAuthenticated ? `Ola, ${greetingName}` : "Login";
   const accountNavPage = isAuthenticated ? "account" : "login";
+  const useCompactSearchCopy = runtimeData.isNativeApp || window.matchMedia("(max-width: 780px)").matches;
+  const searchPlaceholder = useCompactSearchCopy
+    ? "Buscar produtos"
+    : "Buscar carregadores, lampadas, cabos, som...";
   const drawerAccountEntry = isAuthenticated
     ? drawerLink("account", "account.html", "Minha conta", "Perfil e pedidos")
     : drawerLink("login", "login.html", "Minha conta", "Entre para acessar seus dados");
@@ -775,14 +779,17 @@ function renderShell() {
                 id="site-search-input"
                 type="search"
                 class="site-search__input"
-                placeholder="Buscar carregadores, lampadas, cabos, som..."
+                placeholder="${searchPlaceholder}"
                 autocomplete="off"
                 enterkeyhint="search"
                 value="${escapeAttribute(state.searchLabel)}"
                 data-search-input
               >
             </label>
-            <button type="submit" class="site-search__submit">Buscar</button>
+            <button type="submit" class="site-search__submit" aria-label="Buscar">
+              <span class="site-search__submit-icon" aria-hidden="true">${icon("search")}</span>
+              <span class="site-search__submit-label">Buscar</span>
+            </button>
           </form>
 
           <div class="header-actions">

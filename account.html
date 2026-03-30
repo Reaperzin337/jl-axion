@@ -6,9 +6,9 @@
   <title>JL AXION | Minha Conta</title>
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#2ea0ff">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260330l">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260330m">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260330l">
+  <link rel="stylesheet" href="styles.css?v=20260330m">
 </head>
 <body data-page="account">
   <div data-site-shell></div>
@@ -31,7 +31,7 @@
         </div>
 
         <div class="account-overview-card__actions">
-          <a class="secondary-btn" href="#profile">Editar perfil</a>
+          <a class="secondary-btn" href="account-profile.html">Editar perfil</a>
           <div data-account-auth-actions></div>
         </div>
       </article>
@@ -45,21 +45,21 @@
         </div>
 
         <div class="account-shortcuts__grid">
-          <a class="account-shortcut-card" href="#orders">
+          <a class="account-shortcut-card" href="account-orders.html">
             <span class="account-shortcut-card__icon">MP</span>
             <div>
               <strong>Meus pedidos</strong>
               <span>Resumo e andamento</span>
             </div>
           </a>
-          <a class="account-shortcut-card" href="#profile">
+          <a class="account-shortcut-card" href="account-profile.html">
             <span class="account-shortcut-card__icon">MD</span>
             <div>
               <strong>Meus dados</strong>
               <span>Cadastro e contato</span>
             </div>
           </a>
-          <a class="account-shortcut-card" href="#addresses">
+          <a class="account-shortcut-card" href="account-addresses.html">
             <span class="account-shortcut-card__icon">EN</span>
             <div>
               <strong>Endereco</strong>
@@ -73,14 +73,14 @@
               <span>Itens salvos</span>
             </div>
           </a>
-          <a class="account-shortcut-card" href="https://wa.me/5519989994528?text=Ol%C3%A1%2C%20Preciso%20de%20ajuda%20%21" target="_blank" rel="noopener noreferrer">
+          <a class="account-shortcut-card" href="account-support.html">
             <span class="account-shortcut-card__icon">AT</span>
             <div>
               <strong>Atendimento</strong>
               <span>Ajuda rapida</span>
             </div>
           </a>
-          <a class="account-shortcut-card" href="#wallet">
+          <a class="account-shortcut-card" href="account-wallet.html">
             <span class="account-shortcut-card__icon">CT</span>
             <div>
               <strong>Carteira</strong>
@@ -90,8 +90,8 @@
         </div>
       </section>
 
-      <section class="account-center__grid">
-        <article class="content-card account-panel" id="orders">
+      <section class="account-center__grid account-center__grid--hub">
+        <article class="content-card account-panel">
           <div class="section-heading section-heading--stacked">
             <div>
               <span class="eyebrow">Resumo do ultimo pedido</span>
@@ -104,111 +104,43 @@
           <div class="section-heading section-heading--stacked account-panel__subhead">
             <div>
               <span class="eyebrow">Historico</span>
-              <h2>Ultimos movimentos</h2>
+              <h2>Pedidos recentes</h2>
             </div>
           </div>
           <div class="order-list" data-order-list></div>
         </article>
 
-        <article class="content-card account-panel" id="profile">
+        <article class="content-card account-panel account-panel--hub">
           <div class="section-heading section-heading--stacked">
             <div>
-              <span class="eyebrow">Perfil</span>
-              <h2>Meus dados</h2>
+              <span class="eyebrow">Acesso rapido</span>
+              <h2>Escolha para onde ir</h2>
             </div>
           </div>
-
-          <form class="form-grid" data-account-form>
-            <label class="field">
-              <span>Nome completo</span>
-              <input class="input" type="text" name="name" placeholder="Cliente JL AXION">
-            </label>
-
-            <label class="field">
-              <span>E-mail</span>
-              <input class="input" type="email" name="email" placeholder="cliente@jlaxion.com.br">
-            </label>
-
-            <label class="field">
-              <span>Telefone</span>
-              <input class="input" type="tel" name="phone" placeholder="(11) 99999-0000">
-            </label>
-
-            <label class="field">
-              <span>Cidade</span>
-              <input class="input" type="text" name="city" placeholder="Sao Paulo, SP">
-            </label>
-
-            <label class="field field--full">
-              <span>Endereco</span>
-              <input class="input" type="text" name="address" placeholder="Rua, numero e complemento">
-            </label>
-
-            <label class="field">
-              <span>CEP</span>
-              <input class="input" type="text" name="zip" placeholder="00000-000">
-            </label>
-
-            <button type="submit" class="primary-btn primary-btn--full">Salvar ajustes</button>
-          </form>
-        </article>
-      </section>
-
-      <section class="account-center__grid account-center__grid--secondary">
-        <article class="content-card account-panel" id="addresses">
-          <div class="section-heading section-heading--stacked">
-            <div>
-              <span class="eyebrow">Entrega</span>
-              <h2>Endereco principal</h2>
-            </div>
+          <div class="account-hub-links">
+            <a class="account-hub-link" href="account-profile.html">
+              <strong>Atualizar meus dados</strong>
+              <span>Nome, e-mail, telefone e informacoes principais.</span>
+            </a>
+            <a class="account-hub-link" href="account-addresses.html">
+              <strong>Revisar endereco</strong>
+              <span>Consulte o endereco principal e dados de entrega.</span>
+            </a>
+            <a class="account-hub-link" href="account-wallet.html">
+              <strong>Ver carteira</strong>
+              <span>Confira cupons, saldo e campanhas disponiveis.</span>
+            </a>
+            <a class="account-hub-link" href="account-support.html">
+              <strong>Falar com atendimento</strong>
+              <span>Abra suporte rapido e acompanhe orientacoes da loja.</span>
+            </a>
           </div>
-          <div data-account-address-card></div>
-        </article>
-
-        <article class="content-card account-panel" id="wallet">
-          <div class="section-heading section-heading--stacked">
-            <div>
-              <span class="eyebrow">Carteira</span>
-              <h2>Cupons e saldo</h2>
-            </div>
-          </div>
-          <div data-account-wallet></div>
-        </article>
-
-        <article class="content-card account-panel" id="protocols">
-          <div class="section-heading section-heading--stacked">
-            <div>
-              <span class="eyebrow">Protocolos</span>
-              <h2>Suporte e atendimento</h2>
-            </div>
-          </div>
-          <div data-account-protocols></div>
-        </article>
-
-        <article class="content-card account-panel" id="reviews">
-          <div class="section-heading section-heading--stacked">
-            <div>
-              <span class="eyebrow">Avaliacoes</span>
-              <h2>Sua opiniao na loja</h2>
-            </div>
-          </div>
-          <div data-account-reviews></div>
-        </article>
-
-        <article class="content-card account-panel" id="draws">
-          <div class="section-heading section-heading--stacked">
-            <div>
-              <span class="eyebrow">Sorteios</span>
-              <h2>Campanhas ativas</h2>
-            </div>
-          </div>
-          <div data-account-draws></div>
         </article>
       </section>
     </section>
   </main>
 
-  <script src="app.js?v=20260330l"></script>
+  <script src="app.js?v=20260330m"></script>
 </body>
 </html>
 

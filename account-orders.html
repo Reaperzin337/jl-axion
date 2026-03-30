@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JL AXION | Meus pedidos</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#2ea0ff">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260330m">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="styles.css?v=20260330m">
+</head>
+<body data-page="account-orders">
+  <div data-site-shell></div>
+
+  <main class="page">
+    <section class="section account-detail-page">
+      <div class="account-detail-page__intro">
+        <div>
+          <span class="eyebrow">Minha conta</span>
+          <h1>Meus pedidos</h1>
+          <p>Acompanhe seus pedidos, veja o status mais recente e volte para o que importa com mais clareza.</p>
+        </div>
+        <a class="secondary-btn" href="account.html">Voltar para Minha conta</a>
+      </div>
+
+      <section class="account-detail-page__grid">
+        <article class="content-card account-panel">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Pedido mais recente</span>
+              <h2>Resumo do ultimo pedido</h2>
+            </div>
+          </div>
+          <div data-account-order-highlight-page></div>
+        </article>
+
+        <article class="content-card account-panel">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Historico</span>
+              <h2>Todos os pedidos recentes</h2>
+            </div>
+          </div>
+          <div class="order-list" data-account-orders-page></div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js?v=20260330m"></script>
+</body>
+</html>

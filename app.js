@@ -3214,14 +3214,14 @@ function renderShell() {
           </div>
 
           <div class="account-menu__links">
-            <a class="account-menu__link account-menu__link--strong" href="account.html#overview">Central Minha Conta</a>
-            <a class="account-menu__link" href="account.html#orders">Meus pedidos</a>
-            <a class="account-menu__link" href="account.html#profile">Meus dados</a>
-            <a class="account-menu__link" href="account.html#addresses">Endereco</a>
-            <a class="account-menu__link" href="account.html#wallet">Carteira</a>
-            <a class="account-menu__link" href="account.html#protocols">Protocolos</a>
-            <a class="account-menu__link" href="account.html#reviews">Avaliacoes</a>
-            <a class="account-menu__link" href="account.html#draws">Sorteios</a>
+            <a class="account-menu__link account-menu__link--strong" href="account.html">Central Minha Conta</a>
+            <a class="account-menu__link" href="account-orders.html">Meus pedidos</a>
+            <a class="account-menu__link" href="account-profile.html">Meus dados</a>
+            <a class="account-menu__link" href="account-addresses.html">Endereco</a>
+            <a class="account-menu__link" href="account-wallet.html">Carteira</a>
+            <a class="account-menu__link" href="account-protocols.html">Protocolos</a>
+            <a class="account-menu__link" href="account-reviews.html">Avaliacoes</a>
+            <a class="account-menu__link" href="account-draws.html">Sorteios</a>
             <button type="button" class="account-menu__link account-menu__link--button" data-action="logout">Sair</button>
           </div>
         </div>
@@ -3765,7 +3765,7 @@ function renderAccountPage() {
             </div>
           </div>
           <div class="account-order-highlight__actions">
-            <a class="secondary-btn" href="#orders">Ver historico completo</a>
+            <a class="secondary-btn" href="account-orders.html">Ver historico completo</a>
           </div>
         </article>
       `
@@ -3854,6 +3854,342 @@ function renderAll() {
   renderCartPage();
   renderFavoritePage();
   renderAccountPage();
+  renderCategoryPage();
+  renderCheckoutPage();
+  renderProductPage();
+}
+
+function buildAccountOrderHighlightMarkup(order) {
+  if (!order) {
+    return emptyState(
+      "Nenhum pedido por enquanto",
+      "Quando voce finalizar a compra no checkout, o resumo do pedido mais recente aparecera aqui.",
+      '<a class="primary-btn" href="index.html">Explorar a vitrine</a>'
+    );
+  }
+
+  return `
+    <article class="account-order-highlight">
+      <div class="account-order-highlight__head">
+        <div>
+          <strong>Pedido: ${order.id}</strong>
+          <span>${order.placedAt} • ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</span>
+        </div>
+        <span class="status-chip${order.statusTone === "success" ? " status-chip--success" : ""}${order.statusTone === "warning" ? " status-chip--warning" : ""}">${order.status}</span>
+      </div>
+      <div class="account-order-highlight__body">
+        <p>${order.summary}</p>
+        <div class="account-order-highlight__meta">
+          <strong>${money.format(order.total)}</strong>
+          <span>${order.payment || "Pagamento em analise"}</span>
+        </div>
+      </div>
+      <div class="account-order-highlight__actions">
+        <a class="secondary-btn" href="account-orders.html">Ver historico completo</a>
+      </div>
+    </article>
+  `;
+}
+
+function buildAccountOrdersListMarkup(orders, limit = orders.length) {
+  if (!orders.length) {
+    return emptyState(
+      "Nenhum pedido por enquanto",
+      "Quando voce finalizar a compra no checkout, o historico completo vai aparecer aqui automaticamente.",
+      '<a class="secondary-btn" href="index.html">Voltar para a vitrine</a>'
+    );
+  }
+
+  return orders.slice(0, limit).map((order) => `
+    <article class="order-item">
+      <div>
+        <strong>${order.id}</strong>
+        <p>${order.placedAt} • ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
+        <p>${order.summary}</p>
+      </div>
+      <div class="order-item__side">
+        <strong>${money.format(order.total)}</strong>
+        <span class="status-chip${order.statusTone === "success" ? " status-chip--success" : ""}${order.statusTone === "warning" ? " status-chip--warning" : ""}">${order.status}</span>
+      </div>
+    </article>
+  `).join("");
+}
+
+function renderAccountPage() {
+  const root = document.querySelector("[data-account-root]");
+  const orderList = document.querySelector("[data-order-list]");
+  const authActions = document.querySelector("[data-account-auth-actions]");
+  const latestOrder = document.querySelector("[data-account-latest-order]");
+
+  if (!root || !orderList) {
+    return;
+  }
+
+  if (!getIsAuthenticated()) {
+    if (authActions) {
+      authActions.innerHTML = '<a class="primary-btn" href="login.html">Entrar agora</a>';
+    }
+
+    if (latestOrder) {
+      latestOrder.innerHTML = emptyState(
+        "Sua central ainda nao foi ativada",
+        "Entre com seu e-mail e senha para liberar seus atalhos, pedidos e dados do cliente.",
+        '<a class="primary-btn" href="login.html">Entrar para liberar a conta</a>'
+      );
+    }
+
+    orderList.innerHTML = emptyState(
+      "Sem pedidos visiveis",
+      "Depois do acesso, seus pedidos recentes vao aparecer aqui com status, resumo e valor total.",
+      '<a class="secondary-btn" href="login.html">Fazer login</a>'
+    );
+    return;
+  }
+
+  if (authActions) {
+    authActions.innerHTML = '<button type="button" class="ghost-btn" data-action="logout">Sair</button>';
+  }
+
+  const orders = getOrders();
+  const latest = orders[0] || null;
+
+  if (latestOrder) {
+    latestOrder.innerHTML = buildAccountOrderHighlightMarkup(latest);
+  }
+
+  orderList.innerHTML = buildAccountOrdersListMarkup(orders, 3);
+}
+
+function renderAccountOrdersPage() {
+  const highlight = document.querySelector("[data-account-order-highlight-page]");
+  const list = document.querySelector("[data-account-orders-page]");
+
+  if (!highlight && !list) {
+    return;
+  }
+
+  if (!getIsAuthenticated()) {
+    if (highlight) {
+      highlight.innerHTML = emptyState(
+        "Seus pedidos aparecem aqui",
+        "Entre na conta para acompanhar status, historico e valores da sua compra.",
+        '<a class="primary-btn" href="login.html">Entrar agora</a>'
+      );
+    }
+
+    if (list) {
+      list.innerHTML = emptyState(
+        "Sem historico visivel",
+        "Apos o login, os pedidos ficam reunidos nesta pagina com leitura mais clara.",
+        '<a class="secondary-btn" href="login.html">Fazer login</a>'
+      );
+    }
+    return;
+  }
+
+  const orders = getOrders();
+  const latest = orders[0] || null;
+
+  if (highlight) {
+    highlight.innerHTML = buildAccountOrderHighlightMarkup(latest);
+  }
+
+  if (list) {
+    list.innerHTML = buildAccountOrdersListMarkup(orders);
+  }
+}
+
+function renderAccountProfilePage() {
+  const summary = document.querySelector("[data-account-profile-summary]");
+  const pageForm = document.body.dataset.page === "account-profile" ? document.querySelector("[data-account-form]") : null;
+
+  if (!summary && !pageForm) {
+    return;
+  }
+
+  if (!getIsAuthenticated()) {
+    if (summary) {
+      summary.innerHTML = emptyState(
+        "Sua conta ainda nao esta ativa",
+        "Entre para visualizar e editar seus dados principais.",
+        '<a class="primary-btn" href="login.html">Entrar agora</a>'
+      );
+    }
+
+    if (pageForm) {
+      pageForm.querySelectorAll("input, button").forEach((element) => {
+        element.disabled = true;
+      });
+    }
+    return;
+  }
+
+  const profile = getProfile();
+
+  if (summary) {
+    summary.innerHTML = `
+      <article class="account-mini-panel">
+        <strong>${profile.name || DEFAULT_PROFILE.name}</strong>
+        <span>${profile.email || DEFAULT_PROFILE.email}</span>
+        <span>${profile.phone || DEFAULT_PROFILE.phone}</span>
+        <span>${profile.city || DEFAULT_PROFILE.city}</span>
+      </article>
+    `;
+  }
+}
+
+function renderAccountAddressesPage() {
+  const summary = document.querySelector("[data-account-address-summary-page]");
+
+  if (!summary) {
+    return;
+  }
+
+  if (!getIsAuthenticated()) {
+    summary.innerHTML = emptyState(
+      "Endereco indisponivel",
+      "Entre na conta para visualizar os dados principais de entrega.",
+      '<a class="primary-btn" href="login.html">Entrar agora</a>'
+    );
+    return;
+  }
+
+  const profile = getProfile();
+  summary.innerHTML = `
+    <article class="account-mini-panel">
+      <strong>${profile.address || DEFAULT_PROFILE.address}</strong>
+      <span>${profile.city || DEFAULT_PROFILE.city}</span>
+      <span>CEP ${profile.zip || DEFAULT_PROFILE.zip}</span>
+    </article>
+  `;
+}
+
+function renderAccountWalletPage() {
+  const wallet = document.querySelector("[data-account-wallet-page]");
+
+  if (!wallet) {
+    return;
+  }
+
+  if (!getIsAuthenticated()) {
+    wallet.innerHTML = emptyState(
+      "Carteira indisponivel",
+      "Entre com sua conta para visualizar cupons e beneficios liberados.",
+      '<a class="primary-btn" href="login.html">Entrar agora</a>'
+    );
+    return;
+  }
+
+  wallet.innerHTML = `
+    <article class="account-mini-panel">
+      <strong>AXION15 disponivel</strong>
+      <span>Use em campanhas selecionadas enquanto a oferta estiver ativa.</span>
+      <span>Confira os detalhes na pagina de promocoes antes de fechar seu pedido.</span>
+    </article>
+  `;
+}
+
+function renderAccountSupportPage() {
+  const support = document.querySelector("[data-account-support-page]");
+
+  if (!support) {
+    return;
+  }
+
+  support.innerHTML = `
+    <div class="account-inline-link-grid">
+      <a class="account-inline-link" href="https://wa.me/5519989994528?text=Ol%C3%A1%2C%20Preciso%20de%20ajuda%20%21" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
+      <a class="account-inline-link" href="account-protocols.html">Ver protocolos</a>
+    </div>
+    <article class="account-mini-panel">
+      <strong>Atendimento da JL AXION</strong>
+      <span>Use o WhatsApp da loja para suporte rapido, duvidas sobre pedidos e orientacoes gerais.</span>
+    </article>
+  `;
+}
+
+function renderAccountProtocolsPage() {
+  const protocols = document.querySelector("[data-account-protocols-page]");
+
+  if (!protocols) {
+    return;
+  }
+
+  protocols.innerHTML = getIsAuthenticated()
+    ? `
+      <article class="account-mini-panel">
+        <strong>Nenhum protocolo aberto</strong>
+        <span>Quando houver suporte ou troca em andamento, os detalhes ficam reunidos aqui.</span>
+      </article>
+    `
+    : emptyState(
+        "Sem protocolos visiveis",
+        "Entre com sua conta para acompanhar atendimentos e trocas.",
+        '<a class="primary-btn" href="login.html">Entrar agora</a>'
+      );
+}
+
+function renderAccountReviewsPage() {
+  const reviews = document.querySelector("[data-account-reviews-page]");
+
+  if (!reviews) {
+    return;
+  }
+
+  reviews.innerHTML = getIsAuthenticated()
+    ? `
+      <article class="account-mini-panel">
+        <strong>Ainda sem avaliacoes publicadas</strong>
+        <span>Depois das compras, voce podera avaliar produtos e acompanhar suas opinioes nesta pagina.</span>
+      </article>
+    `
+    : emptyState(
+        "Sem avaliacoes visiveis",
+        "Entre na sua conta para consultar futuras opinioes publicadas.",
+        '<a class="primary-btn" href="login.html">Entrar agora</a>'
+      );
+}
+
+function renderAccountDrawsPage() {
+  const draws = document.querySelector("[data-account-draws-page]");
+
+  if (!draws) {
+    return;
+  }
+
+  draws.innerHTML = getIsAuthenticated()
+    ? `
+      <article class="account-mini-panel">
+        <strong>Campanhas em preparacao</strong>
+        <span>Sorteios e beneficios sazonais vao aparecer aqui quando estiverem ativos para a sua conta.</span>
+      </article>
+    `
+    : emptyState(
+        "Campanhas indisponiveis",
+        "Entre com sua conta para visualizar sorteios e beneficios quando existirem.",
+        '<a class="primary-btn" href="login.html">Entrar agora</a>'
+      );
+}
+
+function renderAll() {
+  updateCounts();
+  updateProfileText();
+  renderLoginPage();
+  renderHomeCollections();
+  renderHomeProducts();
+  renderHomeShelves();
+  renderPromotionProducts();
+  renderCartPage();
+  renderFavoritePage();
+  renderAccountPage();
+  renderAccountOrdersPage();
+  renderAccountProfilePage();
+  renderAccountAddressesPage();
+  renderAccountWalletPage();
+  renderAccountSupportPage();
+  renderAccountProtocolsPage();
+  renderAccountReviewsPage();
+  renderAccountDrawsPage();
   renderCategoryPage();
   renderCheckoutPage();
   renderProductPage();

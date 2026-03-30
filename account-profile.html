@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JL AXION | Meus dados</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#2ea0ff">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260330m">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="styles.css?v=20260330m">
+</head>
+<body data-page="account-profile">
+  <div data-site-shell></div>
+
+  <main class="page">
+    <section class="section account-detail-page">
+      <div class="account-detail-page__intro">
+        <div>
+          <span class="eyebrow">Minha conta</span>
+          <h1>Meus dados</h1>
+          <p>Edite suas informacoes principais em uma pagina dedicada, sem excesso visual e com leitura mais direta.</p>
+        </div>
+        <a class="secondary-btn" href="account.html">Voltar para Minha conta</a>
+      </div>
+
+      <section class="account-detail-page__grid account-detail-page__grid--form">
+        <article class="content-card account-panel">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Cadastro</span>
+              <h2>Atualize seu perfil</h2>
+            </div>
+          </div>
+
+          <form class="form-grid" data-account-form>
+            <label class="field">
+              <span>Nome completo</span>
+              <input class="input" type="text" name="name" placeholder="Cliente JL AXION">
+            </label>
+
+            <label class="field">
+              <span>E-mail</span>
+              <input class="input" type="email" name="email" placeholder="cliente@jlaxion.com.br">
+            </label>
+
+            <label class="field">
+              <span>Telefone</span>
+              <input class="input" type="tel" name="phone" placeholder="(11) 99999-0000">
+            </label>
+
+            <label class="field">
+              <span>Cidade</span>
+              <input class="input" type="text" name="city" placeholder="Sao Paulo, SP">
+            </label>
+
+            <label class="field field--full">
+              <span>Endereco</span>
+              <input class="input" type="text" name="address" placeholder="Rua, numero e complemento">
+            </label>
+
+            <label class="field">
+              <span>CEP</span>
+              <input class="input" type="text" name="zip" placeholder="00000-000">
+            </label>
+
+            <button type="submit" class="primary-btn primary-btn--full">Salvar ajustes</button>
+          </form>
+        </article>
+
+        <aside class="content-card account-panel">
+          <div class="section-heading section-heading--stacked">
+            <div>
+              <span class="eyebrow">Resumo</span>
+              <h2>Dados atuais</h2>
+            </div>
+          </div>
+          <div data-account-profile-summary></div>
+        </aside>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js?v=20260330m"></script>
+</body>
+</html>

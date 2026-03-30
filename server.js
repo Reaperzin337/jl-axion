@@ -23,6 +23,7 @@ const SESSION_DB_PATH = process.env.SESSION_DB_PATH
   : path.join(DATA_DIR, "sessions.sqlite");
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "jlaxion.sid";
 const SESSION_REVISION = 2;
+const ROOT_FILE_CACHE_CONTROL = "no-store, max-age=0";
 
 const HTML_FILES = new Set([
   "index.html",
@@ -345,6 +346,7 @@ async function startServer() {
     res.json({ ok: true });
   });
   app.get("/", (_req, res) => {
+    res.set("Cache-Control", ROOT_FILE_CACHE_CONTROL);
     res.sendFile(path.join(ROOT_DIR, "index.html"));
   });
 
@@ -356,6 +358,7 @@ async function startServer() {
       return;
     }
 
+    res.set("Cache-Control", ROOT_FILE_CACHE_CONTROL);
     res.sendFile(path.join(ROOT_DIR, file));
   });
 

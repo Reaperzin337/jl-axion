@@ -3105,7 +3105,7 @@ function renderShell() {
       aria-label="Falar com a JL AXION no WhatsApp"
       title="Atendimento no WhatsApp"
     >
-      ${icon("whatsapp")}
+      <span class="whatsapp-float__icon" aria-hidden="true">${icon("whatsapp")}</span>
       <span class="whatsapp-float__status" aria-hidden="true"></span>
     </a>
   `;

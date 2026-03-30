@@ -861,7 +861,6 @@ function renderShell() {
           ${drawerLink("cart", "cart.html", "Carrinho", "Resumo da compra")}
           ${drawerAccountEntry}
           ${authDrawerEntry}
-          ${drawerLink("admin", "admin.html", "Admin", "Painel da loja")}
         </div>
       </div>
 
@@ -918,11 +917,14 @@ function drawerCategoryCard(category) {
 
   return `
     <button type="button" class="drawer-category-card" data-action="open-category" data-category="${category}">
-      <span class="drawer-category-card__code">${meta.code}</span>
-      <div class="drawer-category-card__meta">
-        <strong>${category}</strong>
-        <small>${productCount} ${productCount === 1 ? "item" : "itens"}</small>
-      </div>
+      <span class="drawer-category-card__lead">
+        <span class="drawer-category-card__code">${meta.code}</span>
+        <span class="drawer-category-card__meta">
+          <strong>${category}</strong>
+          <small>${meta.badge}</small>
+        </span>
+      </span>
+      <span class="drawer-category-card__count">${productCount} ${productCount === 1 ? "item" : "itens"}</span>
     </button>
   `;
 }

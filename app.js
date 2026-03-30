@@ -3098,6 +3098,7 @@ function renderShell() {
 
     <a
       class="whatsapp-float"
+      data-label="Atendimento"
       href="https://wa.me/5519989994528?text=Ola%2C%20vim%20pela%20JL%20AXION%20e%20quero%20ajuda%20com%20um%20pedido."
       target="_blank"
       rel="noopener noreferrer"
@@ -3105,7 +3106,7 @@ function renderShell() {
       title="Atendimento no WhatsApp"
     >
       ${icon("whatsapp")}
-      <span>WhatsApp</span>
+      <span class="whatsapp-float__status" aria-hidden="true"></span>
     </a>
   `;
 

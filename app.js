@@ -367,6 +367,9 @@ const runtimeData = {
   orders: [...DEFAULT_ORDERS]
 };
 
+let whatsappScrollBound = false;
+let whatsappLastY = 0;
+
 document.addEventListener("DOMContentLoaded", async () => {
   applyEnvironmentClasses();
   seedData();
@@ -1486,6 +1489,46 @@ function updateCounts() {
   document.querySelectorAll("[data-order-count]").forEach((element) => {
     element.textContent = String(ordersCount);
   });
+}
+
+function setWhatsappFloatVisibility(visible) {
+  const element = document.querySelector(".whatsapp-float");
+
+  if (!element) {
+    return;
+  }
+
+  element.classList.toggle("is-hidden", !visible);
+}
+
+function syncWhatsappFloatState() {
+  setWhatsappFloatVisibility((window.scrollY || 0) < 80);
+}
+
+function handleWhatsappFloatScroll() {
+  const currentY = window.scrollY || 0;
+
+  if (Math.abs(currentY - whatsappLastY) < 12) {
+    return;
+  }
+
+  const isScrollingUp = currentY < whatsappLastY;
+  const shouldShow = currentY < 80 || isScrollingUp;
+
+  setWhatsappFloatVisibility(shouldShow);
+  whatsappLastY = currentY;
+}
+
+function bindWhatsappFloat() {
+  whatsappLastY = window.scrollY || 0;
+  syncWhatsappFloatState();
+
+  if (whatsappScrollBound) {
+    return;
+  }
+
+  whatsappScrollBound = true;
+  window.addEventListener("scroll", handleWhatsappFloatScroll, { passive: true });
 }
 
 function updateProfileText() {
@@ -3099,7 +3142,7 @@ function renderShell() {
     <a
       class="whatsapp-float"
       data-label="Atendimento"
-      href="https://wa.me/5519989994528?text=Ola%2C%20vim%20pela%20JL%20AXION%20e%20quero%20ajuda%20com%20um%20pedido."
+      href="https://wa.me/5519989994528?text=Ol%C3%A1%2C%20Preciso%20de%20ajuda%20%21"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Falar com a JL AXION no WhatsApp"
@@ -3113,6 +3156,7 @@ function renderShell() {
   mountGlobalFooter(footerMarkup);
   updateCounts();
   updateProfileText();
+  bindWhatsappFloat();
 }
 
 function drawerCategoryCard(category) {

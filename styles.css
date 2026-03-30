@@ -5855,7 +5855,12 @@ body.native-app .site-header__lower {
     0 18px 34px rgba(0, 0, 0, 0.34),
     0 0 0 1px rgba(255, 255, 255, 0.02) inset;
   backdrop-filter: blur(18px);
-  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease;
+  transition:
+    transform 0.24s ease,
+    opacity 0.24s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    background-color 0.22s ease;
 }
 
 .whatsapp-float:hover {
@@ -5864,6 +5869,12 @@ body.native-app .site-header__lower {
   box-shadow:
     0 22px 38px rgba(0, 0, 0, 0.4),
     0 0 18px rgba(48, 212, 112, 0.12);
+}
+
+.whatsapp-float.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(18px) scale(0.94);
 }
 
 .whatsapp-float__icon {

@@ -5473,19 +5473,26 @@ body.native-app .site-header__lower {
   color: rgba(255, 255, 255, 0.24);
 }
 
-.site-header {
+.site-topbar {
   position: sticky;
   top: 0;
   z-index: 40;
+  transition: transform 0.26s ease, opacity 0.22s ease;
+}
+
+.site-topbar.is-hidden {
+  transform: translateY(calc(-100% - 8px));
+  opacity: 0.98;
+}
+
+.site-header {
+  position: relative;
+  top: auto;
+  z-index: auto;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(8, 11, 16, 0.94);
   backdrop-filter: blur(18px);
-  transition: transform 0.26s ease, opacity 0.22s ease, box-shadow 0.22s ease;
-}
-
-.site-header.is-hidden {
-  transform: translateY(calc(-100% - 8px));
-  opacity: 0.98;
+  transition: box-shadow 0.22s ease;
 }
 
 .site-header__inner {

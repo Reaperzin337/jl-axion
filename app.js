@@ -1502,7 +1502,7 @@ function setWhatsappFloatVisibility(visible) {
 }
 
 function setHeaderVisibility(visible) {
-  const header = document.querySelector(".site-header");
+  const header = document.querySelector(".site-topbar");
 
   if (!header) {
     return;
@@ -3027,16 +3027,17 @@ function renderShell() {
   `;
 
   shell.innerHTML = `
-    <div class="top-strip">
-      <div class="top-strip__inner">
-        <span class="top-strip__item">Frete gratis acima de R$ 600</span>
-        <span class="top-strip__item">Ate 10x sem juros</span>
-        <span class="top-strip__item">Cupom AXION15 em campanhas selecionadas</span>
-        <span class="top-strip__item">Compra segura para casa, setup, energia e utilidades</span>
+    <div class="site-topbar">
+      <div class="top-strip">
+        <div class="top-strip__inner">
+          <span class="top-strip__item">Frete gratis acima de R$ 600</span>
+          <span class="top-strip__item">Ate 10x sem juros</span>
+          <span class="top-strip__item">Cupom AXION15 em campanhas selecionadas</span>
+          <span class="top-strip__item">Compra segura para casa, setup, energia e utilidades</span>
+        </div>
       </div>
-    </div>
 
-    <header class="site-header site-header--commerce">
+      <header class="site-header site-header--commerce">
       <div class="site-header__inner">
         <div class="site-header__main">
           <div class="brand-cluster">
@@ -3105,7 +3106,8 @@ function renderShell() {
           </div>
         </div>
       </div>
-    </header>
+      </header>
+    </div>
 
     <div class="drawer-overlay" data-menu-overlay></div>
 

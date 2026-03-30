@@ -1227,39 +1227,46 @@ async function initializeDatabase() {
     }
   }
 
-  const orderCount = await database.get(
-    "SELECT COUNT(*) AS total FROM orders WHERE user_id = ?",
-    defaultUserId
-  );
+  for (const order of SEED_ORDERS) {
+    await database.run(
+      `INSERT INTO orders (id, user_id, placed_at, status, status_tone, total, item_count, summary, payment, delivery)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         user_id = excluded.user_id,
+         placed_at = excluded.placed_at,
+         status = excluded.status,
+         status_tone = excluded.status_tone,
+         total = excluded.total,
+         item_count = excluded.item_count,
+         summary = excluded.summary,
+         payment = excluded.payment,
+         delivery = excluded.delivery`,
+      order.id,
+      defaultUserId,
+      order.placedAt,
+      order.status,
+      order.statusTone,
+      order.total,
+      order.itemCount,
+      order.summary,
+      order.payment,
+      order.delivery
+    );
 
-  if (!orderCount.total) {
-    for (const order of SEED_ORDERS) {
+    for (const item of order.items) {
       await database.run(
-        `INSERT INTO orders (id, user_id, placed_at, status, status_tone, total, item_count, summary, payment, delivery)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO order_items (order_id, product_id, name, quantity, price)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(order_id, product_id) DO UPDATE SET
+           name = excluded.name,
+           quantity = excluded.quantity,
+           price = excluded.price`,
         order.id,
-        defaultUserId,
-        order.placedAt,
-        order.status,
-        order.statusTone,
-        order.total,
-        order.itemCount,
-        order.summary,
-        order.payment,
-        order.delivery
+        item.id,
+        item.name,
+        item.quantity,
+        item.price
       );
-
-      for (const item of order.items) {
-        await database.run(
-          `INSERT INTO order_items (order_id, product_id, name, quantity, price)
-           VALUES (?, ?, ?, ?, ?)`,
-          order.id,
-          item.id,
-          item.name,
-          item.quantity,
-          item.price
-        );
-      }
     }
   }
 

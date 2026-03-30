@@ -7959,3 +7959,60 @@ body::after {
     grid-template-columns: 1fr;
   }
 }
+
+.shop-nav__pill--promo {
+  position: relative;
+  overflow: hidden;
+  color: #04131f;
+  font-weight: 900;
+  border-color: rgba(133, 224, 255, 0.42);
+  background: linear-gradient(135deg, #8fe2ff, #48b8ff 58%, #238dff);
+  box-shadow:
+    0 14px 28px rgba(35, 141, 255, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.shop-nav__pill--promo::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: -34%;
+  width: 34%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  transform: skewX(-20deg);
+  opacity: 0.75;
+  animation: promo-pill-shine 3.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.shop-nav__pill--promo:hover,
+.shop-nav__pill--promo.is-active {
+  color: #04131f;
+  border-color: rgba(157, 233, 255, 0.52);
+  background: linear-gradient(135deg, #9be7ff, #5dc0ff 56%, #2991ff);
+  box-shadow:
+    0 16px 30px rgba(35, 141, 255, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+@keyframes promo-pill-shine {
+  0% {
+    transform: translateX(0) skewX(-20deg);
+    opacity: 0;
+  }
+
+  18% {
+    opacity: 0.78;
+  }
+
+  42% {
+    transform: translateX(280%) skewX(-20deg);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(280%) skewX(-20deg);
+    opacity: 0;
+  }
+}

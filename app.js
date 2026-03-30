@@ -3321,7 +3321,7 @@ function renderShell() {
 
         <div class="site-header__lower">
           <nav class="shop-nav" aria-label="Navegacao comercial">
-            <a class="shop-nav__pill${document.body.dataset.page === "promotions" ? " is-active" : ""}" href="promotions.html">Ofertas do dia</a>
+            <a class="shop-nav__pill shop-nav__pill--promo${document.body.dataset.page === "promotions" ? " is-active" : ""}" href="promotions.html">Ofertas do dia</a>
             <a class="shop-nav__link${document.body.dataset.page === "home" ? " is-active" : ""}" href="index.html">Inicio</a>
             ${headerDepartments.map((category) => `
               <a class="shop-nav__link" href="${buildCategoryHref(category)}">${category}</a>

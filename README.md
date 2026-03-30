@@ -6,8 +6,9 @@ Loja premium de utilidades e tecnologia com frontend multipagina, backend em Exp
 
 - Home, categorias, produto, favoritos, carrinho, conta e checkout
 - Backend com sessao, catalogo, favoritos, carrinho, perfil e pedidos
-- Painel admin em `/admin.html` para gerenciar produtos e pedidos
+- Painel admin em `/admin.html` para gerenciar produtos, fornecedores e pedidos
 - Projeto preparado para deploy com Docker e variaveis de ambiente
+- Base de dropshipping com fornecedor, SKU externo, custo e repasse manual
 
 ## Rodando localmente
 
@@ -25,6 +26,23 @@ Depois abra:
 
 - Cliente: `cliente@jlaxion.com.br` / `axion123`
 - Admin: `admin@jlaxion.com.br` / `axionadmin`
+
+## Dropshipping
+
+O painel admin ja esta preparado para a fase 1 e a fase 2 da operacao sem estoque:
+
+- cadastro de fornecedores
+- produto vinculado ao fornecedor
+- SKU externo
+- custo do parceiro
+- prazo do parceiro por item
+- repasse manual do pedido
+- rastreio e referencia do fornecedor
+- estrutura pronta para operacao hibrida no futuro
+
+Guia operacional:
+
+- [DROPSHIPPING.md](DROPSHIPPING.md)
 
 ## Deploy com Docker
 

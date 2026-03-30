@@ -46,7 +46,7 @@ const HTML_FILES = new Set([
   "jk-bg-fog-4k.png"
 ]);
 
-const SEED_PRODUCTS = [
+const BASE_SEED_PRODUCTS = [
   {
     id: "pulse-lamp",
     name: "PulseBeam Lamp",
@@ -204,6 +204,80 @@ const SEED_PRODUCTS = [
     image: "assets/grid-strip.svg"
   }
 ];
+
+const SEED_SUPPLIERS = [
+  {
+    id: "nex-power",
+    name: "Nex Power Supply",
+    contactName: "Camila Rocha",
+    email: "operacao@nexpower.example",
+    phone: "(11) 4002-1200",
+    leadTimeMin: 1,
+    leadTimeMax: 3,
+    orderChannel: "WhatsApp",
+    website: "https://fornecedor-nex-power.example",
+    notes: "Parceiro para carregadores, cabos e energia. Repasse inicial manual via WhatsApp com SKU externo.",
+    active: true
+  },
+  {
+    id: "lumina-home",
+    name: "Lumina Home Trade",
+    contactName: "Bruna Sales",
+    email: "pedidos@luminahome.example",
+    phone: "(21) 3555-8800",
+    leadTimeMin: 2,
+    leadTimeMax: 5,
+    orderChannel: "E-mail",
+    website: "https://fornecedor-lumina.example",
+    notes: "Foco em lampadas, casa inteligente e utilidades para casa premium.",
+    active: true
+  },
+  {
+    id: "studio-grid",
+    name: "Studio Grid Distribuicao",
+    contactName: "Rafael Ponte",
+    email: "comercial@studiogrid.example",
+    phone: "(31) 3333-4400",
+    leadTimeMin: 2,
+    leadTimeMax: 4,
+    orderChannel: "Portal",
+    website: "https://fornecedor-studiogrid.example",
+    notes: "Fornecedor para escritorio, audio e itens de setup com ticket medio.",
+    active: true
+  }
+];
+
+const SUPPLIER_BY_CATEGORY = {
+  Carregadores: "nex-power",
+  Cabos: "nex-power",
+  Lampadas: "lumina-home",
+  "Casa inteligente": "lumina-home",
+  Utilidades: "lumina-home",
+  Escritorio: "studio-grid",
+  Som: "studio-grid"
+};
+
+const SUPPLIER_COST_RATIO_BY_CATEGORY = {
+  Carregadores: 0.54,
+  Cabos: 0.42,
+  Lampadas: 0.48,
+  "Casa inteligente": 0.63,
+  Utilidades: 0.5,
+  Escritorio: 0.52,
+  Som: 0.57
+};
+
+const SUPPLIER_ETA_BY_CATEGORY = {
+  Carregadores: 2,
+  Cabos: 2,
+  Lampadas: 3,
+  "Casa inteligente": 5,
+  Utilidades: 4,
+  Escritorio: 3,
+  Som: 4
+};
+
+const SEED_PRODUCTS = BASE_SEED_PRODUCTS.map((product) => createSeedProduct(product));
 
 const SEED_PROFILE = {
   name: "Cliente JL AXION",
@@ -416,18 +490,25 @@ async function startServer() {
       const filters = [];
 
       if (category) {
-        filters.push("category = ?");
+        filters.push("products.category = ?");
         params.push(String(category));
       }
 
       if (search) {
-        filters.push("(LOWER(name) LIKE ? OR LOWER(description) LIKE ? OR LOWER(category) LIKE ?)");
+        filters.push("(LOWER(products.name) LIKE ? OR LOWER(products.description) LIKE ? OR LOWER(products.category) LIKE ?)");
         const needle = `%${String(search).trim().toLowerCase()}%`;
         params.push(needle, needle, needle);
       }
 
       const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
-      const rows = await db.all(`SELECT * FROM products ${whereClause} ORDER BY name`, params);
+      const rows = await db.all(
+        `SELECT products.*, suppliers.name AS supplier_name
+         FROM products
+         LEFT JOIN suppliers ON suppliers.id = products.supplier_id
+         ${whereClause}
+         ORDER BY products.name`,
+        params
+      );
       res.json(rows.map(mapProduct));
     } catch (error) {
       next(error);
@@ -551,6 +632,7 @@ async function startServer() {
         user: await getProfile(req.currentUserId),
         products: await getProducts(),
         categories: await getCategories(),
+        suppliers: await getSuppliers(),
         orders: await getAllOrders(),
         stats: await getAdminStats()
       });
@@ -602,6 +684,125 @@ async function startServer() {
         return;
       }
 
+      next(error);
+    }
+  });
+
+  app.get("/api/admin/suppliers", requireAdmin, async (_req, res, next) => {
+    try {
+      res.json(await getSuppliers());
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/admin/suppliers", requireAdmin, async (req, res, next) => {
+    try {
+      const supplier = normalizeSupplierInput(req.body);
+      const exists = await db.get("SELECT id FROM suppliers WHERE id = ?", supplier.id);
+
+      if (exists) {
+        res.status(409).json({ message: "Ja existe um fornecedor com este identificador." });
+        return;
+      }
+
+      await db.run(
+        `INSERT INTO suppliers (id, name, contact_name, email, phone, lead_time_min, lead_time_max, order_channel, website, notes, active)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        supplier.id,
+        supplier.name,
+        supplier.contactName,
+        supplier.email,
+        supplier.phone,
+        supplier.leadTimeMin,
+        supplier.leadTimeMax,
+        supplier.orderChannel,
+        supplier.website,
+        supplier.notes,
+        supplier.active ? 1 : 0
+      );
+
+      res.status(201).json({
+        message: "Fornecedor salvo no painel.",
+        supplier: await getSupplierById(supplier.id),
+        suppliers: await getSuppliers(),
+        products: await getProducts(),
+        stats: await getAdminStats()
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.put("/api/admin/suppliers/:id", requireAdmin, async (req, res, next) => {
+    try {
+      const existing = await getSupplierById(req.params.id);
+
+      if (!existing) {
+        res.status(404).json({ message: "Fornecedor nao encontrado." });
+        return;
+      }
+
+      const supplier = normalizeSupplierInput(req.body, existing);
+
+      await db.run(
+        `UPDATE suppliers
+         SET name = ?, contact_name = ?, email = ?, phone = ?, lead_time_min = ?, lead_time_max = ?, order_channel = ?, website = ?, notes = ?, active = ?
+         WHERE id = ?`,
+        supplier.name,
+        supplier.contactName,
+        supplier.email,
+        supplier.phone,
+        supplier.leadTimeMin,
+        supplier.leadTimeMax,
+        supplier.orderChannel,
+        supplier.website,
+        supplier.notes,
+        supplier.active ? 1 : 0,
+        req.params.id
+      );
+
+      res.json({
+        message: "Fornecedor atualizado.",
+        supplier: await getSupplierById(req.params.id),
+        suppliers: await getSuppliers(),
+        products: await getProducts(),
+        stats: await getAdminStats()
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/admin/suppliers/:id", requireAdmin, async (req, res, next) => {
+    try {
+      const existing = await getSupplierById(req.params.id);
+
+      if (!existing) {
+        res.status(404).json({ message: "Fornecedor nao encontrado." });
+        return;
+      }
+
+      const linkedProducts = await db.get(
+        "SELECT COUNT(*) AS total FROM products WHERE supplier_id = ?",
+        req.params.id
+      );
+
+      if (Number(linkedProducts.total) > 0) {
+        res.status(409).json({
+          message: "Esse fornecedor ainda esta vinculado a produtos. Reatribua os produtos antes de excluir."
+        });
+        return;
+      }
+
+      await db.run("DELETE FROM suppliers WHERE id = ?", req.params.id);
+
+      res.json({
+        message: "Fornecedor removido.",
+        suppliers: await getSuppliers(),
+        stats: await getAdminStats()
+      });
+    } catch (error) {
       next(error);
     }
   });
@@ -816,8 +1017,9 @@ async function startServer() {
       const totals = calculateTotals(cartItems);
       const orderId = createOrderId();
       const placedAt = formatDate(new Date());
-      const status = payment === "pix" ? "Aguardando pagamento" : "Pedido confirmado";
-      const statusTone = payment === "pix" ? "warning" : "success";
+      const fulfillment = buildOrderFulfillment(cartItems, payment);
+      const status = fulfillment.status;
+      const statusTone = getStatusTone(status);
 
       await db.exec("BEGIN");
 
@@ -835,8 +1037,8 @@ async function startServer() {
       );
 
       await db.run(
-        `INSERT INTO orders (id, user_id, placed_at, status, status_tone, total, item_count, summary, payment, delivery)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO orders (id, user_id, placed_at, status, status_tone, total, item_count, summary, payment, delivery, fulfillment_mode, fulfillment_status, supplier_id, supplier_name, tracking_code, supplier_reference, internal_notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         orderId,
         req.currentUserId,
         placedAt,
@@ -844,20 +1046,32 @@ async function startServer() {
         statusTone,
         totals.total,
         cartItems.reduce((sum, item) => sum + item.quantity, 0),
-        `${getDeliveryLabel(delivery)} - ${profile.city}`,
+        `${getDeliveryLabel(delivery)} - ${profile.city || "Operacao nacional"}`,
         getPaymentLabel(payment),
-        getDeliveryLabel(delivery)
+        getDeliveryLabel(delivery),
+        fulfillment.mode,
+        fulfillment.fulfillmentStatus,
+        fulfillment.supplierId,
+        fulfillment.supplierName,
+        "",
+        "",
+        fulfillment.internalNotes
       );
 
       for (const item of cartItems) {
         await db.run(
-          `INSERT INTO order_items (order_id, product_id, name, quantity, price)
-           VALUES (?, ?, ?, ?, ?)`,
+          `INSERT INTO order_items (order_id, product_id, name, quantity, price, supplier_id, supplier_name, supplier_sku, supplier_cost, fulfillment_mode)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           orderId,
           item.product.id,
           item.product.name,
           item.quantity,
-          item.product.price
+          item.product.price,
+          item.product.supplierId || "",
+          item.product.supplierName || "",
+          item.product.supplierSku || "",
+          item.product.supplierCost || 0,
+          item.product.fulfillmentMode || "own_stock"
         );
       }
 
@@ -894,19 +1108,28 @@ async function startServer() {
       }
 
       const status = String(req.body.status || "").trim() || "Em analise";
+      const fulfillmentStatus = String(req.body.fulfillmentStatus || "").trim();
+      const trackingCode = String(req.body.trackingCode || "").trim();
+      const supplierReference = String(req.body.supplierReference || "").trim();
+      const internalNotes = String(req.body.internalNotes || "").trim();
       const statusTone = getStatusTone(status);
 
       await db.run(
-        "UPDATE orders SET status = ?, status_tone = ? WHERE id = ?",
+        "UPDATE orders SET status = ?, status_tone = ?, fulfillment_status = ?, tracking_code = ?, supplier_reference = ?, internal_notes = ? WHERE id = ?",
         status,
         statusTone,
+        fulfillmentStatus,
+        trackingCode,
+        supplierReference,
+        internalNotes,
         req.params.id
       );
 
       res.json({
         message: "Status do pedido atualizado.",
         order: await getOrderById(req.params.id),
-        orders: await getAllOrders()
+        orders: await getAllOrders(),
+        stats: await getAdminStats()
       });
     } catch (error) {
       next(error);
@@ -924,8 +1147,8 @@ async function startServer() {
       }
 
       await db.run(
-        `INSERT INTO products (id, name, category, badge, price, old_price, rating, reviews, shipping, description, image)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO products (id, name, category, badge, price, old_price, rating, reviews, shipping, description, image, fulfillment_mode, supplier_id, supplier_sku, supplier_cost, supplier_eta_days, supplier_url, procurement_notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         product.id,
         product.name,
         product.category,
@@ -936,7 +1159,14 @@ async function startServer() {
         product.reviews,
         product.shipping,
         product.description,
-        product.image
+        product.image,
+        product.fulfillmentMode,
+        product.supplierId,
+        product.supplierSku,
+        product.supplierCost,
+        product.supplierEtaDays,
+        product.supplierUrl,
+        product.procurementNotes
       );
 
       res.status(201).json({
@@ -964,7 +1194,7 @@ async function startServer() {
 
       await db.run(
         `UPDATE products
-         SET name = ?, category = ?, badge = ?, price = ?, old_price = ?, rating = ?, reviews = ?, shipping = ?, description = ?, image = ?
+         SET name = ?, category = ?, badge = ?, price = ?, old_price = ?, rating = ?, reviews = ?, shipping = ?, description = ?, image = ?, fulfillment_mode = ?, supplier_id = ?, supplier_sku = ?, supplier_cost = ?, supplier_eta_days = ?, supplier_url = ?, procurement_notes = ?
          WHERE id = ?`,
         product.name,
         product.category,
@@ -976,6 +1206,13 @@ async function startServer() {
         product.shipping,
         product.description,
         product.image,
+        product.fulfillmentMode,
+        product.supplierId,
+        product.supplierSku,
+        product.supplierCost,
+        product.supplierEtaDays,
+        product.supplierUrl,
+        product.procurementNotes,
         req.params.id
       );
 
@@ -1073,6 +1310,21 @@ async function initializeDatabase() {
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS suppliers (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      contact_name TEXT DEFAULT '',
+      email TEXT DEFAULT '',
+      phone TEXT DEFAULT '',
+      lead_time_min INTEGER DEFAULT 2,
+      lead_time_max INTEGER DEFAULT 7,
+      order_channel TEXT DEFAULT 'manual',
+      website TEXT DEFAULT '',
+      notes TEXT DEFAULT '',
+      active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS products (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -1084,7 +1336,14 @@ async function initializeDatabase() {
       reviews INTEGER,
       shipping TEXT,
       description TEXT,
-      image TEXT
+      image TEXT,
+      fulfillment_mode TEXT NOT NULL DEFAULT 'own_stock',
+      supplier_id TEXT DEFAULT '',
+      supplier_sku TEXT DEFAULT '',
+      supplier_cost REAL DEFAULT 0,
+      supplier_eta_days INTEGER DEFAULT 0,
+      supplier_url TEXT DEFAULT '',
+      procurement_notes TEXT DEFAULT ''
     );
 
     CREATE TABLE IF NOT EXISTS favorites (
@@ -1111,7 +1370,14 @@ async function initializeDatabase() {
       item_count INTEGER NOT NULL,
       summary TEXT NOT NULL,
       payment TEXT NOT NULL,
-      delivery TEXT NOT NULL
+      delivery TEXT NOT NULL,
+      fulfillment_mode TEXT NOT NULL DEFAULT 'own_stock',
+      fulfillment_status TEXT DEFAULT '',
+      supplier_id TEXT DEFAULT '',
+      supplier_name TEXT DEFAULT '',
+      tracking_code TEXT DEFAULT '',
+      supplier_reference TEXT DEFAULT '',
+      internal_notes TEXT DEFAULT ''
     );
 
     CREATE TABLE IF NOT EXISTS order_items (
@@ -1120,11 +1386,35 @@ async function initializeDatabase() {
       name TEXT NOT NULL,
       quantity INTEGER NOT NULL,
       price REAL NOT NULL,
+      supplier_id TEXT DEFAULT '',
+      supplier_name TEXT DEFAULT '',
+      supplier_sku TEXT DEFAULT '',
+      supplier_cost REAL DEFAULT 0,
+      fulfillment_mode TEXT DEFAULT 'own_stock',
       PRIMARY KEY (order_id, product_id)
     );
   `);
 
   await ensureColumn(database, "users", "role", "TEXT NOT NULL DEFAULT 'customer'");
+  await ensureColumn(database, "products", "fulfillment_mode", "TEXT NOT NULL DEFAULT 'own_stock'");
+  await ensureColumn(database, "products", "supplier_id", "TEXT DEFAULT ''");
+  await ensureColumn(database, "products", "supplier_sku", "TEXT DEFAULT ''");
+  await ensureColumn(database, "products", "supplier_cost", "REAL DEFAULT 0");
+  await ensureColumn(database, "products", "supplier_eta_days", "INTEGER DEFAULT 0");
+  await ensureColumn(database, "products", "supplier_url", "TEXT DEFAULT ''");
+  await ensureColumn(database, "products", "procurement_notes", "TEXT DEFAULT ''");
+  await ensureColumn(database, "orders", "fulfillment_mode", "TEXT NOT NULL DEFAULT 'own_stock'");
+  await ensureColumn(database, "orders", "fulfillment_status", "TEXT DEFAULT ''");
+  await ensureColumn(database, "orders", "supplier_id", "TEXT DEFAULT ''");
+  await ensureColumn(database, "orders", "supplier_name", "TEXT DEFAULT ''");
+  await ensureColumn(database, "orders", "tracking_code", "TEXT DEFAULT ''");
+  await ensureColumn(database, "orders", "supplier_reference", "TEXT DEFAULT ''");
+  await ensureColumn(database, "orders", "internal_notes", "TEXT DEFAULT ''");
+  await ensureColumn(database, "order_items", "supplier_id", "TEXT DEFAULT ''");
+  await ensureColumn(database, "order_items", "supplier_name", "TEXT DEFAULT ''");
+  await ensureColumn(database, "order_items", "supplier_sku", "TEXT DEFAULT ''");
+  await ensureColumn(database, "order_items", "supplier_cost", "REAL DEFAULT 0");
+  await ensureColumn(database, "order_items", "fulfillment_mode", "TEXT DEFAULT 'own_stock'");
 
   const passwordHash = await bcrypt.hash(SEED_PROFILE.password, 10);
   await database.run(
@@ -1170,10 +1460,39 @@ async function initializeDatabase() {
   const adminUser = await database.get("SELECT id FROM users WHERE email = ?", ADMIN_SEED.email);
   adminUserId = adminUser.id;
 
+  for (const supplier of SEED_SUPPLIERS) {
+    await database.run(
+      `INSERT INTO suppliers (id, name, contact_name, email, phone, lead_time_min, lead_time_max, order_channel, website, notes, active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(id) DO UPDATE SET
+         name = excluded.name,
+         contact_name = excluded.contact_name,
+         email = excluded.email,
+         phone = excluded.phone,
+         lead_time_min = excluded.lead_time_min,
+         lead_time_max = excluded.lead_time_max,
+         order_channel = excluded.order_channel,
+         website = excluded.website,
+         notes = excluded.notes,
+         active = excluded.active`,
+      supplier.id,
+      supplier.name,
+      supplier.contactName,
+      supplier.email,
+      supplier.phone,
+      supplier.leadTimeMin,
+      supplier.leadTimeMax,
+      supplier.orderChannel,
+      supplier.website,
+      supplier.notes,
+      supplier.active ? 1 : 0
+    );
+  }
+
   for (const product of SEED_PRODUCTS) {
     await database.run(
-      `INSERT INTO products (id, name, category, badge, price, old_price, rating, reviews, shipping, description, image)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO products (id, name, category, badge, price, old_price, rating, reviews, shipping, description, image, fulfillment_mode, supplier_id, supplier_sku, supplier_cost, supplier_eta_days, supplier_url, procurement_notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          name = excluded.name,
          category = excluded.category,
@@ -1184,7 +1503,14 @@ async function initializeDatabase() {
          reviews = excluded.reviews,
          shipping = excluded.shipping,
          description = excluded.description,
-         image = excluded.image`,
+         image = excluded.image,
+         fulfillment_mode = excluded.fulfillment_mode,
+         supplier_id = excluded.supplier_id,
+         supplier_sku = excluded.supplier_sku,
+         supplier_cost = excluded.supplier_cost,
+         supplier_eta_days = excluded.supplier_eta_days,
+         supplier_url = excluded.supplier_url,
+         procurement_notes = excluded.procurement_notes`,
       product.id,
       product.name,
       product.category,
@@ -1195,7 +1521,14 @@ async function initializeDatabase() {
       product.reviews,
       product.shipping,
       product.description,
-      product.image
+      product.image,
+      product.fulfillmentMode,
+      product.supplierId,
+      product.supplierSku,
+      product.supplierCost,
+      product.supplierEtaDays,
+      product.supplierUrl,
+      product.procurementNotes
     );
   }
 
@@ -1231,9 +1564,26 @@ async function initializeDatabase() {
   }
 
   for (const order of SEED_ORDERS) {
+    const orderItems = order.items.map((item) => {
+      const product = SEED_PRODUCTS.find((productEntry) => productEntry.id === item.id);
+
+      return {
+        ...item,
+        supplierId: product?.supplierId || "",
+        supplierName: product?.supplierName || "",
+        supplierSku: product?.supplierSku || "",
+        supplierCost: product?.supplierCost || 0,
+        fulfillmentMode: product?.fulfillmentMode || "own_stock"
+      };
+    });
+    const orderFulfillment = buildOrderFulfillment(orderItems.map((item) => ({
+      quantity: item.quantity,
+      product: item
+    })), order.payment.toLowerCase().includes("pix") ? "pix" : "card");
+
     await database.run(
-      `INSERT INTO orders (id, user_id, placed_at, status, status_tone, total, item_count, summary, payment, delivery)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO orders (id, user_id, placed_at, status, status_tone, total, item_count, summary, payment, delivery, fulfillment_mode, fulfillment_status, supplier_id, supplier_name, tracking_code, supplier_reference, internal_notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          user_id = excluded.user_id,
          placed_at = excluded.placed_at,
@@ -1243,7 +1593,14 @@ async function initializeDatabase() {
          item_count = excluded.item_count,
          summary = excluded.summary,
          payment = excluded.payment,
-         delivery = excluded.delivery`,
+         delivery = excluded.delivery,
+         fulfillment_mode = excluded.fulfillment_mode,
+         fulfillment_status = excluded.fulfillment_status,
+         supplier_id = excluded.supplier_id,
+         supplier_name = excluded.supplier_name,
+         tracking_code = excluded.tracking_code,
+         supplier_reference = excluded.supplier_reference,
+         internal_notes = excluded.internal_notes`,
       order.id,
       defaultUserId,
       order.placedAt,
@@ -1253,22 +1610,39 @@ async function initializeDatabase() {
       order.itemCount,
       order.summary,
       order.payment,
-      order.delivery
+      order.delivery,
+      orderFulfillment.mode,
+      order.fulfillmentStatus || orderFulfillment.fulfillmentStatus,
+      orderFulfillment.supplierId,
+      orderFulfillment.supplierName,
+      order.trackingCode || "",
+      order.supplierReference || "",
+      order.internalNotes || orderFulfillment.internalNotes
     );
 
-    for (const item of order.items) {
+    for (const item of orderItems) {
       await database.run(
-        `INSERT INTO order_items (order_id, product_id, name, quantity, price)
-         VALUES (?, ?, ?, ?, ?)
+        `INSERT INTO order_items (order_id, product_id, name, quantity, price, supplier_id, supplier_name, supplier_sku, supplier_cost, fulfillment_mode)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(order_id, product_id) DO UPDATE SET
            name = excluded.name,
            quantity = excluded.quantity,
-           price = excluded.price`,
+           price = excluded.price,
+           supplier_id = excluded.supplier_id,
+           supplier_name = excluded.supplier_name,
+           supplier_sku = excluded.supplier_sku,
+           supplier_cost = excluded.supplier_cost,
+           fulfillment_mode = excluded.fulfillment_mode`,
         order.id,
         item.id,
         item.name,
         item.quantity,
-        item.price
+        item.price,
+        item.supplierId,
+        item.supplierName,
+        item.supplierSku,
+        item.supplierCost,
+        item.fulfillmentMode
       );
     }
   }
@@ -1295,7 +1669,12 @@ async function buildBootstrapResponse(req) {
 }
 
 async function getProducts() {
-  const rows = await db.all("SELECT * FROM products ORDER BY name");
+  const rows = await db.all(
+    `SELECT products.*, suppliers.name AS supplier_name
+     FROM products
+     LEFT JOIN suppliers ON suppliers.id = products.supplier_id
+     ORDER BY products.name`
+  );
   return rows.map(mapProduct);
 }
 
@@ -1305,8 +1684,24 @@ async function getCategories() {
 }
 
 async function getProductById(productId) {
-  const row = await db.get("SELECT * FROM products WHERE id = ?", productId);
+  const row = await db.get(
+    `SELECT products.*, suppliers.name AS supplier_name
+     FROM products
+     LEFT JOIN suppliers ON suppliers.id = products.supplier_id
+     WHERE products.id = ?`,
+    productId
+  );
   return row ? mapProduct(row) : null;
+}
+
+async function getSuppliers() {
+  const rows = await db.all("SELECT * FROM suppliers ORDER BY active DESC, name");
+  return rows.map(mapSupplier);
+}
+
+async function getSupplierById(supplierId) {
+  const row = await db.get("SELECT * FROM suppliers WHERE id = ?", supplierId);
+  return row ? mapSupplier(row) : null;
 }
 
 async function getProfile(userId) {
@@ -1362,43 +1757,94 @@ async function getOrders(userId) {
     "SELECT * FROM orders WHERE user_id = ? ORDER BY rowid DESC",
     userId
   );
-  return rows.map(mapOrder);
+  const orderItemsMap = await getOrderItemsMap(rows.map((row) => row.id));
+  return rows.map((row) => mapOrder(row, orderItemsMap.get(row.id) || []));
 }
 
 async function getOrderById(orderId) {
   const row = await db.get("SELECT * FROM orders WHERE id = ?", orderId);
-  return row ? mapOrder(row) : null;
+
+  if (!row) {
+    return null;
+  }
+
+  const items = await getOrderItems(orderId);
+  return mapOrder(row, items);
 }
 
 async function getAllOrders() {
   const rows = await db.all(
-    `SELECT orders.*, users.name AS customer_name, users.email AS customer_email
+    `SELECT orders.*, users.name AS customer_name, users.email AS customer_email, users.phone AS customer_phone, users.city AS customer_city, users.address AS customer_address, users.zip AS customer_zip
      FROM orders
      JOIN users ON users.id = orders.user_id
      ORDER BY orders.rowid DESC`
   );
+  const orderItemsMap = await getOrderItemsMap(rows.map((row) => row.id));
 
   return rows.map((row) => ({
-    ...mapOrder(row),
+    ...mapOrder(row, orderItemsMap.get(row.id) || []),
     customerName: row.customer_name,
-    customerEmail: row.customer_email
+    customerEmail: row.customer_email,
+    customerPhone: row.customer_phone || "",
+    customerCity: row.customer_city || "",
+    customerAddress: row.customer_address || "",
+    customerZip: row.customer_zip || ""
   }));
 }
 
 async function getAdminStats() {
-  const [products, categories, orders, revenue] = await Promise.all([
+  const [products, categories, orders, revenue, suppliers, dropshippingProducts, pendingTransfers] = await Promise.all([
     db.get("SELECT COUNT(*) AS total FROM products"),
     db.get("SELECT COUNT(DISTINCT category) AS total FROM products"),
     db.get("SELECT COUNT(*) AS total FROM orders"),
-    db.get("SELECT COALESCE(SUM(total), 0) AS total FROM orders")
+    db.get("SELECT COALESCE(SUM(total), 0) AS total FROM orders"),
+    db.get("SELECT COUNT(*) AS total FROM suppliers WHERE active = 1"),
+    db.get("SELECT COUNT(*) AS total FROM products WHERE fulfillment_mode = 'dropshipping'"),
+    db.get(`SELECT COUNT(*) AS total FROM orders WHERE fulfillment_mode != 'own_stock' AND fulfillment_status IN ('Pagamento pendente', 'A repassar ao fornecedor', 'Repassado manualmente')`)
   ]);
 
   return {
     products: Number(products.total),
     categories: Number(categories.total),
     orders: Number(orders.total),
-    revenue: Number(revenue.total)
+    revenue: Number(revenue.total),
+    suppliers: Number(suppliers.total),
+    dropshippingProducts: Number(dropshippingProducts.total),
+    pendingTransfers: Number(pendingTransfers.total)
   };
+}
+
+async function getOrderItems(orderId) {
+  const rows = await db.all(
+    "SELECT * FROM order_items WHERE order_id = ? ORDER BY rowid ASC",
+    orderId
+  );
+
+  return rows.map(mapOrderItem);
+}
+
+async function getOrderItemsMap(orderIds) {
+  if (!orderIds.length) {
+    return new Map();
+  }
+
+  const placeholders = orderIds.map(() => "?").join(", ");
+  const rows = await db.all(
+    `SELECT * FROM order_items WHERE order_id IN (${placeholders}) ORDER BY rowid ASC`,
+    orderIds
+  );
+
+  const grouped = new Map();
+
+  for (const row of rows) {
+    if (!grouped.has(row.order_id)) {
+      grouped.set(row.order_id, []);
+    }
+
+    grouped.get(row.order_id).push(mapOrderItem(row));
+  }
+
+  return grouped;
 }
 
 async function ensureColumn(database, tableName, columnName, definition) {
@@ -1448,6 +1894,8 @@ async function establishSession(req, userId, isAuthenticated) {
 
 function normalizeProductInput(input, existing = {}) {
   const id = slugify(String(existing.id || input.id || input.name || "produto"));
+  const supplierId = String(input.supplierId ?? existing.supplierId ?? "").trim();
+  const supplier = SEED_SUPPLIERS.find((entry) => entry.id === supplierId);
 
   return {
     id,
@@ -1462,7 +1910,39 @@ function normalizeProductInput(input, existing = {}) {
     reviews: Number(input.reviews ?? existing.reviews ?? 0),
     shipping: String(input.shipping || existing.shipping || "Entrega amanha").trim() || "Entrega amanha",
     description: String(input.description || existing.description || "").trim() || "Descricao premium do produto JL AXION.",
-    image: String(input.image || existing.image || "assets/jl-axion-mark.svg").trim() || "assets/jl-axion-mark.svg"
+    image: String(input.image || existing.image || "assets/jl-axion-mark.svg").trim() || "assets/jl-axion-mark.svg",
+    fulfillmentMode: String(input.fulfillmentMode || existing.fulfillmentMode || "dropshipping").trim() || "dropshipping",
+    supplierId,
+    supplierName: input.supplierName || existing.supplierName || supplier?.name || "",
+    supplierSku: String(input.supplierSku || existing.supplierSku || "").trim(),
+    supplierCost: input.supplierCost === "" || input.supplierCost == null
+      ? Number(existing.supplierCost ?? 0)
+      : Number(input.supplierCost),
+    supplierEtaDays: Number(input.supplierEtaDays ?? existing.supplierEtaDays ?? 0),
+    supplierUrl: String(input.supplierUrl || existing.supplierUrl || supplier?.website || "").trim(),
+    procurementNotes: String(input.procurementNotes || existing.procurementNotes || "").trim()
+  };
+}
+
+function normalizeSupplierInput(input, existing = {}) {
+  const id = slugify(String(existing.id || input.id || input.name || "fornecedor"));
+
+  return {
+    id,
+    name: String(input.name || existing.name || "").trim() || "Fornecedor JL AXION",
+    contactName: String(input.contactName || existing.contactName || "").trim(),
+    email: String(input.email || existing.email || "").trim().toLowerCase(),
+    phone: String(input.phone || existing.phone || "").trim(),
+    leadTimeMin: Math.max(0, Number(input.leadTimeMin ?? existing.leadTimeMin ?? 0)),
+    leadTimeMax: Math.max(0, Number(input.leadTimeMax ?? existing.leadTimeMax ?? 0)),
+    orderChannel: String(input.orderChannel || existing.orderChannel || "Manual").trim() || "Manual",
+    website: String(input.website || existing.website || "").trim(),
+    notes: String(input.notes || existing.notes || "").trim(),
+    active: input.active === false || input.active === "false" || input.active === 0 || input.active === "0"
+      ? false
+      : input.active === true || input.active === "true" || input.active === 1 || input.active === "1" || input.active === "on"
+        ? true
+        : Boolean(existing.active ?? true)
   };
 }
 
@@ -1488,11 +1968,35 @@ function mapProduct(row) {
     reviews: Number(row.reviews),
     shipping: row.shipping,
     description: row.description,
-    image: row.image
+    image: row.image,
+    fulfillmentMode: row.fulfillment_mode || "own_stock",
+    supplierId: row.supplier_id || "",
+    supplierName: row.supplier_name || "",
+    supplierSku: row.supplier_sku || "",
+    supplierCost: row.supplier_cost == null ? 0 : Number(row.supplier_cost),
+    supplierEtaDays: Number(row.supplier_eta_days || 0),
+    supplierUrl: row.supplier_url || "",
+    procurementNotes: row.procurement_notes || ""
   };
 }
 
-function mapOrder(row) {
+function mapSupplier(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    contactName: row.contact_name || "",
+    email: row.email || "",
+    phone: row.phone || "",
+    leadTimeMin: Number(row.lead_time_min || 0),
+    leadTimeMax: Number(row.lead_time_max || 0),
+    orderChannel: row.order_channel || "Manual",
+    website: row.website || "",
+    notes: row.notes || "",
+    active: Boolean(row.active)
+  };
+}
+
+function mapOrder(row, items = []) {
   return {
     id: row.id,
     placedAt: row.placed_at,
@@ -1501,7 +2005,30 @@ function mapOrder(row) {
     total: Number(row.total),
     itemCount: Number(row.item_count),
     summary: row.summary,
-    payment: row.payment
+    payment: row.payment,
+    delivery: row.delivery,
+    fulfillmentMode: row.fulfillment_mode || "own_stock",
+    fulfillmentStatus: row.fulfillment_status || "",
+    supplierId: row.supplier_id || "",
+    supplierName: row.supplier_name || "",
+    trackingCode: row.tracking_code || "",
+    supplierReference: row.supplier_reference || "",
+    internalNotes: row.internal_notes || "",
+    items
+  };
+}
+
+function mapOrderItem(row) {
+  return {
+    id: row.product_id,
+    name: row.name,
+    quantity: Number(row.quantity),
+    price: Number(row.price),
+    supplierId: row.supplier_id || "",
+    supplierName: row.supplier_name || "",
+    supplierSku: row.supplier_sku || "",
+    supplierCost: row.supplier_cost == null ? 0 : Number(row.supplier_cost),
+    fulfillmentMode: row.fulfillment_mode || "own_stock"
   };
 }
 
@@ -1554,4 +2081,80 @@ function getStatusTone(status) {
   }
 
   return "warning";
+}
+
+function createSeedProduct(product) {
+  const supplierId = SUPPLIER_BY_CATEGORY[product.category] || "";
+  const supplier = SEED_SUPPLIERS.find((entry) => entry.id === supplierId);
+  const etaDays = SUPPLIER_ETA_BY_CATEGORY[product.category] || 3;
+  const supplierCost = roundCurrency(product.price * (SUPPLIER_COST_RATIO_BY_CATEGORY[product.category] || 0.5));
+
+  return {
+    ...product,
+    fulfillmentMode: "dropshipping",
+    supplierId,
+    supplierName: supplier?.name || "",
+    supplierSku: `${supplierId || "axion"}-${product.id}`.toUpperCase(),
+    supplierCost,
+    supplierEtaDays: etaDays,
+    supplierUrl: supplier?.website || "",
+    procurementNotes: `Repasse manual inicial via ${supplier?.orderChannel || "canal combinado"} com envio direto ao cliente em ate ${etaDays} dias uteis.`
+  };
+}
+
+function buildOrderFulfillment(cartItems, payment) {
+  const itemModes = [...new Set(cartItems.map((item) => item.product.fulfillmentMode || "own_stock"))];
+  const supplierIds = [...new Set(cartItems.map((item) => item.product.supplierId).filter(Boolean))];
+  const supplierNames = [...new Set(cartItems.map((item) => item.product.supplierName).filter(Boolean))];
+  const allDropshipping = itemModes.length === 1 && itemModes[0] === "dropshipping";
+  const hasDropshipping = itemModes.includes("dropshipping");
+  const paymentPending = payment === "pix";
+
+  if (paymentPending) {
+    return {
+      mode: allDropshipping ? "dropshipping" : hasDropshipping ? "hybrid" : "own_stock",
+      status: "Aguardando pagamento",
+      fulfillmentStatus: "Pagamento pendente",
+      supplierId: supplierIds.length === 1 ? supplierIds[0] : "",
+      supplierName: supplierNames.length === 1 ? supplierNames[0] : supplierNames.length ? "Operacao multipla" : "",
+      internalNotes: hasDropshipping
+        ? "Assim que o pagamento for confirmado, copie o resumo e repasse manualmente ao parceiro."
+        : "Pagamento aguardando confirmacao antes da separacao interna."
+    };
+  }
+
+  if (allDropshipping) {
+    return {
+      mode: "dropshipping",
+      status: "Aguardando repasse ao fornecedor",
+      fulfillmentStatus: "A repassar ao fornecedor",
+      supplierId: supplierIds.length === 1 ? supplierIds[0] : "",
+      supplierName: supplierNames.length === 1 ? supplierNames[0] : "Operacao multipla",
+      internalNotes: "Pedido pronto para repasse manual ao fornecedor parceiro."
+    };
+  }
+
+  if (hasDropshipping) {
+    return {
+      mode: "hybrid",
+      status: "Pedido confirmado",
+      fulfillmentStatus: "Separar itens proprios e repassar parceiros",
+      supplierId: "",
+      supplierName: "Operacao multipla",
+      internalNotes: "Pedido hibrido: separar itens proprios e repassar os parceiros antes do despacho."
+    };
+  }
+
+  return {
+    mode: "own_stock",
+    status: "Pedido confirmado",
+    fulfillmentStatus: "Separacao interna",
+    supplierId: "",
+    supplierName: "",
+    internalNotes: "Fluxo proprio sem parceiro."
+  };
+}
+
+function roundCurrency(value) {
+  return Number(Number(value || 0).toFixed(2));
 }

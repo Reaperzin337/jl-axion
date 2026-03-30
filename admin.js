@@ -3,12 +3,16 @@ const adminState = {
   user: null,
   products: [],
   categories: [],
+  suppliers: [],
   orders: [],
   stats: {
     products: 0,
     categories: 0,
     orders: 0,
-    revenue: 0
+    revenue: 0,
+    suppliers: 0,
+    dropshippingProducts: 0,
+    pendingTransfers: 0
   },
   search: ""
 };
@@ -16,11 +20,28 @@ const adminState = {
 const ORDER_STATUSES = [
   "Aguardando pagamento",
   "Pedido confirmado",
-  "Em separacao",
-  "Em transporte",
+  "Aguardando repasse ao fornecedor",
+  "Repassado ao fornecedor",
+  "Despachado pelo parceiro",
   "Entregue",
   "Cancelado"
 ];
+
+const FULFILLMENT_STATUSES = [
+  "Pagamento pendente",
+  "A repassar ao fornecedor",
+  "Repassado manualmente",
+  "Fornecedor confirmou",
+  "Despachado com rastreio",
+  "Entregue ao cliente",
+  "Operacao pausada"
+];
+
+const FULFILLMENT_LABELS = {
+  dropshipping: "Dropshipping",
+  hybrid: "Hibrido",
+  own_stock: "Estoque proprio"
+};
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -45,10 +66,14 @@ function cacheAdminElements() {
   adminElements.feedback = document.querySelector("[data-admin-feedback]");
   adminElements.stats = document.querySelector("[data-admin-stats]");
   adminElements.productForm = document.querySelector("[data-admin-product-form]");
-  adminElements.productSubmit = adminElements.productForm.querySelector('button[type="submit"]');
+  adminElements.productSubmit = document.querySelector("[data-admin-product-submit]");
+  adminElements.productSupplier = document.querySelector("[data-admin-product-supplier]");
   adminElements.categories = document.querySelector("[data-admin-categories]");
   adminElements.productSearch = document.querySelector("[data-admin-product-search]");
   adminElements.products = document.querySelector("[data-admin-products]");
+  adminElements.supplierForm = document.querySelector("[data-admin-supplier-form]");
+  adminElements.supplierSubmit = document.querySelector("[data-admin-supplier-submit]");
+  adminElements.suppliers = document.querySelector("[data-admin-suppliers]");
   adminElements.orders = document.querySelector("[data-admin-orders]");
   adminElements.logout = document.querySelector("[data-admin-logout]");
 }
@@ -56,6 +81,7 @@ function cacheAdminElements() {
 function bindAdminEvents() {
   adminElements.authRoot.addEventListener("submit", handleAuthSubmit);
   adminElements.productForm.addEventListener("submit", handleProductSubmit);
+  adminElements.supplierForm.addEventListener("submit", handleSupplierSubmit);
   adminElements.productSearch.addEventListener("input", handleSearchInput);
   adminElements.dashboard.addEventListener("click", handleDashboardClick);
   adminElements.logout.addEventListener("click", handleLogout);
@@ -69,6 +95,7 @@ async function initializeAdmin() {
   if (session.isAuthenticated && session.isAdmin) {
     await loadDashboard();
     clearProductForm();
+    clearSupplierForm();
     return;
   }
 
@@ -82,7 +109,7 @@ async function initializeAdmin() {
     return;
   }
 
-  showFeedback("Entre com uma conta admin para liberar o painel da loja.", "info");
+  showFeedback("Entre com uma conta admin para liberar o painel de operacao da loja.", "info");
 }
 
 async function loadDashboard(message = "") {
@@ -126,11 +153,11 @@ function renderLoggedOut() {
       <div class="section-heading section-heading--stacked">
         <div>
           <span class="eyebrow">Acesso admin</span>
-          <h2>Entrar no painel da JL AXION</h2>
+          <h2>Entrar no painel dropshipping da JL AXION</h2>
         </div>
       </div>
 
-      <p>Use uma conta administrativa para gerenciar catalogo, pedidos e a operacao da loja.</p>
+      <p>Use uma conta administrativa para cadastrar fornecedores, vincular SKUs externos e gerenciar pedidos sem estoque proprio.</p>
 
       ${currentAccount}
 
@@ -168,7 +195,9 @@ function renderDashboardShell() {
 function renderAdminData() {
   renderStats();
   renderCategoryOptions();
+  renderSupplierOptions();
   renderProducts();
+  renderSuppliers();
   renderOrders();
 }
 
@@ -177,17 +206,27 @@ function renderStats() {
     {
       label: "Produtos",
       value: adminState.stats.products,
-      detail: "Catalogo pronto para vitrine e detalhe."
+      detail: `${adminState.stats.dropshippingProducts || 0} prontos para dropshipping`
     },
     {
-      label: "Categorias",
-      value: adminState.stats.categories,
-      detail: "Departamentos ativos para a home e paginas internas."
+      label: "Fornecedores",
+      value: adminState.stats.suppliers || 0,
+      detail: "Base ativa para repasse manual."
+    },
+    {
+      label: "Repasses",
+      value: adminState.stats.pendingTransfers || 0,
+      detail: "Pedidos que pedem acao do operador."
     },
     {
       label: "Pedidos",
       value: adminState.stats.orders,
       detail: "Fluxo comercial monitorado no painel."
+    },
+    {
+      label: "Categorias",
+      value: adminState.stats.categories,
+      detail: "Departamentos ativos na vitrine."
     },
     {
       label: "Receita",
@@ -213,6 +252,23 @@ function renderCategoryOptions() {
     .join("");
 }
 
+function renderSupplierOptions() {
+  const currentValue = adminElements.productSupplier.value;
+  const options = [
+    `<option value="">Selecione um fornecedor</option>`,
+    ...adminState.suppliers.map((supplier) => `
+      <option value="${escapeAttribute(supplier.id)}">
+        ${escapeHtml(supplier.name)}${supplier.active ? "" : " (inativo)"}
+      </option>
+    `)
+  ];
+
+  adminElements.productSupplier.innerHTML = options.join("");
+  adminElements.productSupplier.value = adminState.suppliers.some((supplier) => supplier.id === currentValue)
+    ? currentValue
+    : "";
+}
+
 function renderProducts() {
   const searchTerm = adminState.search.trim().toLowerCase();
   const filteredProducts = adminState.products.filter((product) => {
@@ -224,14 +280,16 @@ function renderProducts() {
       product.name,
       product.category,
       product.badge,
-      product.id
+      product.id,
+      product.supplierName,
+      product.supplierSku
     ].some((value) => String(value || "").toLowerCase().includes(searchTerm));
   });
 
   if (!filteredProducts.length) {
     adminElements.products.innerHTML = `
       <tr>
-        <td colspan="5" class="admin-empty-cell">
+        <td colspan="6" class="admin-empty-cell">
           <div class="admin-empty">Nenhum produto encontrado para esse filtro.</div>
         </td>
       </tr>
@@ -257,16 +315,29 @@ function renderProducts() {
       <td>${escapeHtml(product.category)}</td>
 
       <td>
-        <div class="admin-price">
-          <strong>${formatCurrency(product.price)}</strong>
-          <small>${product.oldPrice ? `de ${formatCurrency(product.oldPrice)}` : "sem preco anterior"}</small>
+        <div class="admin-op-stack">
+          <span class="${getToneClass(product.fulfillmentMode === "dropshipping" ? "success" : "warning")}">
+            ${escapeHtml(getFulfillmentLabel(product.fulfillmentMode))}
+          </span>
+          <small>${escapeHtml(product.supplierSku || "SKU externo nao definido")}</small>
         </div>
       </td>
 
       <td>
-        <span class="${getToneClass(product.oldPrice ? "warning" : "success")}">
-          ${escapeHtml(product.badge || "Ativo")}
-        </span>
+        <div class="admin-price">
+          <strong>${formatCurrency(product.price)}</strong>
+          <small>
+            custo ${formatCurrency(product.supplierCost || 0)}
+            ${product.oldPrice ? ` | de ${formatCurrency(product.oldPrice)}` : ""}
+          </small>
+        </div>
+      </td>
+
+      <td>
+        <div class="admin-op-stack">
+          <strong>${escapeHtml(product.supplierName || "Sem fornecedor")}</strong>
+          <small>${product.supplierEtaDays ? `${product.supplierEtaDays} dias parceiro` : "prazo nao definido"}</small>
+        </div>
       </td>
 
       <td>
@@ -281,6 +352,58 @@ function renderProducts() {
       </td>
     </tr>
   `).join("");
+}
+
+function renderSuppliers() {
+  if (!adminState.suppliers.length) {
+    adminElements.suppliers.innerHTML = `<div class="admin-empty">Cadastre o primeiro fornecedor para liberar a operacao de dropshipping.</div>`;
+    return;
+  }
+
+  adminElements.suppliers.innerHTML = adminState.suppliers.map((supplier) => {
+    const linkedProducts = adminState.products.filter((product) => product.supplierId === supplier.id).length;
+
+    return `
+      <article class="admin-supplier-card">
+        <div class="admin-supplier-card__top">
+          <div class="stack-gap">
+            <strong>${escapeHtml(supplier.name)}</strong>
+            <span>${escapeHtml(supplier.contactName || "Contato nao definido")}</span>
+          </div>
+
+          <span class="${getToneClass(supplier.active ? "success" : "warning")}">
+            ${supplier.active ? "Ativo" : "Inativo"}
+          </span>
+        </div>
+
+        <div class="admin-supplier-card__meta">
+          <span>${escapeHtml(supplier.orderChannel)}</span>
+          <span>${formatLeadTime(supplier.leadTimeMin, supplier.leadTimeMax)}</span>
+          <span>${linkedProducts} ${linkedProducts === 1 ? "produto" : "produtos"}</span>
+        </div>
+
+        <div class="summary-note">
+          ${escapeHtml(supplier.notes || "Sem observacoes internas.")}
+        </div>
+
+        <div class="admin-supplier-card__footer">
+          <div class="stack-gap">
+            <small>${escapeHtml(supplier.email || "Sem e-mail")}</small>
+            <small>${escapeHtml(supplier.phone || "Sem telefone")}</small>
+          </div>
+
+          <div class="admin-table__actions">
+            <button type="button" class="secondary-btn" data-admin-action="edit-supplier" data-supplier-id="${escapeAttribute(supplier.id)}">
+              Editar
+            </button>
+            <button type="button" class="ghost-btn" data-admin-action="delete-supplier" data-supplier-id="${escapeAttribute(supplier.id)}">
+              Excluir
+            </button>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
 function renderOrders() {
@@ -311,28 +434,77 @@ function renderOrders() {
           <strong>${formatCurrency(order.total)}</strong>
         </div>
         <div>
-          <span>Itens</span>
-          <strong>${escapeHtml(String(order.itemCount))}</strong>
+          <span>Modo</span>
+          <strong>${escapeHtml(getFulfillmentLabel(order.fulfillmentMode))}</strong>
         </div>
         <div>
-          <span>Pagamento</span>
-          <strong>${escapeHtml(order.payment)}</strong>
+          <span>Fornecedor</span>
+          <strong>${escapeHtml(order.supplierName || "Operacao propria")}</strong>
         </div>
       </div>
 
       <div class="summary-note">${escapeHtml(order.summary || "Resumo indisponivel.")}</div>
 
-      <div class="admin-order-card__actions">
-        <select class="input" data-admin-order-status="${escapeAttribute(order.id)}">
-          ${ORDER_STATUSES.map((status) => `
-            <option value="${escapeAttribute(status)}" ${order.status === status ? "selected" : ""}>
-              ${escapeHtml(status)}
-            </option>
-          `).join("")}
-        </select>
+      <div class="admin-order-items">
+        ${(order.items || []).map((item) => `
+          <div class="admin-order-item">
+            <div>
+              <strong>${escapeHtml(item.name)}</strong>
+              <span>${escapeHtml(item.quantity)} x ${formatCurrency(item.price)}</span>
+            </div>
+            <div>
+              <strong>${escapeHtml(item.supplierName || "Sem parceiro")}</strong>
+              <span>${escapeHtml(item.supplierSku || "SKU nao definido")}</span>
+            </div>
+          </div>
+        `).join("")}
+      </div>
 
+      <div class="admin-order-fields">
+        <label class="field">
+          <span>Status comercial</span>
+          <select class="input" data-admin-order-status="${escapeAttribute(order.id)}">
+            ${ORDER_STATUSES.map((status) => `
+              <option value="${escapeAttribute(status)}" ${order.status === status ? "selected" : ""}>
+                ${escapeHtml(status)}
+              </option>
+            `).join("")}
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Status operacional</span>
+          <select class="input" data-admin-order-fulfillment-status="${escapeAttribute(order.id)}">
+            ${FULFILLMENT_STATUSES.map((status) => `
+              <option value="${escapeAttribute(status)}" ${order.fulfillmentStatus === status ? "selected" : ""}>
+                ${escapeHtml(status)}
+              </option>
+            `).join("")}
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Codigo de rastreio</span>
+          <input class="input" type="text" value="${escapeAttribute(order.trackingCode || "")}" data-admin-order-tracking="${escapeAttribute(order.id)}" placeholder="BR123456789">
+        </label>
+
+        <label class="field">
+          <span>Referencia do fornecedor</span>
+          <input class="input" type="text" value="${escapeAttribute(order.supplierReference || "")}" data-admin-order-reference="${escapeAttribute(order.id)}" placeholder="Pedido no parceiro">
+        </label>
+
+        <label class="field field--full">
+          <span>Observacoes internas</span>
+          <textarea class="input admin-textarea admin-textarea--compact" data-admin-order-notes="${escapeAttribute(order.id)}" placeholder="Anotacoes internas para acompanhar a operacao.">${escapeHtml(order.internalNotes || "")}</textarea>
+        </label>
+      </div>
+
+      <div class="admin-order-card__actions">
         <button type="button" class="primary-btn" data-admin-action="update-order" data-order-id="${escapeAttribute(order.id)}">
-          Atualizar status
+          Salvar operacao
+        </button>
+        <button type="button" class="secondary-btn" data-admin-action="copy-transfer" data-order-id="${escapeAttribute(order.id)}">
+          Copiar resumo para repasse
         </button>
       </div>
     </article>
@@ -378,6 +550,7 @@ async function handleAuthSubmit(event) {
 
     await loadDashboard(response.message || "Painel admin liberado.");
     clearProductForm();
+    clearSupplierForm();
   } catch (error) {
     showFeedback(error.message || "Nao foi possivel entrar no painel.", "warning");
   }
@@ -398,7 +571,14 @@ async function handleProductSubmit(event) {
     reviews: String(formData.get("reviews") || "").trim(),
     shipping: String(formData.get("shipping") || "").trim(),
     image: String(formData.get("image") || "").trim(),
-    description: String(formData.get("description") || "").trim()
+    description: String(formData.get("description") || "").trim(),
+    fulfillmentMode: String(formData.get("fulfillmentMode") || "dropshipping").trim(),
+    supplierId: String(formData.get("supplierId") || "").trim(),
+    supplierSku: String(formData.get("supplierSku") || "").trim(),
+    supplierCost: String(formData.get("supplierCost") || "").trim(),
+    supplierEtaDays: String(formData.get("supplierEtaDays") || "").trim(),
+    supplierUrl: String(formData.get("supplierUrl") || "").trim(),
+    procurementNotes: String(formData.get("procurementNotes") || "").trim()
   };
 
   const endpoint = currentId
@@ -406,6 +586,16 @@ async function handleProductSubmit(event) {
     : "/api/admin/products";
 
   const method = currentId ? "PUT" : "POST";
+
+  if (!payload.name || !payload.category || !payload.price) {
+    showFeedback("Preencha nome, categoria e preco antes de salvar o produto.", "warning");
+    return;
+  }
+
+  if (payload.fulfillmentMode !== "own_stock" && !payload.supplierId) {
+    showFeedback("Selecione um fornecedor para operar este item em dropshipping ou no modo hibrido.", "warning");
+    return;
+  }
 
   try {
     const response = await apiRequest(endpoint, {
@@ -425,6 +615,59 @@ async function handleProductSubmit(event) {
   }
 }
 
+async function handleSupplierSubmit(event) {
+  event.preventDefault();
+
+  const formData = new FormData(adminElements.supplierForm);
+  const currentId = String(formData.get("currentId") || "").trim();
+  const payload = {
+    name: String(formData.get("name") || "").trim(),
+    contactName: String(formData.get("contactName") || "").trim(),
+    email: String(formData.get("email") || "").trim(),
+    phone: String(formData.get("phone") || "").trim(),
+    leadTimeMin: String(formData.get("leadTimeMin") || "").trim(),
+    leadTimeMax: String(formData.get("leadTimeMax") || "").trim(),
+    orderChannel: String(formData.get("orderChannel") || "").trim(),
+    website: String(formData.get("website") || "").trim(),
+    notes: String(formData.get("notes") || "").trim(),
+    active: adminElements.supplierForm.elements.active.checked
+  };
+
+  const endpoint = currentId
+    ? `/api/admin/suppliers/${encodeURIComponent(currentId)}`
+    : "/api/admin/suppliers";
+
+  const method = currentId ? "PUT" : "POST";
+
+  if (!payload.name) {
+    showFeedback("Informe pelo menos o nome do fornecedor para salvar a base.", "warning");
+    return;
+  }
+
+  if (payload.leadTimeMax && payload.leadTimeMin && Number(payload.leadTimeMax) < Number(payload.leadTimeMin)) {
+    const currentMax = payload.leadTimeMax;
+    payload.leadTimeMax = payload.leadTimeMin;
+    payload.leadTimeMin = currentMax;
+  }
+
+  try {
+    const response = await apiRequest(endpoint, {
+      method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    applyAdminPayload(response);
+    renderAdminData();
+    clearSupplierForm();
+    showFeedback(response.message || "Fornecedor salvo no painel.", "success");
+  } catch (error) {
+    showFeedback(error.message || "Nao foi possivel salvar o fornecedor.", "warning");
+  }
+}
+
 function handleSearchInput(event) {
   adminState.search = event.target.value || "";
   renderProducts();
@@ -437,10 +680,15 @@ async function handleDashboardClick(event) {
     return;
   }
 
-  const { adminAction, productId, orderId } = actionTarget.dataset;
+  const { adminAction, productId, supplierId, orderId } = actionTarget.dataset;
 
   if (adminAction === "clear-product-form") {
     clearProductForm();
+    return;
+  }
+
+  if (adminAction === "clear-supplier-form") {
+    clearSupplierForm();
     return;
   }
 
@@ -460,8 +708,29 @@ async function handleDashboardClick(event) {
     return;
   }
 
+  if (adminAction === "edit-supplier") {
+    const supplier = adminState.suppliers.find((item) => item.id === supplierId);
+
+    if (supplier) {
+      fillSupplierForm(supplier);
+      showFeedback(`Editando ${supplier.name}.`, "info");
+    }
+
+    return;
+  }
+
+  if (adminAction === "delete-supplier") {
+    await deleteSupplier(supplierId);
+    return;
+  }
+
   if (adminAction === "update-order") {
     await updateOrderStatus(orderId);
+    return;
+  }
+
+  if (adminAction === "copy-transfer") {
+    await copyTransferSummary(orderId);
   }
 }
 
@@ -496,9 +765,43 @@ async function deleteProduct(productId) {
   }
 }
 
+async function deleteSupplier(supplierId) {
+  const supplier = adminState.suppliers.find((item) => item.id === supplierId);
+
+  if (!supplier) {
+    return;
+  }
+
+  const confirmed = window.confirm(`Remover "${supplier.name}" da base de fornecedores?`);
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response = await apiRequest(`/api/admin/suppliers/${encodeURIComponent(supplierId)}`, {
+      method: "DELETE"
+    });
+
+    applyAdminPayload(response);
+    renderAdminData();
+
+    if (adminElements.supplierForm.elements.currentId.value === supplierId) {
+      clearSupplierForm();
+    }
+
+    showFeedback(response.message || "Fornecedor removido.", "success");
+  } catch (error) {
+    showFeedback(error.message || "Nao foi possivel remover o fornecedor.", "warning");
+  }
+}
+
 async function updateOrderStatus(orderId) {
-  const select = adminElements.orders.querySelector(`[data-admin-order-status="${orderId}"]`);
-  const status = select ? select.value : "";
+  const status = readOrderField(`[data-admin-order-status="${orderId}"]`);
+  const fulfillmentStatus = readOrderField(`[data-admin-order-fulfillment-status="${orderId}"]`);
+  const trackingCode = readOrderField(`[data-admin-order-tracking="${orderId}"]`);
+  const supplierReference = readOrderField(`[data-admin-order-reference="${orderId}"]`);
+  const internalNotes = readOrderField(`[data-admin-order-notes="${orderId}"]`);
 
   try {
     const response = await apiRequest(`/api/admin/orders/${encodeURIComponent(orderId)}`, {
@@ -506,14 +809,37 @@ async function updateOrderStatus(orderId) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ status })
+      body: JSON.stringify({
+        status,
+        fulfillmentStatus,
+        trackingCode,
+        supplierReference,
+        internalNotes
+      })
     });
 
     applyAdminPayload(response);
     renderOrders();
-    showFeedback(response.message || "Status atualizado.", "success");
+    showFeedback(response.message || "Pedido atualizado.", "success");
   } catch (error) {
     showFeedback(error.message || "Nao foi possivel atualizar o pedido.", "warning");
+  }
+}
+
+async function copyTransferSummary(orderId) {
+  const order = adminState.orders.find((item) => item.id === orderId);
+
+  if (!order) {
+    return;
+  }
+
+  const summary = buildTransferSummary(order);
+
+  try {
+    await navigator.clipboard.writeText(summary);
+    showFeedback(`Resumo do pedido ${order.id} copiado para repasse manual.`, "success");
+  } catch (error) {
+    showFeedback("Nao foi possivel copiar automaticamente. Tente novamente.", "warning");
   }
 }
 
@@ -527,12 +853,16 @@ async function handleLogout() {
     adminState.user = null;
     adminState.products = [];
     adminState.categories = [];
+    adminState.suppliers = [];
     adminState.orders = [];
     adminState.stats = {
       products: 0,
       categories: 0,
       orders: 0,
-      revenue: 0
+      revenue: 0,
+      suppliers: 0,
+      dropshippingProducts: 0,
+      pendingTransfers: 0
     };
 
     renderLoggedOut();
@@ -554,6 +884,13 @@ function fillProductForm(product) {
   adminElements.productForm.elements.shipping.value = product.shipping || "";
   adminElements.productForm.elements.image.value = product.image || "";
   adminElements.productForm.elements.description.value = product.description || "";
+  adminElements.productForm.elements.fulfillmentMode.value = product.fulfillmentMode || "dropshipping";
+  adminElements.productForm.elements.supplierId.value = product.supplierId || "";
+  adminElements.productForm.elements.supplierSku.value = product.supplierSku || "";
+  adminElements.productForm.elements.supplierCost.value = product.supplierCost || "";
+  adminElements.productForm.elements.supplierEtaDays.value = product.supplierEtaDays || "";
+  adminElements.productForm.elements.supplierUrl.value = product.supplierUrl || "";
+  adminElements.productForm.elements.procurementNotes.value = product.procurementNotes || "";
   adminElements.productSubmit.textContent = "Atualizar produto";
   adminElements.productForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -561,27 +898,70 @@ function fillProductForm(product) {
 function clearProductForm() {
   adminElements.productForm.reset();
   adminElements.productForm.elements.currentId.value = "";
+  adminElements.productForm.elements.fulfillmentMode.value = "dropshipping";
+  adminElements.productForm.elements.supplierId.value = "";
   adminElements.productSubmit.textContent = "Salvar produto";
 }
 
-function applyAdminPayload(payload) {
+function fillSupplierForm(supplier) {
+  adminElements.supplierForm.elements.currentId.value = supplier.id;
+  adminElements.supplierForm.elements.name.value = supplier.name;
+  adminElements.supplierForm.elements.contactName.value = supplier.contactName || "";
+  adminElements.supplierForm.elements.email.value = supplier.email || "";
+  adminElements.supplierForm.elements.phone.value = supplier.phone || "";
+  adminElements.supplierForm.elements.leadTimeMin.value = supplier.leadTimeMin || "";
+  adminElements.supplierForm.elements.leadTimeMax.value = supplier.leadTimeMax || "";
+  adminElements.supplierForm.elements.orderChannel.value = supplier.orderChannel || "";
+  adminElements.supplierForm.elements.website.value = supplier.website || "";
+  adminElements.supplierForm.elements.notes.value = supplier.notes || "";
+  adminElements.supplierForm.elements.active.checked = Boolean(supplier.active);
+  adminElements.supplierSubmit.textContent = "Atualizar fornecedor";
+  adminElements.supplierForm.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function clearSupplierForm() {
+  adminElements.supplierForm.reset();
+  adminElements.supplierForm.elements.currentId.value = "";
+  adminElements.supplierForm.elements.active.checked = true;
+  adminElements.supplierSubmit.textContent = "Salvar fornecedor";
+}
+
+function applyAdminPayload(payload = {}) {
+  if (!payload || typeof payload !== "object") {
+    return;
+  }
+
   if (payload.user) {
     adminState.user = payload.user;
   }
 
-  if (payload.products) {
-    adminState.products = sortProducts(payload.products);
+  if (Array.isArray(payload.products)) {
+    adminState.products = [...payload.products].sort((left, right) => compareText(left.name, right.name));
+  } else if (payload.product && payload.product.id) {
+    adminState.products = upsertById(adminState.products, payload.product).sort((left, right) => compareText(left.name, right.name));
   }
 
-  if (payload.categories) {
-    adminState.categories = [...payload.categories];
+  if (Array.isArray(payload.categories)) {
+    adminState.categories = [...new Set(payload.categories.filter(Boolean))]
+      .sort(compareText);
+  } else if (adminState.products.length) {
+    adminState.categories = [...new Set(adminState.products.map((product) => product.category).filter(Boolean))]
+      .sort(compareText);
   }
 
-  if (payload.orders) {
+  if (Array.isArray(payload.suppliers)) {
+    adminState.suppliers = [...payload.suppliers].sort(sortSuppliers);
+  } else if (payload.supplier && payload.supplier.id) {
+    adminState.suppliers = upsertById(adminState.suppliers, payload.supplier).sort(sortSuppliers);
+  }
+
+  if (Array.isArray(payload.orders)) {
     adminState.orders = [...payload.orders];
+  } else if (payload.order && payload.order.id) {
+    adminState.orders = upsertById(adminState.orders, payload.order);
   }
 
-  if (payload.stats) {
+  if (payload.stats && typeof payload.stats === "object") {
     adminState.stats = {
       ...adminState.stats,
       ...payload.stats
@@ -589,26 +969,127 @@ function applyAdminPayload(payload) {
   }
 }
 
-function sortProducts(products) {
-  return [...products].sort((left, right) => left.name.localeCompare(right.name, "pt-BR"));
+function upsertById(collection, item) {
+  const items = Array.isArray(collection) ? [...collection] : [];
+  const index = items.findIndex((entry) => entry.id === item.id);
+
+  if (index >= 0) {
+    items[index] = {
+      ...items[index],
+      ...item
+    };
+  } else {
+    items.push(item);
+  }
+
+  return items;
 }
+
+function compareText(left, right) {
+  return String(left || "").localeCompare(String(right || ""), "pt-BR", {
+    sensitivity: "base"
+  });
+}
+
+function sortSuppliers(left, right) {
+  return Number(Boolean(right.active)) - Number(Boolean(left.active))
+    || compareText(left.name, right.name);
+}
+
+function readOrderField(selector) {
+  const field = document.querySelector(selector);
+  return field ? String(field.value || "").trim() : "";
+}
+
+function buildTransferSummary(order) {
+  const items = Array.isArray(order.items) ? order.items : [];
+  const customerLabel = order.customerName || "Cliente JL AXION";
+  const addressParts = [
+    order.customerAddress,
+    order.customerCity,
+    order.customerZip
+  ].filter(Boolean);
+
+  const lines = [
+    "JL AXION | Repasse manual dropshipping",
+    `Pedido: ${order.id}`,
+    `Cliente: ${customerLabel}`,
+    `Contato: ${order.customerEmail || "sem email"}${order.customerPhone ? ` | ${order.customerPhone}` : ""}`,
+    `Entrega: ${addressParts.length ? addressParts.join(" | ") : order.delivery || "nao informada"}`,
+    `Pagamento: ${order.payment || "nao informado"}`,
+    `Operacao: ${getFulfillmentLabel(order.fulfillmentMode)}`,
+    `Fornecedor principal: ${order.supplierName || "a definir"}`,
+    "",
+    "Itens"
+  ];
+
+  items.forEach((item, index) => {
+    lines.push(
+      `${index + 1}. ${item.name}`,
+      `   Quantidade: ${item.quantity}`,
+      `   Valor venda: ${formatCurrency(item.price)}`,
+      `   Fornecedor: ${item.supplierName || "nao definido"}`,
+      `   SKU parceiro: ${item.supplierSku || "nao definido"}`,
+      `   Custo parceiro: ${formatCurrency(item.supplierCost || 0)}`
+    );
+  });
+
+  if (order.supplierReference) {
+    lines.push("", `Referencia do parceiro: ${order.supplierReference}`);
+  }
+
+  if (order.trackingCode) {
+    lines.push(`Rastreio: ${order.trackingCode}`);
+  }
+
+  if (order.internalNotes) {
+    lines.push("", `Observacoes internas: ${order.internalNotes}`);
+  }
+
+  return lines.join("\n");
+}
+
+function getFulfillmentLabel(mode) {
+  return FULFILLMENT_LABELS[mode] || "Operacao personalizada";
+}
+
+function formatLeadTime(minDays, maxDays) {
+  const min = Number(minDays || 0);
+  const max = Number(maxDays || 0);
+
+  if (!min && !max) {
+    return "Prazo a combinar";
+  }
+
+  if (min && max && min !== max) {
+    return `${min} a ${Math.max(min, max)} dias uteis`;
+  }
+
+  return `${Math.max(min, max)} dias uteis`;
+}
+
+let feedbackTimerId = 0;
 
 function showFeedback(message, tone = "info") {
+  if (!message) {
+    adminElements.feedback.hidden = true;
+    adminElements.feedback.textContent = "";
+    adminElements.feedback.className = "summary-note admin-feedback";
+    return;
+  }
+
   adminElements.feedback.hidden = false;
-  adminElements.feedback.className = `summary-note admin-feedback admin-feedback--${tone}`;
   adminElements.feedback.textContent = message;
+  adminElements.feedback.className = `summary-note admin-feedback admin-feedback--${tone}`;
+
+  window.clearTimeout(feedbackTimerId);
+  feedbackTimerId = window.setTimeout(() => {
+    adminElements.feedback.hidden = true;
+  }, 7000);
 }
 
-function getToneClass(tone) {
-  if (tone === "success") {
-    return "status-chip status-chip--success";
-  }
-
-  if (tone === "warning") {
-    return "status-chip status-chip--warning";
-  }
-
-  return "status-chip";
+function getToneClass(tone = "info") {
+  return `admin-tone admin-tone--${tone}`;
 }
 
 function formatCurrency(value) {
@@ -616,33 +1097,63 @@ function formatCurrency(value) {
 }
 
 async function apiRequest(url, options = {}) {
-  const response = await fetch(url, {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+
+  const nextOptions = {
+    method: options.method || "GET",
     credentials: "same-origin",
-    ...options
-  });
+    signal: controller.signal,
+    headers: {
+      ...(options.headers || {})
+    }
+  };
 
-  const isJson = response.headers.get("content-type")?.includes("application/json");
-  const payload = isJson ? await response.json() : null;
-
-  if (!response.ok) {
-    const error = new Error(payload && payload.message ? payload.message : "Erro ao comunicar com o servidor.");
-    error.status = response.status;
-    error.payload = payload;
-    throw error;
+  if (options.body !== undefined) {
+    nextOptions.body = typeof options.body === "string"
+      ? options.body
+      : JSON.stringify(options.body);
   }
 
-  return payload;
+  try {
+    const response = await fetch(url, nextOptions);
+    const contentType = response.headers.get("content-type") || "";
+    const payload = contentType.includes("application/json")
+      ? await response.json()
+      : await response.text();
+
+    if (!response.ok) {
+      const error = new Error(
+        typeof payload === "string"
+          ? payload
+          : payload.message || "Nao foi possivel concluir a requisicao."
+      );
+      error.status = response.status;
+      error.payload = payload;
+      throw error;
+    }
+
+    return payload;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("A requisicao demorou demais. Tente novamente.");
+    }
+
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }
 
 function escapeHtml(value) {
-  return String(value || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function escapeAttribute(value) {
-  return escapeHtml(value);
+  return escapeHtml(value).replace(/`/g, "&#96;");
 }

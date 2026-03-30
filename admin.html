@@ -19,29 +19,29 @@
 
       <div class="admin-shell__actions">
         <a class="secondary-btn" href="index.html">Ver loja</a>
-        <button type="button" class="ghost-btn" data-admin-action="logout-admin" data-admin-logout hidden>Sair</button>
+        <button type="button" class="ghost-btn" data-admin-logout hidden>Sair</button>
       </div>
     </header>
 
     <section class="page-hero page-hero--premium section">
       <div>
-        <span class="eyebrow">Painel administrativo</span>
-        <h1>Gerencie catalogo, pedidos e a operacao da JL AXION.</h1>
-        <p>Area preparada para controlar produtos, acompanhar pedidos e dar base para o deploy com uma estrutura mais profissional.</p>
+        <span class="eyebrow">Painel dropshipping</span>
+        <h1>Prepare a JL AXION para vender sem estoque fisico, com repasse manual e operacao enxuta.</h1>
+        <p>Esta fase organiza fornecedores, custos, SKU externo, prazo do parceiro e o fluxo do pedido ate o envio ao cliente.</p>
       </div>
 
       <div class="hero-panel-grid">
         <article class="micro-card">
-          <strong>Produtos</strong>
-          <span>Cadastro, edicao e remocao do catalogo com leitura rapida.</span>
+          <strong>Fase 1</strong>
+          <span>Pedido entra no site, voce copia o resumo e repassa ao fornecedor manualmente.</span>
         </article>
         <article class="micro-card">
-          <strong>Pedidos</strong>
-          <span>Status e historico comercial em um mesmo painel.</span>
+          <strong>Fase 2</strong>
+          <span>Fornecedor, custo, SKU e status ficam estruturados para automacao futura.</span>
         </article>
         <article class="micro-card micro-card--accent">
-          <strong>Deploy</strong>
-          <span>Base pronta para subir com variaveis de ambiente e container.</span>
+          <strong>Lancamento</strong>
+          <span>O CNPJ entra por ultimo, quando o fluxo da loja estiver redondo e validado.</span>
         </article>
       </div>
     </section>
@@ -55,12 +55,30 @@
     <section class="section admin-dashboard" data-admin-dashboard hidden>
       <div class="stats-grid" data-admin-stats></div>
 
+      <div class="admin-guide-grid">
+        <article class="content-card admin-guide-card">
+          <span class="eyebrow">Passo 1</span>
+          <h3>Cadastrar fornecedor</h3>
+          <p>Defina contato, prazo, canal de pedido e observacoes internas para repasse rapido.</p>
+        </article>
+        <article class="content-card admin-guide-card">
+          <span class="eyebrow">Passo 2</span>
+          <h3>Vincular produto</h3>
+          <p>Amarre SKU do parceiro, custo e prazo por item para saber margem e operacao.</p>
+        </article>
+        <article class="content-card admin-guide-card">
+          <span class="eyebrow">Passo 3</span>
+          <h3>Repassar pedido</h3>
+          <p>Use o botao de copiar resumo dentro do pedido e envie ao fornecedor pelo canal combinado.</p>
+        </article>
+      </div>
+
       <div class="admin-grid">
         <article class="content-card admin-panel">
           <div class="section-heading section-heading--stacked">
             <div>
-              <span class="eyebrow">Catalogo</span>
-              <h2>Editar ou criar produto</h2>
+              <span class="eyebrow">Produtos</span>
+              <h2>Cadastro e operacao dropshipping</h2>
             </div>
           </div>
 
@@ -85,7 +103,16 @@
             </label>
 
             <label class="field">
-              <span>Preco</span>
+              <span>Modo de operacao</span>
+              <select class="input" name="fulfillmentMode">
+                <option value="dropshipping">Dropshipping</option>
+                <option value="hybrid">Hibrido</option>
+                <option value="own_stock">Estoque proprio</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Preco de venda</span>
               <input class="input" type="number" step="0.01" min="0" name="price" placeholder="189.90" required>
             </label>
 
@@ -105,8 +132,33 @@
             </label>
 
             <label class="field">
-              <span>Entrega</span>
+              <span>Entrega para vitrine</span>
               <input class="input" type="text" name="shipping" placeholder="Entrega amanha">
+            </label>
+
+            <label class="field">
+              <span>Fornecedor</span>
+              <select class="input" name="supplierId" data-admin-product-supplier></select>
+            </label>
+
+            <label class="field">
+              <span>SKU do fornecedor</span>
+              <input class="input" type="text" name="supplierSku" placeholder="FORN-AXION-001">
+            </label>
+
+            <label class="field">
+              <span>Custo do fornecedor</span>
+              <input class="input" type="number" step="0.01" min="0" name="supplierCost" placeholder="98.90">
+            </label>
+
+            <label class="field">
+              <span>Prazo do parceiro (dias)</span>
+              <input class="input" type="number" min="0" name="supplierEtaDays" placeholder="3">
+            </label>
+
+            <label class="field">
+              <span>Link do parceiro</span>
+              <input class="input" type="text" name="supplierUrl" placeholder="https://fornecedor.example/produto">
             </label>
 
             <label class="field">
@@ -119,47 +171,123 @@
               <textarea class="input admin-textarea" name="description" placeholder="Descricao premium do produto"></textarea>
             </label>
 
+            <label class="field field--full">
+              <span>Observacoes internas de compra</span>
+              <textarea class="input admin-textarea admin-textarea--compact" name="procurementNotes" placeholder="Como repassar esse item ao fornecedor, cuidados, combinados de envio e afins."></textarea>
+            </label>
+
             <div class="admin-inline-actions">
-              <button type="submit" class="primary-btn">Salvar produto</button>
+              <button type="submit" class="primary-btn" data-admin-product-submit>Salvar produto</button>
               <button type="button" class="secondary-btn" data-admin-action="clear-product-form">Limpar formulario</button>
             </div>
           </form>
         </article>
 
         <article class="content-card admin-panel">
-          <div class="section-heading">
+          <div class="section-heading section-heading--stacked">
             <div>
-              <span class="eyebrow">Produtos</span>
-              <h2>Catalogo atual</h2>
+              <span class="eyebrow">Fornecedores</span>
+              <h2>Base de parceiros da fase 1</h2>
             </div>
+          </div>
 
-            <label class="search-shell">
-              <input type="search" class="input" placeholder="Buscar produto no painel" data-admin-product-search>
+          <form class="form-grid" data-admin-supplier-form>
+            <input type="hidden" name="currentId">
+
+            <label class="field">
+              <span>Nome do fornecedor</span>
+              <input class="input" type="text" name="name" placeholder="Fornecedor parceiro" required>
             </label>
-          </div>
 
-          <div class="admin-table-wrap">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>Produto</th>
-                  <th>Categoria</th>
-                  <th>Preco</th>
-                  <th>Status</th>
-                  <th>Acoes</th>
-                </tr>
-              </thead>
-              <tbody data-admin-products></tbody>
-            </table>
-          </div>
+            <label class="field">
+              <span>Responsavel</span>
+              <input class="input" type="text" name="contactName" placeholder="Nome do contato">
+            </label>
+
+            <label class="field">
+              <span>E-mail</span>
+              <input class="input" type="email" name="email" placeholder="pedidos@fornecedor.com">
+            </label>
+
+            <label class="field">
+              <span>Telefone</span>
+              <input class="input" type="text" name="phone" placeholder="(11) 99999-0000">
+            </label>
+
+            <label class="field">
+              <span>Prazo minimo</span>
+              <input class="input" type="number" min="0" name="leadTimeMin" placeholder="1">
+            </label>
+
+            <label class="field">
+              <span>Prazo maximo</span>
+              <input class="input" type="number" min="0" name="leadTimeMax" placeholder="4">
+            </label>
+
+            <label class="field">
+              <span>Canal de pedido</span>
+              <input class="input" type="text" name="orderChannel" placeholder="WhatsApp, E-mail, Portal">
+            </label>
+
+            <label class="field">
+              <span>Site ou portal</span>
+              <input class="input" type="text" name="website" placeholder="https://fornecedor.example">
+            </label>
+
+            <label class="field field--full">
+              <span>Observacoes</span>
+              <textarea class="input admin-textarea admin-textarea--compact" name="notes" placeholder="Condicoes do parceiro, como repassar, horario de atendimento, rastreio, etc."></textarea>
+            </label>
+
+            <label class="checkbox-row admin-checkbox-row">
+              <input type="checkbox" name="active" checked>
+              <span>Fornecedor ativo para novos produtos</span>
+            </label>
+
+            <div class="admin-inline-actions">
+              <button type="submit" class="primary-btn" data-admin-supplier-submit>Salvar fornecedor</button>
+              <button type="button" class="secondary-btn" data-admin-action="clear-supplier-form">Limpar formulario</button>
+            </div>
+          </form>
+
+          <div class="admin-supplier-list" data-admin-suppliers></div>
         </article>
       </div>
+
+      <article class="content-card admin-panel">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Catalogo</span>
+            <h2>Produtos preparados para venda sem estoque</h2>
+          </div>
+
+          <label class="search-shell">
+            <input type="search" class="input" placeholder="Buscar produto no painel" data-admin-product-search>
+          </label>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table admin-table--products">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Operacao</th>
+                <th>Venda</th>
+                <th>Fornecedor</th>
+                <th>Acoes</th>
+              </tr>
+            </thead>
+            <tbody data-admin-products></tbody>
+          </table>
+        </div>
+      </article>
 
       <article class="content-card admin-panel">
         <div class="section-heading section-heading--stacked">
           <div>
             <span class="eyebrow">Pedidos</span>
-            <h2>Acompanhar e atualizar status</h2>
+            <h2>Repasse manual, rastreio e status comercial</h2>
           </div>
         </div>
 

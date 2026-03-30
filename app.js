@@ -351,6 +351,7 @@ const state = {
 const runtimeData = {
   useBackend: false,
   isAuthenticated: false,
+  isNativeApp: false,
   userId: null,
   cart: [...DEFAULT_CART],
   favorites: [...DEFAULT_FAVORITES],
@@ -359,6 +360,7 @@ const runtimeData = {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
+  applyEnvironmentClasses();
   seedData();
   restorePendingCategory();
   restoreSearchState();
@@ -396,6 +398,17 @@ function seedData() {
   }
 
   runtimeData.isAuthenticated = getIsAuthenticated();
+}
+
+function isNativeAppRuntime() {
+  const userAgent = window.navigator.userAgent || "";
+  const hostname = window.location.hostname || "";
+  return /Android|iPhone|iPad|iPod/i.test(userAgent) && hostname === "localhost";
+}
+
+function applyEnvironmentClasses() {
+  runtimeData.isNativeApp = isNativeAppRuntime();
+  document.body.classList.toggle("native-app", runtimeData.isNativeApp);
 }
 
 function readStorage(key) {

@@ -44,6 +44,21 @@ body {
   overflow-x: hidden;
 }
 
+body.native-app {
+  --container: min(100vw - 18px, 760px);
+  --header-container: min(100vw - 14px, 760px);
+}
+
+body.native-app .top-strip,
+body.native-app .site-header__navrow,
+body.native-app .site-footer {
+  display: none;
+}
+
+body.native-app .page {
+  padding-bottom: 28px;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -3000,5 +3015,335 @@ body.menu-open .drawer {
 
   .product-stage-media {
     min-height: 260px;
+  }
+}
+
+@media (max-width: 780px) {
+  body.native-app .site-header {
+    top: 0;
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  body.native-app .site-header__inner {
+    width: min(100vw - 14px, 760px);
+    gap: 8px;
+    padding: 10px 0 8px;
+  }
+
+  body.native-app .site-header__top {
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  body.native-app .brand-cluster {
+    gap: 8px;
+  }
+
+  body.native-app .brand__logo {
+    height: 42px;
+  }
+
+  body.native-app .menu-toggle,
+  body.native-app .header-actions .action-link {
+    width: 42px;
+    height: 42px;
+  }
+
+  body.native-app .header-actions {
+    gap: 4px;
+  }
+
+  body.native-app .header-actions .action-link {
+    position: relative;
+    padding: 0;
+    min-width: 42px;
+    border-radius: 50%;
+  }
+
+  body.native-app .header-actions .action-link > span:first-of-type {
+    display: none;
+  }
+
+  body.native-app .header-actions .count-badge {
+    position: absolute;
+    top: -4px;
+    right: -2px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 0.68rem;
+  }
+
+  body.native-app .site-header__search {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    margin-top: 0;
+  }
+
+  body.native-app .site-search {
+    min-height: 48px;
+    padding: 0 12px;
+  }
+
+  body.native-app .site-search__input {
+    padding: 12px 0;
+  }
+
+  body.native-app .site-search__submit {
+    width: auto;
+    min-width: 104px;
+    min-height: 48px;
+    padding-inline: 18px;
+  }
+
+  body.native-app .store-hero,
+  body.native-app .hero,
+  body.native-app .split-layout,
+  body.native-app .cart-layout,
+  body.native-app .account-grid {
+    gap: 12px;
+  }
+
+  body.native-app .store-banner,
+  body.native-app .catalog-shell,
+  body.native-app .content-card,
+  body.native-app .benefit-card,
+  body.native-app .deal-card,
+  body.native-app .page-hero,
+  body.native-app .summary-card,
+  body.native-app .checkout-form-card,
+  body.native-app .checkout-summary-card,
+  body.native-app .promo-band {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  body.native-app .store-banner {
+    gap: 14px;
+  }
+
+  body.native-app .store-banner h1,
+  body.native-app .page-hero h1 {
+    font-size: clamp(1.6rem, 7vw, 2.05rem);
+    line-height: 1.05;
+  }
+
+  body.native-app .store-banner p,
+  body.native-app .page-hero p,
+  body.native-app .catalog-shell__intro {
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  body.native-app[data-page="home"] .hero-side-stack,
+  body.native-app[data-page="home"] .banner-footer {
+    display: none;
+  }
+
+  body.native-app .hero-badges,
+  body.native-app .category-row,
+  body.native-app .service-bar,
+  body.native-app .department-grid,
+  body.native-app .product-grid,
+  body.native-app .product-grid--compact {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 76vw);
+    grid-template-columns: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    padding: 2px 2px 10px;
+    gap: 12px;
+    scrollbar-width: none;
+  }
+
+  body.native-app .hero-badges,
+  body.native-app .category-row {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 6px;
+  }
+
+  body.native-app .hero-badges::-webkit-scrollbar,
+  body.native-app .category-row::-webkit-scrollbar,
+  body.native-app .service-bar::-webkit-scrollbar,
+  body.native-app .department-grid::-webkit-scrollbar,
+  body.native-app .product-grid::-webkit-scrollbar,
+  body.native-app .product-grid--compact::-webkit-scrollbar {
+    display: none;
+  }
+
+  body.native-app .hero-badges > *,
+  body.native-app .category-row > *,
+  body.native-app .service-bar > *,
+  body.native-app .department-grid > *,
+  body.native-app .product-grid > *,
+  body.native-app .product-grid--compact > * {
+    scroll-snap-align: start;
+  }
+
+  body.native-app .mini-pill,
+  body.native-app .filter-chip {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  body.native-app .service-card,
+  body.native-app .department-card,
+  body.native-app .product-card {
+    min-height: 100%;
+  }
+
+  body.native-app .service-card {
+    padding: 14px;
+  }
+
+  body.native-app .department-card {
+    padding: 16px;
+    gap: 10px;
+  }
+
+  body.native-app .department-card p {
+    font-size: 0.88rem;
+  }
+
+  body.native-app .product-card {
+    width: min(76vw, 272px);
+    padding: 14px;
+    gap: 10px;
+  }
+
+  body.native-app .product-media {
+    aspect-ratio: 1 / 0.92;
+    border-radius: 18px;
+  }
+
+  body.native-app .product-top h3 {
+    font-size: 1rem;
+  }
+
+  body.native-app .product-description {
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+
+  body.native-app .product-installment,
+  body.native-app .product-footer-note,
+  body.native-app .product-top span,
+  body.native-app .shipping-pill,
+  body.native-app .rating-pill {
+    font-size: 0.84rem;
+  }
+
+  body.native-app .product-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  body.native-app .product-actions .primary-btn,
+  body.native-app .product-actions .secondary-btn {
+    width: 100%;
+    min-height: 42px;
+    padding-inline: 12px;
+    font-size: 0.88rem;
+  }
+
+  body.native-app .drawer {
+    width: min(88vw, 360px);
+    padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.native-app .drawer-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  body.native-app .drawer-category-card {
+    padding: 12px;
+    min-height: auto;
+  }
+
+  body.native-app .drawer-category-card strong {
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 560px) {
+  body.native-app .page,
+  body.native-app .site-header__inner {
+    width: min(100vw - 12px, 760px);
+  }
+
+  body.native-app .brand__logo {
+    height: 38px;
+  }
+
+  body.native-app .menu-toggle,
+  body.native-app .header-actions .action-link {
+    width: 40px;
+    height: 40px;
+  }
+
+  body.native-app .site-header__search {
+    gap: 6px;
+  }
+
+  body.native-app .site-search {
+    min-height: 46px;
+    padding: 0 10px;
+  }
+
+  body.native-app .site-search__input {
+    font-size: 16px;
+  }
+
+  body.native-app .site-search__submit {
+    min-width: 92px;
+    min-height: 46px;
+    font-size: 0.88rem;
+    padding-inline: 14px;
+  }
+
+  body.native-app .store-banner h1,
+  body.native-app .page-hero h1 {
+    font-size: clamp(1.42rem, 7vw, 1.8rem);
+  }
+
+  body.native-app .store-banner p,
+  body.native-app .catalog-shell__intro {
+    font-size: 0.88rem;
+  }
+
+  body.native-app .hero-badges,
+  body.native-app .category-row {
+    gap: 8px;
+  }
+
+  body.native-app .service-bar,
+  body.native-app .department-grid {
+    grid-auto-columns: minmax(182px, 72vw);
+  }
+
+  body.native-app .product-grid,
+  body.native-app .product-grid--compact {
+    grid-auto-columns: minmax(208px, 76vw);
+  }
+
+  body.native-app .product-card {
+    width: min(76vw, 236px);
+    padding: 12px;
+  }
+
+  body.native-app .product-actions {
+    grid-template-columns: 1fr;
+  }
+
+  body.native-app .drawer-category-grid {
+    grid-template-columns: 1fr;
   }
 }

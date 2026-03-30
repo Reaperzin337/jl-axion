@@ -3,57 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JL AXION | Login</title>
+  <title>JL AXION | Entrar ou criar conta</title>
+  <meta name="description" content="Entre na sua conta JL AXION ou crie seu acesso para acompanhar pedidos, salvar favoritos e comprar com mais rapidez.">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#58c2ff">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20260330i">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=20260330c">
+  <link rel="stylesheet" href="styles.css?v=20260330i">
 </head>
 <body data-page="login">
   <div data-site-shell></div>
 
   <main class="page">
-    <section class="page-hero section page-hero--compact">
-      <span class="eyebrow">Acesso do cliente</span>
-      <h1>Entre na sua conta</h1>
-      <p>Use seu e-mail e sua senha. No primeiro acesso, informe tambem o seu nome para criar a conta.</p>
-    </section>
+    <section class="section auth-shell auth-shell--page">
+      <article class="content-card content-card--accent auth-stage">
+        <span class="eyebrow">Conta JL AXION</span>
+        <h1>Entre para comprar com mais agilidade e acompanhar tudo em um so lugar.</h1>
+        <p>Com a sua conta, voce salva favoritos, acompanha pedidos, finaliza mais rapido e centraliza seus dados com uma experiencia mais limpa e mais confiavel.</p>
 
-    <section class="section login-shell">
-      <article class="content-card login-card">
-        <div class="login-card__header">
-          <span class="eyebrow">Login</span>
-          <h2>Acesse ou crie sua conta em um so passo</h2>
-          <p>Seu nome so e necessario no primeiro acesso.</p>
+        <div class="auth-stage__metric-grid">
+          <article class="auth-metric-card">
+            <strong>Pedidos acompanhados</strong>
+            <span>Status, historico e dados do pedido organizados na mesma area.</span>
+          </article>
+          <article class="auth-metric-card">
+            <strong>Favoritos e carrinho salvos</strong>
+            <span>Volte para os itens certos sem precisar montar tudo de novo.</span>
+          </article>
+          <article class="auth-metric-card">
+            <strong>Checkout mais rapido</strong>
+            <span>Conta pronta para acelerar o fechamento quando voce decidir comprar.</span>
+          </article>
         </div>
 
-        <form class="form-grid" data-login-form>
-          <label class="field">
-            <span>Nome</span>
-            <input class="input" type="text" name="name" placeholder="Preencha apenas no primeiro acesso">
-          </label>
+        <div class="auth-stage__trust">
+          <article>
+            <strong>Compra segura</strong>
+            <span>Conta usada para identificar seus pedidos e facilitar seu atendimento.</span>
+          </article>
+          <article>
+            <strong>Linguagem clara</strong>
+            <span>Sem fluxo confuso: entrar serve para entrar, criar conta serve para cadastrar.</span>
+          </article>
+          <article>
+            <strong>Rotina organizada</strong>
+            <span>Mais controle sobre favoritos, carrinho, conta e pos-compra.</span>
+          </article>
+        </div>
+      </article>
 
-          <label class="field">
-            <span>E-mail</span>
-            <input class="input" type="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required>
-          </label>
+      <article class="content-card auth-card" data-auth-root data-auth-mode="login">
+        <div class="auth-card__header">
+          <span class="eyebrow">Acesso do cliente</span>
+          <h2>Entrar ou criar conta</h2>
+          <p>Escolha a opcao certa para continuar. O processo agora esta separado para ficar mais claro e mais profissional.</p>
+        </div>
 
-          <label class="field">
-            <span>Senha</span>
-            <div class="input-row">
-              <input class="input" type="password" name="password" placeholder="Sua senha" autocomplete="current-password" minlength="6" required>
-              <button type="button" class="ghost-btn" data-action="toggle-password">Mostrar</button>
-            </div>
-          </label>
+        <div class="auth-switch" role="tablist" aria-label="Escolher modo de acesso">
+          <button
+            type="button"
+            class="auth-switch__button is-active"
+            data-action="switch-auth-mode"
+            data-auth-switch
+            data-auth-mode="login"
+            aria-selected="true"
+          >
+            Entrar
+          </button>
+          <button
+            type="button"
+            class="auth-switch__button"
+            data-action="switch-auth-mode"
+            data-auth-switch
+            data-auth-mode="register"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            Criar conta
+          </button>
+        </div>
 
-          <button type="submit" class="primary-btn primary-btn--full">Continuar</button>
-          <p class="helper-text">Ao continuar, voce entra na conta existente ou cria uma nova com os dados informados.</p>
-        </form>
+        <section class="auth-panel" data-auth-panel="login">
+          <div class="auth-panel__intro">
+            <strong>Ja tenho conta</strong>
+            <p>Use seu e-mail e sua senha para acessar favoritos, pedidos e dados salvos.</p>
+          </div>
+
+          <form class="form-grid auth-form" data-login-form>
+            <label class="field">
+              <span>E-mail</span>
+              <input class="input" type="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required>
+            </label>
+
+            <label class="field">
+              <span>Senha</span>
+              <div class="input-row">
+                <input class="input" id="login-password" type="password" name="password" placeholder="Digite sua senha" autocomplete="current-password" minlength="6" required>
+                <button type="button" class="ghost-btn ghost-btn--inline" data-action="toggle-password" data-toggle-target="login-password">Mostrar</button>
+              </div>
+            </label>
+
+            <button type="submit" class="primary-btn primary-btn--full">Entrar na conta</button>
+            <p class="helper-text">Se ainda nao tiver acesso, use a aba "Criar conta" para cadastrar nome, e-mail e senha.</p>
+          </form>
+        </section>
+
+        <section class="auth-panel" data-auth-panel="register" hidden>
+          <div class="auth-panel__intro">
+            <strong>Criar nova conta</strong>
+            <p>Cadastre seus dados principais para salvar compras, agilizar o checkout e acompanhar seus pedidos.</p>
+          </div>
+
+          <form class="form-grid auth-form" data-register-form>
+            <label class="field">
+              <span>Nome completo</span>
+              <input class="input" type="text" name="name" placeholder="Como devemos te chamar" autocomplete="name" minlength="3" required>
+            </label>
+
+            <label class="field">
+              <span>E-mail</span>
+              <input class="input" type="email" name="email" placeholder="voce@exemplo.com" autocomplete="email" required>
+            </label>
+
+            <label class="field">
+              <span>Senha</span>
+              <div class="input-row">
+                <input class="input" id="register-password" type="password" name="password" placeholder="Crie uma senha com pelo menos 6 caracteres" autocomplete="new-password" minlength="6" required>
+                <button type="button" class="ghost-btn ghost-btn--inline" data-action="toggle-password" data-toggle-target="register-password">Mostrar</button>
+              </div>
+            </label>
+
+            <label class="field">
+              <span>Confirmar senha</span>
+              <div class="input-row">
+                <input class="input" id="register-confirm-password" type="password" name="confirmPassword" placeholder="Repita a senha para confirmar" autocomplete="new-password" minlength="6" required>
+                <button type="button" class="ghost-btn ghost-btn--inline" data-action="toggle-password" data-toggle-target="register-confirm-password">Mostrar</button>
+              </div>
+            </label>
+
+            <button type="submit" class="primary-btn primary-btn--full">Criar minha conta</button>
+            <p class="helper-text">Ao criar seu acesso, voce ja entra na conta e pode seguir direto para favoritos, carrinho e acompanhamento dos pedidos.</p>
+          </form>
+        </section>
+
+        <div class="auth-card__note">
+          <strong>Conta pensada para compra clara</strong>
+          <span>Seu acesso existe para deixar carrinho, favoritos, checkout e pos-compra mais organizados dentro da JL AXION.</span>
+        </div>
       </article>
     </section>
   </main>
 
-  <script src="app.js?v=20260330c"></script>
+  <script src="app.js?v=20260330i"></script>
 </body>
 </html>

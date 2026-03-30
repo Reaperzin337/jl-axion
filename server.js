@@ -438,6 +438,7 @@ async function startServer() {
 
   app.use("/api", sessionMiddleware);
   app.use("/api/auth/login", loginLimiter);
+  app.use("/api/auth/register", loginLimiter);
   app.use("/api/admin", adminLimiter);
   app.use("/api", (_req, res, next) => {
     res.set("Cache-Control", "no-store");
@@ -550,7 +551,6 @@ async function startServer() {
     try {
       const email = String(req.body.email || "").trim().toLowerCase();
       const password = String(req.body.password || "").trim();
-      const name = String(req.body.name || "").trim();
 
       if (!email || !password) {
         res.status(400).json({ message: "Informe e-mail e senha." });
@@ -565,25 +565,7 @@ async function startServer() {
       let user = await db.get("SELECT * FROM users WHERE email = ?", email);
 
       if (!user) {
-        const passwordHash = await bcrypt.hash(password, 10);
-        const result = await db.run(
-        `INSERT INTO users (name, email, password_hash, role, phone, city, address, zip)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          name || email.split("@")[0],
-          email,
-          passwordHash,
-          "customer",
-          "",
-          "",
-          "",
-          ""
-        );
-        await establishSession(req, result.lastID, true);
-
-        res.status(201).json({
-          message: "Conta criada com sucesso.",
-          user: await getProfile(result.lastID)
-        });
+        res.status(404).json({ message: "Conta nao encontrada. Crie seu acesso para continuar." });
         return;
       }
 
@@ -604,6 +586,59 @@ async function startServer() {
       res.json({
         message: "Login concluido com sucesso.",
         user: await getProfile(user.id)
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/auth/register", async (req, res, next) => {
+    try {
+      const name = String(req.body.name || "").trim();
+      const email = String(req.body.email || "").trim().toLowerCase();
+      const password = String(req.body.password || "").trim();
+
+      if (!name || !email || !password) {
+        res.status(400).json({ message: "Informe nome, e-mail e senha para criar sua conta." });
+        return;
+      }
+
+      if (name.length < 3) {
+        res.status(400).json({ message: "Informe seu nome completo para criar a conta." });
+        return;
+      }
+
+      if (password.length < 6) {
+        res.status(400).json({ message: "A senha precisa ter pelo menos 6 caracteres." });
+        return;
+      }
+
+      const existingUser = await db.get("SELECT id FROM users WHERE email = ?", email);
+
+      if (existingUser) {
+        res.status(409).json({ message: "Este e-mail ja esta cadastrado. Entre para continuar." });
+        return;
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+      const result = await db.run(
+        `INSERT INTO users (name, email, password_hash, role, phone, city, address, zip)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        name,
+        email,
+        passwordHash,
+        "customer",
+        "",
+        "",
+        "",
+        ""
+      );
+
+      await establishSession(req, result.lastID, true);
+
+      res.status(201).json({
+        message: "Conta criada com sucesso.",
+        user: await getProfile(result.lastID)
       });
     } catch (error) {
       next(error);

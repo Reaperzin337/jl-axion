@@ -3,6 +3,7 @@ const STORAGE_KEYS = {
   favorites: "jlaxion-favorites",
   profile: "jlaxion-profile",
   auth: "jlaxion-auth",
+  accounts: "jlaxion-accounts",
   orders: "jlaxion-orders",
   pendingCategory: "jlaxion-pending-category"
 };
@@ -221,6 +222,7 @@ const CATEGORY_META = {
     description: "Produtos para casa conectada, limpeza automatizada e mais praticidade no dia a dia, com visual premium e leitura simples.",
     badge: "SMART HOME",
     shipping: "Envio agil para automacao, rotina e conforto",
+    homeBenefit: "Rotina conectada com menos esforco e mais conforto visual.",
     subtitle: "Tecnologia pensada para deixar a casa mais leve, organizada e funcional",
     editorialTitle: "Casa inteligente com apelo real de uso",
     editorialText: "Aqui entram os itens que trazem conveniencia para o ambiente, sem cara de produto tecnico demais. A ideia e vender conforto, rotina e praticidade.",
@@ -238,6 +240,7 @@ const CATEGORY_META = {
     description: "Selecao de luminarias e lampadas com foco em atmosfera, leitura visual forte e ambientacao premium para casa ou escritorio.",
     badge: "LIGHTING",
     shipping: "Entrega rapida para itens de iluminacao",
+    homeBenefit: "Luz ambiente e iluminacao funcional com clima mais premium.",
     subtitle: "Luz decorativa, funcional e facil de combinar com a identidade da casa",
     editorialTitle: "Iluminacao que vende sensacao, nao apenas produto",
     editorialText: "Esta categoria ajuda a loja a parecer mais desejada e menos tecnica. A proposta e mostrar luz como elemento de atmosfera, conforto e estilo.",
@@ -255,6 +258,7 @@ const CATEGORY_META = {
     description: "Bases sem fio, reguas com USB e acessorios para quem quer carregar melhor, organizar a mesa e manter tudo pronto para uso.",
     badge: "POWER PICK",
     shipping: "Entrega expressa em itens selecionados de energia",
+    homeBenefit: "Energia organizada para mesa, cabeceira e rotina mobile.",
     subtitle: "Energia organizada para mesa, cabeceira, home office e rotina mobile",
     editorialTitle: "Uma categoria com leitura comercial imediata",
     editorialText: "Carregadores costumam ser compra rapida. Por isso a pagina precisa ser direta, forte e bem explicada, com foco em conveniencia e valor percebido.",
@@ -272,6 +276,7 @@ const CATEGORY_META = {
     description: "Cabos reforcados para celular, notebook e setup, com foco em durabilidade, velocidade e uma apresentacao mais premium.",
     badge: "FAST CABLES",
     shipping: "Pronta expedicao para itens de alto giro",
+    homeBenefit: "Reposicao rapida com mais resistencia e leitura clara de valor.",
     subtitle: "Cabos com boa leitura de valor para venda recorrente e reposicao",
     editorialTitle: "Categoria pensada para giro rapido e recompra",
     editorialText: "Aqui a loja ganha profundidade comercial. Cabos funcionam bem como compra de entrada, complemento e upsell no checkout.",
@@ -289,6 +294,7 @@ const CATEGORY_META = {
     description: "Itens para casa e dia a dia com linguagem premium, praticidade real e leitura comercial mais clara para compra sem duvida.",
     badge: "HOME ESSENTIALS",
     shipping: "Postagem agil em itens de rotina e cozinha",
+    homeBenefit: "Objetos uteis para deixar a rotina mais pratica e melhor resolvida.",
     subtitle: "Objetos uteis que deixam a rotina mais bonita, simples e organizada",
     editorialTitle: "Utilidade com mais apelo de loja premium",
     editorialText: "Aqui entram os produtos de rotina que fazem a JL AXION parecer uma marca de estilo de vida, e nao apenas tecnologia.",
@@ -306,6 +312,7 @@ const CATEGORY_META = {
     description: "Hubs, bases e acessorios que deixam a mesa mais limpa, produtiva e visualmente bem resolvida para trabalho ou estudo.",
     badge: "DESK SETUP",
     shipping: "Frete rapido para mesa, hub e organizacao",
+    homeBenefit: "Setup limpo, produtividade alta e mesa com leitura premium.",
     subtitle: "Produtos para produtividade com cara de setup premium e leitura comercial forte",
     editorialTitle: "Escritorio como experiencia de uso e composicao",
     editorialText: "Mais do que vender acessorios, esta categoria mostra como a mesa pode ficar melhor organizada, mais funcional e mais bonita.",
@@ -323,6 +330,7 @@ const CATEGORY_META = {
     description: "Caixas e acessorios de audio com leitura premium, design limpo e boa presenca em mesas, quartos e ambientes criativos.",
     badge: "AUDIO EDIT",
     shipping: "Entrega prioritaria para itens de som",
+    homeBenefit: "Audio compacto para ambiente, presente e composicao de setup.",
     subtitle: "Audio com visual forte para compor estilo, mesa e atmosfera",
     editorialTitle: "Som como categoria de desejo dentro da loja",
     editorialText: "Ela ajuda a JL AXION a parecer mais completa e aspiracional. E uma categoria que vende experiencia, presente e lifestyle.",
@@ -375,8 +383,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function seedData() {
-  removeStorage(STORAGE_KEYS.auth);
-
   if (!readStorage(STORAGE_KEYS.cart)) {
     writeStorage(STORAGE_KEYS.cart, DEFAULT_CART);
   }
@@ -391,6 +397,10 @@ function seedData() {
 
   if (!readStorage(STORAGE_KEYS.orders)) {
     writeStorage(STORAGE_KEYS.orders, DEFAULT_ORDERS);
+  }
+
+  if (!readStorage(STORAGE_KEYS.accounts)) {
+    writeStorage(STORAGE_KEYS.accounts, []);
   }
 
   if (!readStorage(STORAGE_KEYS.auth)) {
@@ -438,6 +448,57 @@ function removeStorage(key) {
   }
 
   return true;
+}
+
+function getLocalAccounts() {
+  const accounts = readStorage(STORAGE_KEYS.accounts);
+  return Array.isArray(accounts) ? accounts : [];
+}
+
+function setLocalAccounts(accounts) {
+  return writeStorage(STORAGE_KEYS.accounts, accounts);
+}
+
+function findLocalAccountByEmail(email) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  return getLocalAccounts().find((account) => account.email === normalizedEmail) || null;
+}
+
+function buildProfileFromAccount(account) {
+  return {
+    ...GUEST_PROFILE,
+    name: account.name || "",
+    email: account.email || "",
+    phone: account.phone || "",
+    city: account.city || "",
+    address: account.address || "",
+    zip: account.zip || ""
+  };
+}
+
+function syncLocalAccountProfile(profile) {
+  if (runtimeData.useBackend) {
+    return;
+  }
+
+  const normalizedEmail = String(profile.email || "").trim().toLowerCase();
+
+  if (!normalizedEmail) {
+    return;
+  }
+
+  const nextAccounts = getLocalAccounts().map((account) => (
+    account.email === normalizedEmail
+      ? {
+          ...account,
+          ...buildProfileFromAccount(profile),
+          email: normalizedEmail,
+          password: account.password
+        }
+      : account
+  ));
+
+  setLocalAccounts(nextAccounts);
 }
 
 function readTransientState(key) {
@@ -750,17 +811,17 @@ function renderShell() {
   const footerMarkup = `
     <footer class="site-footer" data-global-footer>
       <div class="site-footer__inner">
-        <div>
+        <div class="site-footer__block">
           <strong>JL AXION</strong>
-          <span>Utilidades e tecnologia com foco em casa, setup, energia, iluminacao e rotina premium.</span>
+          <span>Utilidades e tecnologia para casa, setup, energia, iluminacao e rotina com uma leitura mais comercial e mais clara.</span>
         </div>
-        <div>
-          <strong>Compra simples</strong>
-          <span>Escolha a categoria, explore os produtos, salve favoritos e finalize com clareza.</span>
+        <div class="site-footer__block">
+          <strong>Compra com mais confianca</strong>
+          <span>Frete destacado, parcelamento visivel, promocoes objetivas e paginas pensadas para decidir rapido.</span>
         </div>
-        <div>
-          <strong>Entrega e ofertas</strong>
-          <span>Promocoes, frete vantajoso e textos pensados para guiar sem poluir a experiencia.</span>
+        <div class="site-footer__block">
+          <strong>Atendimento e conta</strong>
+          <span>Carrinho, favoritos, login, checkout e historico conectados para a loja crescer sem perder organizacao.</span>
         </div>
       </div>
     </footer>
@@ -769,7 +830,10 @@ function renderShell() {
   shell.innerHTML = `
     <div class="top-strip">
       <div class="top-strip__inner">
-        <span>Frete gratis acima de R$ 600 | Ate 10x sem juros | Casa, setup, energia e utilidades em uma so curadoria</span>
+        <span class="top-strip__item">Frete gratis acima de R$ 600</span>
+        <span class="top-strip__item">Ate 10x sem juros</span>
+        <span class="top-strip__item">Ofertas da semana</span>
+        <span class="top-strip__item">Casa, setup, energia e utilidades</span>
       </div>
     </div>
 
@@ -786,7 +850,7 @@ function renderShell() {
             </button>
 
             <a class="brand" href="index.html" aria-label="Ir para a home da JL AXION">
-              <img class="brand__logo" src="assets/jl-axion-lockup.svg" alt="JL AXION">
+              <img class="brand__logo" src="assets/jl-axion-lockup.svg?v=20260330h" alt="JL AXION">
             </a>
           </div>
 
@@ -830,12 +894,17 @@ function renderShell() {
 
         <div class="site-header__navrow">
           <nav class="nav-links" aria-label="Navegacao principal">
+            <a class="nav-link nav-link--highlight" href="promotions.html">Ofertas</a>
             ${navLink("home", "index.html", "Inicio")}
             ${navLink("promotions", "promotions.html", "Promocoes")}
             ${navLink("favorites", "favorites.html", "Favoritos")}
             ${navLink("cart", "cart.html", "Carrinho")}
             ${navLink(accountNavPage, accountHref, "Minha conta")}
           </nav>
+          <div class="nav-meta">
+            <a class="nav-sale-link" href="promotions.html">Campanha da semana</a>
+            <span class="nav-meta__text">Desconto, frete e parcelamento em leitura comercial forte</span>
+          </div>
         </div>
       </div>
     </header>
@@ -845,15 +914,25 @@ function renderShell() {
     <aside class="drawer" data-menu-drawer aria-hidden="true">
       <div class="drawer__header">
         <a class="brand" href="index.html">
-          <img class="brand__logo" src="assets/jl-axion-lockup.svg" alt="JL AXION">
+          <img class="brand__logo" src="assets/jl-axion-lockup.svg?v=20260330h" alt="JL AXION">
         </a>
         <button type="button" class="icon-button drawer__close" data-menu-close aria-label="Fechar menu">
           ${icon("close")}
         </button>
       </div>
 
+      <div class="drawer-spotlight">
+        <span class="eyebrow">Comprar agora</span>
+        <h2>Casa, setup e energia em uma navegação mais direta.</h2>
+        <p>Entre pelas campanhas, departamentos ou pela busca principal e monte seu pedido com mais confiança.</p>
+        <div class="drawer-spotlight__actions">
+          <a class="primary-btn" href="promotions.html">Ver ofertas</a>
+          <a class="secondary-btn" href="index.html#catalogo">Ir para a vitrine</a>
+        </div>
+      </div>
+
       <div class="drawer__section">
-        <h2>Paginas</h2>
+        <h2>Navegacao rapida</h2>
         <div class="drawer__group">
           ${drawerLink("home", "index.html", "Inicio", "Vitrine e categorias")}
           ${drawerLink("promotions", "promotions.html", "Promocoes", "Cupons, frete e combos")}
@@ -865,16 +944,16 @@ function renderShell() {
       </div>
 
       <div class="drawer__section">
-        <h2>Categorias</h2>
+        <h2>Departamentos</h2>
         <div class="drawer-category-grid">
           ${getCategoryNames().map((category) => drawerCategoryCard(category)).join("")}
         </div>
       </div>
 
       <div class="drawer-promo">
-        <span class="eyebrow">Oferta em destaque</span>
-        <h2>AXION15</h2>
-        <p>Use o cupom em utilidades e iluminacao selecionadas para compor pedidos mais completos com melhor custo.</p>
+        <span class="eyebrow">Condicoes em destaque</span>
+        <h2>Frete, cupom e parcelamento em evidência</h2>
+        <p>Entre nas promocoes para ver as oportunidades mais fortes da semana com produtos ja ligados a cada campanha.</p>
       </div>
     </aside>
   `;
@@ -1013,13 +1092,18 @@ function bindSearch() {
 
 function bindForms() {
   const loginForm = document.querySelector("[data-login-form]");
+  const registerForm = document.querySelector("[data-register-form]");
   const accountForm = document.querySelector("[data-account-form]");
+  const authRoot = document.querySelector("[data-auth-root]");
+
+  if (authRoot) {
+    setAuthMode(authRoot.dataset.authMode || "login");
+  }
 
   if (loginForm) {
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const formData = new FormData(loginForm);
-      const name = String(formData.get("name") || "").trim();
       const email = String(formData.get("email") || "").trim();
       const password = String(formData.get("password") || "").trim();
 
@@ -1035,7 +1119,84 @@ function bindForms() {
 
       try {
         if (runtimeData.useBackend) {
+          const submitButton = loginForm.querySelector('button[type="submit"]');
+          setFormSubmitting(submitButton, true, "Entrando...");
           const payload = await apiRequest("/api/auth/login", {
+            method: "POST",
+            body: {
+              email,
+              password
+            }
+          });
+
+          applyRuntimePatch(payload);
+          await refreshRuntimeData();
+          refreshShellUi();
+          showToast(payload.message || "Login concluido. Redirecionando para Minha Conta.");
+          setFormSubmitting(submitButton, false);
+        } else {
+          const localAccount = findLocalAccountByEmail(email);
+
+          if (!localAccount) {
+            throw new Error("Conta nao encontrada. Crie seu acesso para continuar.");
+          }
+
+          if (localAccount.password !== password) {
+            throw new Error("Senha incorreta.");
+          }
+
+          setProfile(buildProfileFromAccount(localAccount));
+          setLocalAuthState(true);
+          refreshShellUi();
+          showToast("Login concluido com sucesso.");
+        }
+
+        window.setTimeout(() => {
+          window.location.href = "account.html";
+        }, 700);
+      } catch (error) {
+        const submitButton = loginForm.querySelector('button[type="submit"]');
+        setFormSubmitting(submitButton, false);
+        showToast(error.message);
+      }
+    });
+  }
+
+  if (registerForm) {
+    registerForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(registerForm);
+      const name = String(formData.get("name") || "").trim();
+      const email = String(formData.get("email") || "").trim();
+      const password = String(formData.get("password") || "").trim();
+      const confirmPassword = String(formData.get("confirmPassword") || "").trim();
+      const submitButton = registerForm.querySelector('button[type="submit"]');
+
+      if (!name || !email || !password || !confirmPassword) {
+        showToast("Preencha nome, e-mail e senha para criar sua conta.");
+        return;
+      }
+
+      if (name.length < 3) {
+        showToast("Informe seu nome completo para criar a conta.");
+        return;
+      }
+
+      if (password.length < 6) {
+        showToast("Sua senha precisa ter pelo menos 6 caracteres.");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showToast("As senhas nao conferem.");
+        return;
+      }
+
+      try {
+        setFormSubmitting(submitButton, true, "Criando conta...");
+
+        if (runtimeData.useBackend) {
+          const payload = await apiRequest("/api/auth/register", {
             method: "POST",
             body: {
               name,
@@ -1047,26 +1208,36 @@ function bindForms() {
           applyRuntimePatch(payload);
           await refreshRuntimeData();
           refreshShellUi();
-          showToast(payload.message || "Login concluido. Redirecionando para Minha Conta.");
+          showToast(payload.message || "Conta criada com sucesso.");
         } else {
-          const current = getViewerProfile();
-          const nextProfile = {
-            ...current,
-            name: name || current.name,
-            email: email || current.email
+          const normalizedEmail = email.toLowerCase();
+
+          if (findLocalAccountByEmail(normalizedEmail)) {
+            throw new Error("Este e-mail ja esta cadastrado.");
+          }
+
+          const localAccount = {
+            ...buildProfileFromAccount({ name, email: normalizedEmail }),
+            email: normalizedEmail,
+            password
           };
 
-          setProfile(nextProfile);
+          setLocalAccounts([...getLocalAccounts(), localAccount]);
+          setProfile(buildProfileFromAccount(localAccount));
           setLocalAuthState(true);
+          setOrders([]);
           refreshShellUi();
-          showToast("Conta criada com sucesso. Redirecionando para Minha Conta.");
+          showToast("Conta criada com sucesso.");
         }
 
+        registerForm.reset();
         window.setTimeout(() => {
           window.location.href = "account.html";
         }, 700);
       } catch (error) {
         showToast(error.message);
+      } finally {
+        setFormSubmitting(submitButton, false);
       }
     });
   }
@@ -1104,6 +1275,7 @@ function bindForms() {
           applyRuntimePatch(payload);
         } else {
           setProfile(nextProfile);
+          syncLocalAccountProfile(nextProfile);
         }
 
         refreshShellUi();
@@ -1127,10 +1299,23 @@ function bindActions() {
     const productId = target.dataset.id;
 
     if (action === "toggle-password") {
-      const input = target.parentElement.querySelector("input");
+      const targetName = target.dataset.toggleTarget;
+      const input = targetName
+        ? document.getElementById(targetName)
+        : target.parentElement.querySelector("input");
+
+      if (!input) {
+        return;
+      }
+
       const isPassword = input.type === "password";
       input.type = isPassword ? "text" : "password";
       target.textContent = isPassword ? "Ocultar" : "Mostrar";
+      return;
+    }
+
+    if (action === "switch-auth-mode") {
+      setAuthMode(target.dataset.authMode || "login");
       return;
     }
 
@@ -1210,6 +1395,41 @@ function bindActions() {
       updateHomeSearchUrl();
       renderHomeProducts();
     }
+  });
+}
+
+function setFormSubmitting(button, isSubmitting, busyLabel = "Enviando...") {
+  if (!button) {
+    return;
+  }
+
+  if (!button.dataset.defaultLabel) {
+    button.dataset.defaultLabel = button.textContent.trim();
+  }
+
+  button.disabled = Boolean(isSubmitting);
+  button.textContent = isSubmitting ? busyLabel : button.dataset.defaultLabel;
+}
+
+function setAuthMode(mode) {
+  const authRoot = document.querySelector("[data-auth-root]");
+
+  if (!authRoot) {
+    return;
+  }
+
+  const nextMode = mode === "register" ? "register" : "login";
+  authRoot.dataset.authMode = nextMode;
+
+  authRoot.querySelectorAll("[data-auth-switch]").forEach((button) => {
+    const isActive = button.dataset.authMode === nextMode;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+    button.setAttribute("tabindex", isActive ? "0" : "-1");
+  });
+
+  authRoot.querySelectorAll("[data-auth-panel]").forEach((panel) => {
+    panel.hidden = panel.dataset.authPanel !== nextMode;
   });
 }
 
@@ -1411,7 +1631,7 @@ function renderPromotionProducts() {
     return;
   }
 
-  container.innerHTML = PRODUCTS.slice(0, 8).map((product) => productCard(product, { promo: true })).join("");
+  container.innerHTML = getPromotionalProducts().slice(0, 8).map((product) => productCard(product, { promo: true })).join("");
 }
 
 function renderCartPage() {
@@ -1428,14 +1648,14 @@ function renderCartPage() {
   if (!cartProducts.length) {
     itemsContainer.innerHTML = emptyState(
       "Seu carrinho esta vazio",
-      "Adicione alguns itens da vitrine para testar a experiencia de compra.",
-      '<a class="primary-btn" href="index.html">Voltar para a loja</a>'
+      "Adicione itens da vitrine para montar um pedido com mais valor e mais clareza no fechamento.",
+      '<a class="primary-btn" href="index.html">Voltar para a vitrine</a>'
     );
     summaryContainer.innerHTML = `
       <span class="eyebrow">Resumo</span>
       <h2>Nada por aqui ainda</h2>
-      <p>Assim que voce adicionar produtos, o total aparecera neste painel.</p>
-      <div class="summary-note">Seu carrinho premium vai exibir subtotal, frete, desconto e beneficios assim que houver itens selecionados.</div>
+      <p>Assim que voce adicionar produtos, subtotal, frete e condicoes vao aparecer neste painel.</p>
+      <div class="summary-note">Este resumo foi pensado para mostrar o valor do pedido sem confusao: item, frete, desconto e total no mesmo bloco.</div>
     `;
 
     if (recommendations) {
@@ -1488,7 +1708,7 @@ function renderCartPage() {
     <div class="summary-line"><span>Cupom simulado</span><strong>- ${money.format(discount)}</strong></div>
     <hr>
     <div class="summary-line"><span>Total estimado</span><strong>${money.format(total)}</strong></div>
-    <div class="summary-note">Pagamento protegido, embalagem reforcada e acompanhamento do pedido em uma unica experiencia.</div>
+    <div class="summary-note">Pagamento, envio e acompanhamento do pedido organizados para passar mais confianca na decisao final.</div>
     <button type="button" class="primary-btn primary-btn--full" data-action="checkout">Finalizar compra</button>
     <a class="secondary-btn primary-btn--full" href="promotions.html">Aplicar mais ofertas</a>
   `;
@@ -1513,7 +1733,7 @@ function renderFavoritePage() {
   if (!favoriteProducts.length) {
     container.innerHTML = emptyState(
       "Nenhum favorito salvo",
-      "Clique no coracao dos produtos para montar sua lista de desejos.",
+      "Clique no coracao dos produtos para montar uma lista de desejo pronta para futura compra.",
       '<a class="primary-btn" href="index.html">Explorar vitrine</a>'
     );
   } else {
@@ -1547,7 +1767,7 @@ function renderAccountPage() {
 
     orderList.innerHTML = emptyState(
       "Sua conta ainda nao foi acessada",
-      "Entre com seu e-mail e senha para acompanhar pedidos, editar seus dados e ver sua area pessoal.",
+      "Entre com seu e-mail e senha para acompanhar pedidos, editar seus dados e usar a area do cliente de forma completa.",
       '<a class="primary-btn" href="login.html">Entrar agora</a>'
     );
     return;
@@ -2051,19 +2271,19 @@ function renderProductPage() {
     <p class="product-installment">ou ${installmentCount}x de ${installmentValue} sem juros</p>
     <div class="mini-metric-grid detail-assurance-grid">
       <article class="mini-metric">
-        <strong>Compra assistida</strong>
-        <span>Resumo claro de preco, entrega e parcelamento antes de finalizar.</span>
-      </article>
-      <article class="mini-metric">
-        <strong>Pos-venda organizado</strong>
-        <span>Pedido e historico ficam concentrados em Minha Conta.</span>
-      </article>
+          <strong>Compra assistida</strong>
+          <span>Resumo claro de preco, entrega e parcelamento antes de finalizar.</span>
+        </article>
+        <article class="mini-metric">
+          <strong>Pos-venda organizado</strong>
+          <span>Pedido e historico ficam concentrados em Minha Conta.</span>
+        </article>
     </div>
     <div class="detail-actions">
-      <button type="button" class="primary-btn" data-action="add-to-cart" data-id="${product.id}">Adicionar ao carrinho</button>
+      <button type="button" class="primary-btn" data-action="add-to-cart" data-id="${product.id}">Comprar agora</button>
       <button type="button" class="secondary-btn" data-action="toggle-favorite" data-id="${product.id}">${isFavorite ? "Remover dos favoritos" : "Salvar nos favoritos"}</button>
     </div>
-    <div class="summary-note">${product.reviews} avaliacoes nesta demonstracao. Produto apresentado em um layout pensado para venda com foco e sofisticacao.</div>
+    <div class="summary-note">${product.reviews} avaliacoes nesta demonstracao. Produto apresentado com leitura de preco, categoria, entrega e decisao muito mais comercial.</div>
   `;
 
   highlightsContainer.innerHTML = `
@@ -2170,9 +2390,14 @@ function productCard(product, options = {}) {
   const isFavorite = favorites.includes(product.id);
   const showDiscount = options.promo && typeof product.oldPrice === "number";
   const discount = showDiscount ? percentage(product.oldPrice, product.price) : null;
+  const savings = productSavings(product);
   const installmentCount = product.price >= 300 ? 10 : 6;
   const installmentValue = money.format(product.price / installmentCount);
   const detailsHref = `product.html?id=${encodeURIComponent(product.id)}`;
+  const [primarySignal, secondarySignal] = getProductSignals(product);
+  const reviewCount = product.reviews || 0;
+  const reviewLabel = `${reviewCount} ${reviewCount === 1 ? "avaliacao" : "avaliacoes"}`;
+  const footerNote = options.promo ? "Oferta ativa nesta campanha" : "Preco, envio e CTA em leitura clara";
 
   return `
     <article class="product-card">
@@ -2183,9 +2408,9 @@ function productCard(product, options = {}) {
       </a>
 
       <div class="product-top">
-        <div>
+        <div class="product-copy">
+          <span class="product-category">${product.category}</span>
           <h3><a class="product-title-link" href="${detailsHref}">${product.name}</a></h3>
-          <span>${product.category}</span>
         </div>
 
         <button type="button" class="icon-button${isFavorite ? " is-active" : ""}" data-action="toggle-favorite" data-id="${product.id}" aria-label="Favoritar ${product.name}">
@@ -2193,26 +2418,39 @@ function productCard(product, options = {}) {
         </button>
       </div>
 
+      <div class="product-signal-row">
+        <span class="product-signal product-signal--accent">${primarySignal}</span>
+        <span class="product-signal">${secondarySignal}</span>
+      </div>
+
+      <p class="product-description">${product.description}</p>
+
       <div class="product-meta-row">
         <span class="rating-pill">${String(product.rating || 4.8).replace(".", ",")} &#9733;</span>
         <span class="shipping-pill">${product.shipping || "Frete rapido"}</span>
       </div>
 
-      <p class="product-description">${product.description}</p>
-
       <div class="price-row">
-        <strong>${money.format(product.price)}</strong>
-        ${product.oldPrice ? `<del>${money.format(product.oldPrice)}</del>` : ""}
+        <div class="product-price-stack">
+          <strong>${money.format(product.price)}</strong>
+          <div class="product-price-meta">
+            ${product.oldPrice ? `<del>${money.format(product.oldPrice)}</del>` : ""}
+            <span>${savings ? `Economize ${money.format(savings)}` : "Preco forte da categoria"}</span>
+          </div>
+        </div>
       </div>
 
-      <p class="product-installment">ou ${installmentCount}x de ${installmentValue} sem juros</p>
+      <p class="product-installment">ou ${installmentCount}x de ${installmentValue} sem juros no cartao</p>
 
       <div class="product-actions">
-        <button type="button" class="primary-btn" data-action="add-to-cart" data-id="${product.id}">Comprar</button>
-        <a class="secondary-btn" href="${detailsHref}">Detalhes</a>
+        <button type="button" class="primary-btn" data-action="add-to-cart" data-id="${product.id}">Comprar agora</button>
+        <a class="secondary-btn" href="${detailsHref}">Ver detalhes</a>
       </div>
 
-      <div class="product-footer-note">${product.reviews || 0} avaliacoes</div>
+      <div class="product-footer-note">
+        <span>${reviewLabel}</span>
+        <span>${footerNote}</span>
+      </div>
     </article>
   `;
 }
@@ -2258,22 +2496,22 @@ function buildCatalogMeta(totalResults, visibleResults) {
   const itemLabel = totalResults === 1 ? "item" : "itens";
 
   if (state.search && state.category !== "Todos") {
-    return `${totalResults} ${itemLabel} em ${state.category} para "${state.searchLabel}".`;
+    return `${totalResults} ${itemLabel} em ${state.category} para "${state.searchLabel}", com foco em preco, parcelamento e acao de compra.`;
   }
 
   if (state.search) {
-    return `${totalResults} ${itemLabel} encontrados para "${state.searchLabel}".`;
+    return `${totalResults} ${itemLabel} encontrados para "${state.searchLabel}" na vitrine principal da JL AXION.`;
   }
 
   if (state.category !== "Todos") {
-    return `${totalResults} ${itemLabel} disponiveis em ${state.category}.`;
+    return `${totalResults} ${itemLabel} disponiveis em ${state.category}, organizados para decidir rapido e comprar melhor.`;
   }
 
   if (visibleResults < totalResults) {
-    return `${visibleResults} itens em destaque de ${totalResults} na curadoria principal da loja.`;
+    return `${visibleResults} destaques iniciais entre ${totalResults} itens da loja para entrar pelas melhores oportunidades do momento.`;
   }
 
-  return `${totalResults} itens com curadoria premium na vitrine principal.`;
+  return `${totalResults} itens com preco forte, envio claro e leitura comercial mais objetiva.`;
 }
 
 function buildCategoryHref(category) {
@@ -2287,9 +2525,12 @@ function categoryLinkCard(category) {
   return `
     <a class="department-card department-card--link" href="${buildCategoryHref(category)}">
       <span class="department-icon">${meta.code}</span>
-      <strong>${meta.title}</strong>
-      <p>${productCount} itens com curadoria premium para ${category.toLowerCase()}.</p>
-      <span class="department-link">Abrir categoria</span>
+      <strong>${category}</strong>
+      <p>${meta.homeBenefit || `${productCount} itens com leitura mais clara para ${category.toLowerCase()}.`}</p>
+      <div class="department-card__foot">
+        <span class="department-meta-pill">${productCount} ${productCount === 1 ? "item" : "itens"}</span>
+        <span class="department-link">Ver departamento</span>
+      </div>
     </a>
   `;
 }
@@ -2299,13 +2540,57 @@ function homeCategoryCard(category) {
   const productCount = getCategoryProducts(category).length;
 
   return `
-    <button type="button" class="department-card" data-action="open-category" data-category="${category}">
-      <span class="department-icon">${meta.code}</span>
-      <strong>${category}</strong>
-      <p>${meta.subtitle}</p>
-      <span class="department-link">Ver ${productCount} ${productCount === 1 ? "item" : "itens"}</span>
+    <button type="button" class="department-card department-card--home" data-action="open-category" data-category="${category}">
+      <div class="department-card__head">
+        <span class="department-icon">${meta.code}</span>
+        <span class="department-kicker">${meta.badge}</span>
+      </div>
+      <div class="department-card__body">
+        <strong>${category}</strong>
+        <p>${meta.homeBenefit || meta.subtitle}</p>
+      </div>
+      <div class="department-card__foot">
+        <span class="department-meta-pill">${productCount} ${productCount === 1 ? "item" : "itens"}</span>
+        <span class="department-link">Comprar agora</span>
+      </div>
     </button>
   `;
+}
+
+function productSavings(product) {
+  if (typeof product.oldPrice !== "number" || product.oldPrice <= product.price) {
+    return 0;
+  }
+
+  return product.oldPrice - product.price;
+}
+
+function getPromotionalProducts() {
+  const withDiscount = PRODUCTS.filter((product) => productSavings(product) > 0);
+
+  return withDiscount.sort((a, b) => {
+    const savingsDiff = productSavings(b) - productSavings(a);
+
+    if (savingsDiff !== 0) {
+      return savingsDiff;
+    }
+
+    return (b.rating || 0) - (a.rating || 0);
+  });
+}
+
+function getProductSignals(product) {
+  const byCategory = {
+    "Casa inteligente": ["Casa conectada", "Praticidade no dia a dia"],
+    "Lampadas": ["Luz e ambiente", "Melhor para setup"],
+    "Carregadores": ["Energia organizada", "Mais vendido da categoria"],
+    "Cabos": ["Compra de reposicao", "Alta saida"],
+    "Utilidades": ["Casa e rotina", "Boa opcao para presente"],
+    "Escritorio": ["Mesa mais limpa", "Escolha para produtividade"],
+    "Som": ["Audio para setup", "Categoria de desejo"]
+  };
+
+  return byCategory[product.category] || ["Curadoria JL AXION", "Compra mais clara"];
 }
 
 function getCartProducts(cart = getCart()) {
@@ -2619,4 +2904,437 @@ function icon(name) {
   };
 
   return icons[name] || "";
+}
+
+function getCategoryPreviewProduct(category) {
+  return getCategoryProducts(category)[0] || PRODUCTS[0];
+}
+
+function getPixPrice(product) {
+  return money.format(product.price * 0.9);
+}
+
+function pickProductsByCategoryGroup(categories, limit = 4, excludeId = "") {
+  return PRODUCTS.filter((product) => categories.includes(product.category) && product.id !== excludeId).slice(0, limit);
+}
+
+function renderShell() {
+  const shell = document.querySelector("[data-site-shell]");
+
+  if (!shell) {
+    return;
+  }
+
+  const isAuthenticated = getIsAuthenticated();
+  const greetingName = getGreetingName();
+  const accountHref = isAuthenticated ? "account.html" : "login.html";
+  const accountLabel = isAuthenticated ? `Ola, ${greetingName}` : "Login";
+  const useCompactSearchCopy = runtimeData.isNativeApp || window.matchMedia("(max-width: 780px)").matches;
+  const searchPlaceholder = useCompactSearchCopy
+    ? "Buscar produtos"
+    : "Buscar carregadores, lampadas, cabos, som...";
+  const headerDepartments = getCategoryNames().slice(0, 5);
+  const drawerAccountEntry = isAuthenticated
+    ? drawerLink("account", "account.html", "Minha conta", "Perfil, pedidos e dados")
+    : drawerLink("login", "login.html", "Minha conta", "Entre para acompanhar seus pedidos");
+  const authDrawerEntry = isAuthenticated
+    ? drawerLink("account", "account.html", `Ola, ${greetingName}`, "Voltar para sua area")
+    : "";
+  const footerMarkup = `
+    <footer class="site-footer" data-global-footer>
+      <div class="site-footer__inner">
+        <div class="site-footer__block">
+          <strong>JL AXION</strong>
+          <span>Casa, setup, energia, iluminacao e utilidades em uma vitrine mais forte e mais organizada.</span>
+        </div>
+        <div class="site-footer__block">
+          <strong>Compra clara</strong>
+          <span>Preco, desconto, frete e parcelamento posicionados para ajudar a comparar e decidir rapido.</span>
+        </div>
+        <div class="site-footer__block">
+          <strong>Departamentos</strong>
+          <span>Categorias tratadas como areas reais da loja para facilitar descoberta e montagem de carrinho.</span>
+        </div>
+        <div class="site-footer__block">
+          <strong>Conta e atendimento</strong>
+          <span>Favoritos, carrinho, login, checkout e historico conectados para o fluxo ficar coeso.</span>
+        </div>
+      </div>
+    </footer>
+  `;
+
+  shell.innerHTML = `
+    <div class="top-strip">
+      <div class="top-strip__inner">
+        <span class="top-strip__item">Frete gratis acima de R$ 600</span>
+        <span class="top-strip__item">Ate 10x sem juros</span>
+        <span class="top-strip__item">Cupom AXION15 em campanhas selecionadas</span>
+        <span class="top-strip__item">Compra segura para casa, setup, energia e utilidades</span>
+      </div>
+    </div>
+
+    <header class="site-header site-header--commerce">
+      <div class="site-header__inner">
+        <div class="site-header__main">
+          <div class="brand-cluster">
+            <button type="button" class="menu-toggle" data-menu-button aria-label="Abrir menu">
+              <span class="menu-icon">
+                <span></span>
+                <span></span>
+                <span></span>
+              </span>
+            </button>
+
+            <a class="brand" href="index.html" aria-label="Ir para a home da JL AXION">
+              <img class="brand__logo" src="assets/jl-axion-lockup.svg?v=20260330i" alt="JL AXION">
+            </a>
+          </div>
+
+          <form class="site-header__search" data-site-search-form role="search" aria-label="Buscar produtos na JL AXION">
+            <label class="site-search" for="site-search-input">
+              <span class="site-search__icon" aria-hidden="true">${icon("search")}</span>
+              <input
+                id="site-search-input"
+                type="search"
+                class="site-search__input"
+                placeholder="${searchPlaceholder}"
+                autocomplete="off"
+                enterkeyhint="search"
+                value="${escapeAttribute(state.searchLabel)}"
+                data-search-input
+              >
+            </label>
+            <button type="submit" class="site-search__submit" aria-label="Buscar">
+              <span class="site-search__submit-icon" aria-hidden="true">${icon("search")}</span>
+              <span class="site-search__submit-label">Buscar</span>
+            </button>
+          </form>
+
+          <div class="header-actions">
+            <a class="action-link" href="favorites.html">
+              ${icon("heart")}
+              <span>Favoritos</span>
+              <span class="count-badge" data-favorites-count>0</span>
+            </a>
+            <a class="action-link" href="cart.html">
+              ${icon("cart")}
+              <span>Carrinho</span>
+              <span class="count-badge" data-cart-count>0</span>
+            </a>
+            <a class="action-link action-link--account" href="${accountHref}" data-account-entry>
+              ${icon("user")}
+              <span data-account-entry-label>${accountLabel}</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="site-header__lower">
+          <nav class="shop-nav" aria-label="Navegacao comercial">
+            <a class="shop-nav__pill${document.body.dataset.page === "promotions" ? " is-active" : ""}" href="promotions.html">Ofertas do dia</a>
+            <a class="shop-nav__link${document.body.dataset.page === "home" ? " is-active" : ""}" href="index.html">Inicio</a>
+            ${headerDepartments.map((category) => `
+              <a class="shop-nav__link" href="${buildCategoryHref(category)}">${category}</a>
+            `).join("")}
+          </nav>
+          <div class="header-note">
+            <strong>Preco forte, campanhas claras e descoberta rapida</strong>
+            <span>Busca protagonista, departamentos organizados e vitrine mais proxima de varejo tech real.</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="drawer-overlay" data-menu-overlay></div>
+
+    <aside class="drawer" data-menu-drawer aria-hidden="true">
+      <div class="drawer__header">
+        <a class="brand" href="index.html">
+          <img class="brand__logo" src="assets/jl-axion-lockup.svg?v=20260330i" alt="JL AXION">
+        </a>
+        <button type="button" class="icon-button drawer__close" data-menu-close aria-label="Fechar menu">
+          ${icon("close")}
+        </button>
+      </div>
+
+      <div class="drawer__hero">
+        <span class="eyebrow">Menu JL AXION</span>
+        <h2>Entre por ofertas, departamentos e atalhos de compra.</h2>
+        <p>Use o menu para ir direto para campanhas do dia, categorias mais vendidas e paginas da sua jornada.</p>
+        <a class="primary-btn primary-btn--full" href="promotions.html">Ver ofertas do dia</a>
+      </div>
+
+      <div class="drawer__section">
+        <h2>Acesso rapido</h2>
+        <div class="drawer-link-list">
+          ${drawerLink("home", "index.html", "Inicio", "Home, departamentos e vitrines")}
+          ${drawerLink("promotions", "promotions.html", "Promocoes", "Cupons, combos e ofertas do dia")}
+          ${drawerLink("favorites", "favorites.html", "Favoritos", "Salve itens e volte depois")}
+          ${drawerLink("cart", "cart.html", "Carrinho", "Resumo e andamento da compra")}
+          ${drawerAccountEntry}
+          ${authDrawerEntry}
+        </div>
+      </div>
+
+      <div class="drawer__section">
+        <h2>Departamentos</h2>
+        <div class="drawer-category-list">
+          ${getCategoryNames().map((category) => drawerCategoryCard(category)).join("")}
+        </div>
+      </div>
+
+      <div class="drawer__meta-card">
+        <span class="eyebrow">Campanha ativa</span>
+        <h2>AXION15 + frete gratis</h2>
+        <p>Combine carregadores, lampadas, escritorio e utilidades para montar um pedido com mais valor.</p>
+      </div>
+    </aside>
+  `;
+
+  mountGlobalFooter(footerMarkup);
+  updateCounts();
+  updateProfileText();
+}
+
+function drawerCategoryCard(category) {
+  const meta = getCategoryMeta(category);
+  const previewProduct = getCategoryPreviewProduct(category);
+  const productCount = getCategoryProducts(category).length;
+
+  return `
+    <a class="drawer-category-item" href="${buildCategoryHref(category)}">
+      <span class="drawer-category-item__icon">${meta.code}</span>
+      <span class="drawer-category-item__copy">
+        <strong>${category}</strong>
+        <small>${meta.homeBenefit || meta.badge}</small>
+      </span>
+      <span class="drawer-category-item__meta">${productCount} ${productCount === 1 ? "item" : "itens"}</span>
+      <img class="drawer-category-item__thumb" src="${previewProduct.image}" alt="${category}">
+    </a>
+  `;
+}
+
+function categoryLinkCard(category) {
+  const meta = getCategoryMeta(category);
+  const previewProduct = getCategoryPreviewProduct(category);
+  const productCount = getCategoryProducts(category).length;
+
+  return `
+    <a class="department-card department-card--link department-card--commerce" href="${buildCategoryHref(category)}">
+      <div class="department-card__media">
+        <img src="${previewProduct.image}" alt="${category}">
+      </div>
+      <div class="department-card__body">
+        <span class="department-kicker">${meta.badge}</span>
+        <strong>${category}</strong>
+        <p>${meta.homeBenefit || meta.subtitle}</p>
+      </div>
+      <div class="department-card__foot">
+        <span class="department-meta-pill">${productCount} ${productCount === 1 ? "item" : "itens"}</span>
+        <span class="department-link">Ver categoria</span>
+      </div>
+    </a>
+  `;
+}
+
+function homeCategoryCard(category) {
+  const meta = getCategoryMeta(category);
+  const previewProduct = getCategoryPreviewProduct(category);
+  const productCount = getCategoryProducts(category).length;
+
+  return `
+    <button type="button" class="department-card department-card--home department-card--commerce" data-action="open-category" data-category="${category}">
+      <div class="department-card__media">
+        <img src="${previewProduct.image}" alt="${category}">
+      </div>
+      <div class="department-card__body">
+        <span class="department-kicker">${meta.badge}</span>
+        <strong>${category}</strong>
+        <p>${meta.homeBenefit || meta.subtitle}</p>
+      </div>
+      <div class="department-card__foot">
+        <span class="department-meta-pill">${productCount} ${productCount === 1 ? "item" : "itens"}</span>
+        <span class="department-link">Comprar agora</span>
+      </div>
+    </button>
+  `;
+}
+
+function productCard(product, options = {}) {
+  const favorites = getFavorites();
+  const isFavorite = favorites.includes(product.id);
+  const discount = typeof product.oldPrice === "number" && product.oldPrice > product.price
+    ? percentage(product.oldPrice, product.price)
+    : 0;
+  const installmentCount = product.price >= 300 ? 10 : 6;
+  const installmentValue = money.format(product.price / installmentCount);
+  const detailsHref = `product.html?id=${encodeURIComponent(product.id)}`;
+  const [primarySignal, secondarySignal] = getProductSignals(product);
+  const reviewCount = product.reviews || 0;
+  const pixPrice = getPixPrice(product);
+
+  return `
+    <article class="product-card product-card--commerce${options.compact ? " product-card--compact" : ""}${options.promo ? " product-card--promo" : ""}">
+      <div class="product-media-wrap">
+        <a class="product-media" href="${detailsHref}" aria-label="Abrir detalhes de ${product.name}">
+          <div class="product-media__flag-row">
+            <span class="product-badge">${options.promo && discount ? `-${discount}% OFF` : product.badge}</span>
+            <span class="product-shipping-tag">${product.shipping || "Envio rapido"}</span>
+          </div>
+          <img src="${product.image}" alt="${product.name}">
+        </a>
+
+        <button type="button" class="icon-button product-favorite${isFavorite ? " is-active" : ""}" data-action="toggle-favorite" data-id="${product.id}" aria-label="Favoritar ${product.name}">
+          ${icon("heart")}
+        </button>
+      </div>
+
+      <div class="product-copy-stack">
+        <span class="product-category">${product.category}</span>
+        <h3><a class="product-title-link" href="${detailsHref}">${product.name}</a></h3>
+        <p class="product-description">${product.description}</p>
+      </div>
+
+      <div class="product-signal-row">
+        <span class="product-signal product-signal--accent">${primarySignal}</span>
+        <span class="product-signal">${secondarySignal}</span>
+      </div>
+
+      <div class="product-meta-row">
+        <span class="rating-pill">${String(product.rating || 4.8).replace(".", ",")} &#9733;</span>
+        <span class="product-meta-note">${reviewCount} ${reviewCount === 1 ? "avaliacao" : "avaliacoes"}</span>
+      </div>
+
+      <div class="price-row">
+        <div class="price-row__stack">
+          <strong>${money.format(product.price)}</strong>
+          ${product.oldPrice ? `<del>${money.format(product.oldPrice)}</del>` : ""}
+        </div>
+        <span class="price-row__pix">ou ${pixPrice} no PIX</span>
+      </div>
+
+      <p class="product-installment">em ate ${installmentCount}x de ${installmentValue} sem juros</p>
+
+      <div class="product-actions">
+        <button type="button" class="primary-btn" data-action="add-to-cart" data-id="${product.id}">Comprar</button>
+        <a class="secondary-btn" href="${detailsHref}">Detalhes</a>
+      </div>
+    </article>
+  `;
+}
+
+function renderHomeProducts() {
+  const container = document.querySelector("[data-featured-products]");
+  const meta = document.querySelector("[data-catalog-meta]");
+
+  if (!container) {
+    return;
+  }
+
+  const results = PRODUCTS.filter((product) => {
+    const matchesCategory = state.category === "Todos" || product.category === state.category;
+    const needle = `${product.name} ${product.category} ${product.description}`.toLowerCase();
+    const matchesSearch = !state.search || needle.includes(state.search);
+    return matchesCategory && matchesSearch;
+  });
+
+  updateCategoryButtons();
+
+  if (!results.length) {
+    if (meta) {
+      meta.textContent = "Nenhum produto combinou com os filtros atuais.";
+    }
+
+    container.innerHTML = emptyState(
+      "Nenhum produto encontrado",
+      "Ajuste os filtros ou volte para todos os departamentos.",
+      '<button type="button" class="secondary-btn" data-action="clear-search">Limpar filtros</button>'
+    );
+    return;
+  }
+
+  const visibleResults = !state.search && state.category === "Todos"
+    ? results.slice(0, 4)
+    : results.slice(0, 8);
+
+  if (meta) {
+    meta.textContent = buildCatalogMeta(results.length, visibleResults.length);
+  }
+
+  container.innerHTML = visibleResults.map((product) => productCard(product, { promo: true })).join("");
+}
+
+function renderHomeCollections() {
+  const categoryContainer = document.querySelector("[data-home-categories]");
+  const filterContainer = document.querySelector("[data-home-filters]");
+
+  if (categoryContainer) {
+    categoryContainer.innerHTML = getCategoryNames().map((category) => homeCategoryCard(category)).join("");
+  }
+
+  if (filterContainer) {
+    filterContainer.innerHTML = [
+      '<button type="button" class="filter-chip" data-action="set-category" data-category="Todos">Todos</button>',
+      ...getCategoryNames().map((category) => `<button type="button" class="filter-chip" data-action="set-category" data-category="${category}">${category}</button>`)
+    ].join("");
+  }
+}
+
+function renderHomeShelves() {
+  const livingContainer = document.querySelector("[data-home-living-products]");
+  const techContainer = document.querySelector("[data-home-tech-products]");
+
+  if (livingContainer) {
+    livingContainer.innerHTML = pickProductsByCategoryGroup(["Lampadas", "Utilidades", "Casa inteligente"], 4).map((product) => productCard(product, { compact: true })).join("");
+  }
+
+  if (techContainer) {
+    techContainer.innerHTML = pickProductsByCategoryGroup(["Carregadores", "Cabos", "Escritorio", "Som"], 4).map((product) => productCard(product, { compact: true })).join("");
+  }
+}
+
+function renderPromotionProducts() {
+  const container = document.querySelector("[data-promo-products]");
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = getPromotionalProducts().slice(0, 8).map((product) => productCard(product, { promo: true })).join("");
+}
+
+function buildCatalogMeta(totalResults, visibleResults) {
+  const itemLabel = totalResults === 1 ? "item" : "itens";
+
+  if (state.search && state.category !== "Todos") {
+    return `${totalResults} ${itemLabel} em ${state.category} para "${state.searchLabel}".`;
+  }
+
+  if (state.search) {
+    return `${totalResults} ${itemLabel} encontrados para "${state.searchLabel}".`;
+  }
+
+  if (state.category !== "Todos") {
+    return `${totalResults} ${itemLabel} em ${state.category} com preco, envio e CTA mais claros.`;
+  }
+
+  if (visibleResults < totalResults) {
+    return `${visibleResults} destaques entre ${totalResults} itens da vitrine principal.`;
+  }
+
+  return `${totalResults} ${itemLabel} organizados por preco, envio e oportunidade.`;
+}
+
+function renderAll() {
+  updateCounts();
+  updateProfileText();
+  renderHomeCollections();
+  renderHomeProducts();
+  renderHomeShelves();
+  renderPromotionProducts();
+  renderCartPage();
+  renderFavoritePage();
+  renderAccountPage();
+  renderCategoryPage();
+  renderCheckoutPage();
+  renderProductPage();
 }

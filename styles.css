@@ -5480,6 +5480,12 @@ body.native-app .site-header__lower {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(8, 11, 16, 0.94);
   backdrop-filter: blur(18px);
+  transition: transform 0.26s ease, opacity 0.22s ease, box-shadow 0.22s ease;
+}
+
+.site-header.is-hidden {
+  transform: translateY(calc(-100% - 8px));
+  opacity: 0.98;
 }
 
 .site-header__inner {

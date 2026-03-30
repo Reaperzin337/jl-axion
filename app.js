@@ -1501,8 +1501,19 @@ function setWhatsappFloatVisibility(visible) {
   element.classList.toggle("is-hidden", !visible);
 }
 
+function setHeaderVisibility(visible) {
+  const header = document.querySelector(".site-header");
+
+  if (!header) {
+    return;
+  }
+
+  header.classList.toggle("is-hidden", !visible);
+}
+
 function syncWhatsappFloatState() {
   setWhatsappFloatVisibility((window.scrollY || 0) < 80);
+  setHeaderVisibility(true);
 }
 
 function handleWhatsappFloatScroll() {
@@ -1514,8 +1525,10 @@ function handleWhatsappFloatScroll() {
 
   const isScrollingUp = currentY < whatsappLastY;
   const shouldShow = currentY < 80 || isScrollingUp;
+  const shouldShowHeader = currentY < 120 || isScrollingUp;
 
   setWhatsappFloatVisibility(shouldShow);
+  setHeaderVisibility(shouldShowHeader);
   whatsappLastY = currentY;
 }
 

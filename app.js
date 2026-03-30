@@ -369,6 +369,7 @@ const runtimeData = {
 
 let whatsappScrollBound = false;
 let whatsappLastY = 0;
+let topbarResizeBound = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
   applyEnvironmentClasses();
@@ -1511,6 +1512,16 @@ function setHeaderVisibility(visible) {
   header.classList.toggle("is-hidden", !visible);
 }
 
+function syncTopbarSpacer() {
+  const topbar = document.querySelector(".site-topbar");
+
+  if (!topbar) {
+    return;
+  }
+
+  document.documentElement.style.setProperty("--site-topbar-height", `${topbar.offsetHeight}px`);
+}
+
 function syncWhatsappFloatState() {
   setWhatsappFloatVisibility((window.scrollY || 0) < 80);
   setHeaderVisibility(true);
@@ -1534,7 +1545,13 @@ function handleWhatsappFloatScroll() {
 
 function bindWhatsappFloat() {
   whatsappLastY = window.scrollY || 0;
+  syncTopbarSpacer();
   syncWhatsappFloatState();
+
+  if (!topbarResizeBound) {
+    topbarResizeBound = true;
+    window.addEventListener("resize", syncTopbarSpacer, { passive: true });
+  }
 
   if (whatsappScrollBound) {
     return;
@@ -3108,6 +3125,7 @@ function renderShell() {
       </div>
       </header>
     </div>
+    <div class="site-topbar-spacer" aria-hidden="true"></div>
 
     <div class="drawer-overlay" data-menu-overlay></div>
 

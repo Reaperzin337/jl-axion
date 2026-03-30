@@ -5474,8 +5474,10 @@ body.native-app .site-header__lower {
 }
 
 .site-topbar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 40;
   transition: transform 0.26s ease, opacity 0.22s ease;
 }
@@ -5483,6 +5485,10 @@ body.native-app .site-header__lower {
 .site-topbar.is-hidden {
   transform: translateY(calc(-100% - 8px));
   opacity: 0.98;
+}
+
+.site-topbar-spacer {
+  height: var(--site-topbar-height, 148px);
 }
 
 .site-header {

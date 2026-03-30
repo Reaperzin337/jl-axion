@@ -532,11 +532,14 @@ async function startServer() {
 
   app.get("/api/auth/session", async (req, res, next) => {
     try {
-      const user = await getProfile(req.currentUserId);
+      const user = req.session.isAuthenticated
+        ? await getProfile(req.currentUserId)
+        : await getProfile(defaultUserId);
       res.json({
         isAuthenticated: Boolean(req.session.isAuthenticated),
-        isAdmin: user.role === "admin",
-        user
+        isAdmin: Boolean(req.session.isAuthenticated && user.role === "admin"),
+        user: req.session.isAuthenticated ? user : null,
+        guest: req.session.isAuthenticated ? null : user
       });
     } catch (error) {
       next(error);
@@ -584,7 +587,13 @@ async function startServer() {
         return;
       }
 
-      const matches = await bcrypt.compare(password, user.password_hash);
+      let matches = false;
+
+      try {
+        matches = await bcrypt.compare(password, user.password_hash);
+      } catch (_error) {
+        matches = false;
+      }
 
       if (!matches) {
         res.status(401).json({ message: "Senha incorreta." });
@@ -603,11 +612,14 @@ async function startServer() {
 
   app.get("/api/admin/session", async (req, res, next) => {
     try {
-      const user = await getProfile(req.currentUserId);
+      const user = req.session.isAuthenticated
+        ? await getProfile(req.currentUserId)
+        : await getProfile(defaultUserId);
       res.json({
         isAuthenticated: Boolean(req.session.isAuthenticated),
-        isAdmin: user.role === "admin",
-        user
+        isAdmin: Boolean(req.session.isAuthenticated && user.role === "admin"),
+        user: req.session.isAuthenticated ? user : null,
+        guest: req.session.isAuthenticated ? null : user
       });
     } catch (error) {
       next(error);
@@ -1422,6 +1434,7 @@ async function initializeDatabase() {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(email) DO UPDATE SET
        name = excluded.name,
+       password_hash = excluded.password_hash,
        role = excluded.role,
        phone = excluded.phone,
        city = excluded.city,
@@ -1446,6 +1459,7 @@ async function initializeDatabase() {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(email) DO UPDATE SET
        name = excluded.name,
+       password_hash = excluded.password_hash,
        role = excluded.role`,
     ADMIN_SEED.name,
     ADMIN_SEED.email,

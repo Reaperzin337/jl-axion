@@ -747,6 +747,24 @@ function renderShell() {
   const authDrawerEntry = isAuthenticated
     ? drawerLink("account", "account.html", `Ola, ${greetingName}`, "Perfil, pedidos e dados salvos")
     : "";
+  const footerMarkup = `
+    <footer class="site-footer" data-global-footer>
+      <div class="site-footer__inner">
+        <div>
+          <strong>JL AXION</strong>
+          <span>Utilidades e tecnologia com foco em casa, setup, energia, iluminacao e rotina premium.</span>
+        </div>
+        <div>
+          <strong>Compra simples</strong>
+          <span>Escolha a categoria, explore os produtos, salve favoritos e finalize com clareza.</span>
+        </div>
+        <div>
+          <strong>Entrega e ofertas</strong>
+          <span>Promocoes, frete vantajoso e textos pensados para guiar sem poluir a experiencia.</span>
+        </div>
+      </div>
+    </footer>
+  `;
 
   shell.innerHTML = `
     <div class="top-strip">
@@ -860,27 +878,23 @@ function renderShell() {
         <p>Use o cupom em utilidades e iluminacao selecionadas para compor pedidos mais completos com melhor custo.</p>
       </div>
     </aside>
-
-    <footer class="site-footer">
-      <div class="site-footer__inner">
-        <div>
-          <strong>JL AXION</strong>
-          <span>Utilidades e tecnologia com foco em casa, setup, energia, iluminacao e rotina premium.</span>
-        </div>
-        <div>
-          <strong>Compra simples</strong>
-          <span>Escolha a categoria, explore os produtos, salve favoritos e finalize com clareza.</span>
-        </div>
-        <div>
-          <strong>Entrega e ofertas</strong>
-          <span>Promocoes, frete vantajoso e textos pensados para guiar sem poluir a experiencia.</span>
-        </div>
-      </div>
-    </footer>
   `;
 
+  mountGlobalFooter(footerMarkup);
   updateCounts();
   updateProfileText();
+}
+
+function mountGlobalFooter(markup) {
+  document.querySelector("[data-global-footer]")?.remove();
+  const main = document.querySelector("main.page, main");
+
+  if (main) {
+    main.insertAdjacentHTML("afterend", markup);
+    return;
+  }
+
+  document.body.insertAdjacentHTML("beforeend", markup);
 }
 
 function navLink(page, href, label) {

@@ -3098,7 +3098,7 @@ function renderShell() {
 
     <a
       class="whatsapp-float"
-      href="https://wa.me/5511999990000?text=Ola%2C%20vim%20pela%20JL%20AXION%20e%20quero%20ajuda%20com%20um%20pedido."
+      href="https://wa.me/5519989994528?text=Ola%2C%20vim%20pela%20JL%20AXION%20e%20quero%20ajuda%20com%20um%20pedido."
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Falar com a JL AXION no WhatsApp"

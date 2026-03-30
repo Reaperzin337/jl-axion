@@ -2900,6 +2900,13 @@ function icon(name) {
       <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M7.15 7.15 16.85 16.85M16.85 7.15 7.15 16.85" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
       </svg>
+    `,
+    whatsapp: `
+      <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12.02 3.9c4.52 0 8.2 3.5 8.2 7.83 0 4.32-3.68 7.83-8.2 7.83-1.2 0-2.33-.24-3.35-.68l-4.01 1.22 1.32-3.74c-.75-1.1-1.16-2.42-1.16-3.85 0-4.33 3.68-7.83 8.2-7.83Z" fill="currentColor" fill-opacity="0.13"/>
+        <path d="M12.02 3.9c4.52 0 8.2 3.5 8.2 7.83 0 4.32-3.68 7.83-8.2 7.83-1.2 0-2.33-.24-3.35-.68l-4.01 1.22 1.32-3.74c-.75-1.1-1.16-2.42-1.16-3.85 0-4.33 3.68-7.83 8.2-7.83Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M9.3 8.9c-.22-.48-.45-.49-.66-.5-.17 0-.37-.01-.56-.01-.2 0-.53.08-.81.38-.28.3-1.06 1-1.06 2.45s1.08 2.86 1.23 3.05c.15.19 2.12 3.28 5.23 4.46 2.57.97 3.1.78 3.65.73.56-.06 1.8-.74 2.05-1.46.25-.72.25-1.34.18-1.46-.07-.12-.26-.19-.54-.33-.28-.14-1.66-.83-1.91-.92-.25-.09-.44-.14-.62.15-.18.29-.71.92-.87 1.11-.16.19-.32.21-.6.07-.28-.14-1.17-.42-2.23-1.33-.83-.72-1.39-1.61-1.55-1.88-.16-.28-.02-.43.12-.57.13-.12.28-.32.42-.48.14-.17.19-.29.28-.49.09-.19.05-.36-.02-.5-.07-.14-.63-1.54-.87-2.09Z" fill="currentColor"/>
+      </svg>
     `
   };
 
@@ -3088,6 +3095,18 @@ function renderShell() {
         <p>Combine carregadores, lampadas, escritorio e utilidades para montar um pedido com mais valor.</p>
       </div>
     </aside>
+
+    <a
+      class="whatsapp-float"
+      href="https://wa.me/5511999990000?text=Ola%2C%20vim%20pela%20JL%20AXION%20e%20quero%20ajuda%20com%20um%20pedido."
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Falar com a JL AXION no WhatsApp"
+      title="Atendimento no WhatsApp"
+    >
+      ${icon("whatsapp")}
+      <span>WhatsApp</span>
+    </a>
   `;
 
   mountGlobalFooter(footerMarkup);

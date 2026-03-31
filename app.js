@@ -3657,6 +3657,9 @@ function renderAccountPage() {
   const orderList = document.querySelector("[data-order-list]");
   const accountForm = document.querySelector("[data-account-form]");
   const authActions = document.querySelector("[data-account-auth-actions]");
+  const profileLink = document.querySelector("[data-account-profile-link]");
+  const overviewTitle = document.querySelector("[data-account-overview-title]");
+  const overviewSubtitle = document.querySelector("[data-account-overview-subtitle]");
   const latestOrder = document.querySelector("[data-account-latest-order]");
   const addressCard = document.querySelector("[data-account-address-card]");
   const walletCard = document.querySelector("[data-account-wallet]");
@@ -3671,6 +3674,18 @@ function renderAccountPage() {
   const isAuthenticated = getIsAuthenticated();
 
   if (!isAuthenticated) {
+    if (profileLink) {
+      profileLink.hidden = true;
+    }
+
+    if (overviewTitle) {
+      overviewTitle.textContent = "Entre na sua conta";
+    }
+
+    if (overviewSubtitle) {
+      overviewSubtitle.textContent = "Use seu e-mail e senha para acompanhar pedidos, dados e enderecos com mais praticidade.";
+    }
+
     if (authActions) {
       authActions.innerHTML = '<a class="primary-btn" href="login.html">Entrar agora</a>';
     }
@@ -3738,11 +3753,24 @@ function renderAccountPage() {
     return;
   }
 
+  const profile = getProfile();
+
+  if (profileLink) {
+    profileLink.hidden = false;
+  }
+
+  if (overviewTitle) {
+    overviewTitle.innerHTML = `Bem-vindo, <span>${escapeHtml(profile.name || "Cliente JL AXION")}</span>`;
+  }
+
+  if (overviewSubtitle) {
+    overviewSubtitle.textContent = profile.email || "cliente@jlaxion.com.br";
+  }
+
   if (authActions) {
     authActions.innerHTML = '<button type="button" class="ghost-btn" data-action="logout">Sair</button>';
   }
 
-  const profile = getProfile();
   const orders = getOrders();
   const latest = orders[0] || null;
 
@@ -3963,6 +3991,9 @@ function renderAccountPage() {
   const root = document.querySelector("[data-account-root]");
   const orderList = document.querySelector("[data-order-list]");
   const authActions = document.querySelector("[data-account-auth-actions]");
+  const profileLink = document.querySelector("[data-account-profile-link]");
+  const overviewTitle = document.querySelector("[data-account-overview-title]");
+  const overviewSubtitle = document.querySelector("[data-account-overview-subtitle]");
   const latestOrder = document.querySelector("[data-account-latest-order]");
 
   if (!root || !orderList) {
@@ -3970,6 +4001,18 @@ function renderAccountPage() {
   }
 
   if (!getIsAuthenticated()) {
+    if (profileLink) {
+      profileLink.hidden = true;
+    }
+
+    if (overviewTitle) {
+      overviewTitle.textContent = "Entre na sua conta";
+    }
+
+    if (overviewSubtitle) {
+      overviewSubtitle.textContent = "Use seu e-mail e senha para acompanhar pedidos, dados e enderecos com mais praticidade.";
+    }
+
     if (authActions) {
       authActions.innerHTML = '<a class="primary-btn" href="login.html">Entrar agora</a>';
     }
@@ -3988,6 +4031,20 @@ function renderAccountPage() {
       '<a class="secondary-btn" href="login.html">Fazer login</a>'
     );
     return;
+  }
+
+  const profile = getProfile();
+
+  if (profileLink) {
+    profileLink.hidden = false;
+  }
+
+  if (overviewTitle) {
+    overviewTitle.innerHTML = `Bem-vindo, <span>${escapeHtml(profile.name || DEFAULT_PROFILE.name)}</span>`;
+  }
+
+  if (overviewSubtitle) {
+    overviewSubtitle.textContent = profile.email || DEFAULT_PROFILE.email;
   }
 
   if (authActions) {
@@ -4406,6 +4463,9 @@ function renderAccountPage() {
   const root = document.querySelector("[data-account-root]");
   const orderList = document.querySelector("[data-order-list]");
   const authActions = document.querySelector("[data-account-auth-actions]");
+  const profileLink = document.querySelector("[data-account-profile-link]");
+  const overviewTitle = document.querySelector("[data-account-overview-title]");
+  const overviewSubtitle = document.querySelector("[data-account-overview-subtitle]");
   const latestOrder = document.querySelector("[data-account-latest-order]");
 
   if (!root || !orderList) {
@@ -4413,6 +4473,18 @@ function renderAccountPage() {
   }
 
   if (!getIsAuthenticated()) {
+    if (profileLink) {
+      profileLink.hidden = true;
+    }
+
+    if (overviewTitle) {
+      overviewTitle.textContent = "Entre na sua conta";
+    }
+
+    if (overviewSubtitle) {
+      overviewSubtitle.textContent = "Use seu e-mail e senha para acompanhar pedidos, dados e enderecos com mais praticidade.";
+    }
+
     if (authActions) {
       authActions.innerHTML = '<a class="primary-btn" href="login.html">Entrar agora</a>';
     }
@@ -4431,6 +4503,20 @@ function renderAccountPage() {
       '<a class="secondary-btn" href="login.html">Fazer login</a>'
     );
     return;
+  }
+
+  const profile = getProfile();
+
+  if (profileLink) {
+    profileLink.hidden = false;
+  }
+
+  if (overviewTitle) {
+    overviewTitle.innerHTML = `Bem-vindo, <span>${escapeHtml(profile.name || DEFAULT_PROFILE.name)}</span>`;
+  }
+
+  if (overviewSubtitle) {
+    overviewSubtitle.textContent = profile.email || DEFAULT_PROFILE.email;
   }
 
   if (authActions) {

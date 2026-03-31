@@ -8400,6 +8400,24 @@ body::after {
     overflow-x: hidden;
   }
 
+  .top-strip {
+    display: none;
+  }
+
+  main,
+  .page,
+  .section,
+  .site-topbar,
+  .site-header__inner,
+  .site-header__main,
+  .site-header__lower,
+  .commerce-hero,
+  .promo-hero,
+  .offer-hub,
+  .drawer {
+    max-width: 100%;
+  }
+
   .page,
   .site-header__inner,
   .top-strip__inner {
@@ -8424,6 +8442,7 @@ body::after {
     grid-area: brand;
     gap: 10px;
     min-width: 0;
+    overflow: hidden;
   }
 
   .site-header__search {
@@ -8489,6 +8508,8 @@ body::after {
 
   .brand__logo {
     height: 54px;
+    width: auto;
+    max-width: min(100%, 220px);
   }
 
   .menu-toggle {
@@ -8508,6 +8529,9 @@ body::after {
     overflow-x: auto;
     padding-bottom: 2px;
     scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
   }
 
   .shop-nav::-webkit-scrollbar {
@@ -8758,15 +8782,16 @@ body::after {
   body[data-page="promotions"] .product-grid--commerce,
   body[data-page="product"] .product-grid--compact,
   body[data-page="cart"] .product-grid--compact {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(240px, 84vw);
-    grid-template-columns: none;
+    display: flex;
+    flex-wrap: nowrap;
     overflow-x: auto;
     gap: 12px;
-    padding: 2px 2px 10px;
+    padding: 2px 2px 12px;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
   }
 
   body[data-page="home"] .department-grid--commerce::-webkit-scrollbar,
@@ -8782,7 +8807,9 @@ body::after {
   body[data-page="promotions"] .product-grid--commerce > *,
   body[data-page="product"] .product-grid--compact > *,
   body[data-page="cart"] .product-grid--compact > * {
-    width: 100%;
+    flex: 0 0 min(84vw, 286px);
+    width: min(84vw, 286px);
+    min-width: 0;
     scroll-snap-align: start;
   }
 

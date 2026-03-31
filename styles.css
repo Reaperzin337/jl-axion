@@ -9573,3 +9573,303 @@ html[data-theme="light"] .auth-google {
     display: inline-flex !important;
   }
 }
+
+html[data-theme="light"] .site-topbar,
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .site-header__lower,
+html[data-theme="light"] .drawer,
+html[data-theme="light"] .site-footer {
+  background:
+    linear-gradient(180deg, rgba(11, 18, 29, 0.94), rgba(15, 23, 37, 0.94));
+  border-color: rgba(104, 144, 191, 0.14);
+}
+
+html[data-theme="light"] .top-strip__inner,
+html[data-theme="light"] .top-strip__item,
+html[data-theme="light"] .header-note strong,
+html[data-theme="light"] .header-note span,
+html[data-theme="light"] .brand,
+html[data-theme="light"] .drawer__hero h2,
+html[data-theme="light"] .drawer__hero p,
+html[data-theme="light"] .drawer__section h2,
+html[data-theme="light"] .site-footer__block strong,
+html[data-theme="light"] .site-footer__block span {
+  color: #eef5ff;
+}
+
+html[data-theme="light"] .site-search,
+html[data-theme="light"] .action-link,
+html[data-theme="light"] .shop-nav__link,
+html[data-theme="light"] .shop-nav__pill {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(242, 247, 255, 0.94));
+  color: #10233a;
+}
+
+html[data-theme="light"] .site-search__submit,
+html[data-theme="light"] .primary-btn {
+  box-shadow: 0 14px 28px rgba(30, 126, 255, 0.18);
+}
+
+html[data-theme="light"] .commerce-hero__main,
+html[data-theme="light"] .promo-hero__main,
+html[data-theme="light"] .offer-hub__spotlight,
+html[data-theme="light"] .offer-hub__products,
+html[data-theme="light"] .hero-showcase-card,
+html[data-theme="light"] .promo-showcase,
+html[data-theme="light"] .campaign-banner,
+html[data-theme="light"] .campaign-card--dark,
+html[data-theme="light"] .membership-card {
+  background:
+    linear-gradient(180deg, rgba(16, 25, 39, 0.98), rgba(20, 31, 47, 0.98));
+  border-color: rgba(84, 140, 214, 0.18);
+  box-shadow: 0 20px 40px rgba(10, 22, 37, 0.16);
+}
+
+html[data-theme="light"] .commerce-hero__copy h1,
+html[data-theme="light"] .promo-hero__copy h1,
+html[data-theme="light"] .offer-hub__spotlight h2,
+html[data-theme="light"] .hero-showcase-card__copy strong,
+html[data-theme="light"] .promo-showcase__copy strong,
+html[data-theme="light"] .campaign-banner__copy strong,
+html[data-theme="light"] .membership-card h2 {
+  color: #f5f8fd;
+}
+
+html[data-theme="light"] .commerce-hero__copy p,
+html[data-theme="light"] .promo-hero__copy p,
+html[data-theme="light"] .offer-hub__spotlight p,
+html[data-theme="light"] .hero-showcase-card__copy p,
+html[data-theme="light"] .promo-showcase__copy p,
+html[data-theme="light"] .hero-showcase-card__price span,
+html[data-theme="light"] .hero-perks span {
+  color: #a7bad2;
+}
+
+html[data-theme="light"] .hero-showcase-card__price strong,
+html[data-theme="light"] .promo-showcase__price strong,
+html[data-theme="light"] .offer-hub__price strong {
+  color: #ffffff;
+}
+
+html[data-theme="light"] .section-heading h2,
+html[data-theme="light"] .section-heading--commerce h2,
+html[data-theme="light"] .section-heading--stacked h2,
+html[data-theme="light"] .account-center__intro h1,
+html[data-theme="light"] .page-hero h1,
+html[data-theme="light"] .page-hero h2 {
+  color: #12243a;
+}
+
+html[data-theme="light"] .department-card--commerce,
+html[data-theme="light"] .product-card--commerce,
+html[data-theme="light"] .product-card,
+html[data-theme="light"] .department-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(243, 248, 255, 0.98));
+  border-color: rgba(104, 144, 191, 0.16);
+}
+
+html[data-theme="light"] .department-card strong,
+html[data-theme="light"] .product-card strong,
+html[data-theme="light"] .product-copy strong,
+html[data-theme="light"] .product-title,
+html[data-theme="light"] .product-price__primary,
+html[data-theme="light"] .price-block__primary {
+  color: #12243a;
+}
+
+html[data-theme="light"] .department-card p,
+html[data-theme="light"] .product-card p,
+html[data-theme="light"] .product-copy p,
+html[data-theme="light"] .price-block__secondary,
+html[data-theme="light"] .product-price__secondary {
+  color: #617690;
+}
+
+html[data-theme="light"] .product-signal,
+html[data-theme="light"] .department-meta-pill,
+html[data-theme="light"] .category-row--filters > *,
+html[data-theme="light"] .hero-perks span {
+  background: rgba(29, 147, 255, 0.08);
+  border-color: rgba(29, 147, 255, 0.14);
+  color: #245074;
+}
+
+html[data-theme="light"] .auth-stage h1,
+html[data-theme="light"] .auth-card h2,
+html[data-theme="light"] .auth-logged-card__summary strong {
+  color: #11243b;
+}
+
+html[data-theme="light"] .auth-stage p,
+html[data-theme="light"] .auth-card p,
+html[data-theme="light"] .auth-logged-card__summary span {
+  color: #62758f;
+}
+
+html[data-theme="light"] {
+  --bg: #e6edf7;
+  --bg-deep: #f6f9fd;
+  --bg-mid: #edf3fa;
+  --bg-surface: #ffffff;
+  --surface: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(246, 250, 255, 0.95));
+  --border: rgba(88, 121, 162, 0.18);
+  --text: #14263c;
+  --muted: #5f7590;
+  --primary: #167ff2;
+  --secondary: #f38c24;
+  --accent: #102239;
+  --warning: #fff1df;
+  --primary-ink: #f8fbff;
+  --secondary-ink: #352008;
+  --shadow: 0 20px 44px rgba(46, 79, 120, 0.1);
+}
+
+html[data-theme="light"] body {
+  color: var(--text);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(var(--glow-blue), 0.1), transparent 22%),
+    radial-gradient(circle at 92% 18%, rgba(var(--glow-orange), 0.07), transparent 18%),
+    linear-gradient(180deg, #f9fbff 0%, #edf3fa 42%, #e7eef7 100%);
+}
+
+html[data-theme="light"] body::before {
+  opacity: 0.05;
+}
+
+html[data-theme="light"] body::after {
+  opacity: 0.08;
+}
+
+html[data-theme="light"] .site-topbar,
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .site-header__lower,
+html[data-theme="light"] .drawer,
+html[data-theme="light"] .site-footer {
+  background:
+    linear-gradient(180deg, rgba(9, 15, 25, 0.97), rgba(15, 24, 39, 0.96));
+  border-color: rgba(90, 121, 161, 0.12);
+  box-shadow: 0 12px 34px rgba(8, 18, 31, 0.12);
+}
+
+html[data-theme="light"] .site-search,
+html[data-theme="light"] .action-link,
+html[data-theme="light"] .shop-nav__link,
+html[data-theme="light"] .shop-nav__pill,
+html[data-theme="light"] .input,
+html[data-theme="light"] .ghost-btn,
+html[data-theme="light"] .secondary-btn {
+  background: linear-gradient(180deg, rgba(252, 254, 255, 0.98), rgba(238, 244, 252, 0.96));
+  border-color: rgba(92, 124, 166, 0.18);
+  color: #12243a;
+  box-shadow: 0 10px 20px rgba(37, 78, 128, 0.06);
+}
+
+html[data-theme="light"] .site-search {
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0.98), rgba(232, 239, 249, 0.96));
+}
+
+html[data-theme="light"] .site-search__submit,
+html[data-theme="light"] .primary-btn {
+  background: linear-gradient(135deg, #52b6ff 0%, #1a83f6 55%, #1272e8 100%);
+  border-color: rgba(16, 104, 214, 0.22);
+  color: #f8fbff;
+  box-shadow: 0 16px 30px rgba(22, 127, 242, 0.22);
+}
+
+html[data-theme="light"] .site-search__submit:hover,
+html[data-theme="light"] .primary-btn:hover {
+  box-shadow: 0 18px 34px rgba(22, 127, 242, 0.28);
+}
+
+html[data-theme="light"] .content-card,
+html[data-theme="light"] .product-card,
+html[data-theme="light"] .benefit-card,
+html[data-theme="light"] .coupon-card,
+html[data-theme="light"] .summary-card,
+html[data-theme="light"] .promo-code-card,
+html[data-theme="light"] .promo-combo-card,
+html[data-theme="light"] .trust-card,
+html[data-theme="light"] .campaign-card,
+html[data-theme="light"] .cart-item,
+html[data-theme="light"] .checkout-form-card,
+html[data-theme="light"] .checkout-summary-card,
+html[data-theme="light"] .account-shortcut-card,
+html[data-theme="light"] .auth-card,
+html[data-theme="light"] .auth-stage,
+html[data-theme="light"] .account-overview-card,
+html[data-theme="light"] .account-panel-card,
+html[data-theme="light"] .empty-state,
+html[data-theme="light"] .department-card,
+html[data-theme="light"] .department-card--commerce,
+html[data-theme="light"] .product-card--commerce,
+html[data-theme="light"] .product-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(244, 248, 253, 0.95));
+  border-color: rgba(88, 121, 162, 0.16);
+  box-shadow: 0 14px 28px rgba(46, 79, 120, 0.08);
+}
+
+html[data-theme="light"] .commerce-hero__main,
+html[data-theme="light"] .promo-hero__main,
+html[data-theme="light"] .offer-hub__spotlight,
+html[data-theme="light"] .offer-hub__products,
+html[data-theme="light"] .hero-showcase-card,
+html[data-theme="light"] .promo-showcase,
+html[data-theme="light"] .campaign-banner,
+html[data-theme="light"] .campaign-card--dark,
+html[data-theme="light"] .membership-card {
+  background:
+    radial-gradient(circle at 84% 14%, rgba(84, 182, 255, 0.12), transparent 20%),
+    radial-gradient(circle at 14% 86%, rgba(243, 140, 36, 0.1), transparent 18%),
+    linear-gradient(160deg, rgba(14, 27, 44, 0.98), rgba(10, 20, 33, 0.98));
+  border-color: rgba(90, 141, 212, 0.18);
+  box-shadow: 0 20px 42px rgba(13, 28, 47, 0.16);
+}
+
+html[data-theme="light"] body[data-page="home"] .commerce-hero__copy h1,
+html[data-theme="light"] body[data-page="promotions"] .promo-hero__copy h1,
+html[data-theme="light"] .offer-hub__spotlight h2,
+html[data-theme="light"] .hero-showcase-card__copy strong,
+html[data-theme="light"] .promo-showcase__copy strong,
+html[data-theme="light"] .campaign-banner__copy strong,
+html[data-theme="light"] .membership-card h2 {
+  color: #f7fbff;
+}
+
+html[data-theme="light"] body[data-page="home"] .commerce-hero__copy p,
+html[data-theme="light"] body[data-page="promotions"] .promo-hero__copy p,
+html[data-theme="light"] .offer-hub__spotlight p,
+html[data-theme="light"] .hero-showcase-card__copy p,
+html[data-theme="light"] .promo-showcase__copy p,
+html[data-theme="light"] .campaign-banner__copy p,
+html[data-theme="light"] .hero-showcase-card__price span,
+html[data-theme="light"] .hero-perks span {
+  color: #aabed7;
+}
+
+html[data-theme="light"] .hero-showcase-card__price strong,
+html[data-theme="light"] .promo-showcase__price strong,
+html[data-theme="light"] .offer-hub__price strong,
+html[data-theme="light"] .commerce-hero__copy .mini-pill,
+html[data-theme="light"] .promo-hero__copy .mini-pill {
+  color: #ffffff;
+}
+
+html[data-theme="light"] .product-signal,
+html[data-theme="light"] .department-meta-pill,
+html[data-theme="light"] .category-row--filters > *,
+html[data-theme="light"] .hero-perks span {
+  background: rgba(22, 127, 242, 0.08);
+  border-color: rgba(22, 127, 242, 0.14);
+  color: #214f7d;
+}
+
+html[data-theme="light"] .auth-google {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 253, 0.95));
+  border-color: rgba(88, 121, 162, 0.16);
+}
+
+html[data-theme="light"] .whatsapp-float {
+  background: rgba(249, 252, 255, 0.94);
+  border-color: rgba(22, 127, 242, 0.14);
+  box-shadow: 0 18px 32px rgba(39, 75, 113, 0.12);
+}

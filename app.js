@@ -562,6 +562,10 @@ function getResolvedTheme(theme) {
   return theme === "light" ? "light" : "dark";
 }
 
+function isValidGoogleClientId(clientId) {
+  return /\.apps\.googleusercontent\.com$/i.test(String(clientId || "").trim());
+}
+
 function updateThemeColor(theme = runtimeData.theme) {
   const metaThemeColor = document.querySelector('meta[name="theme-color"]');
 
@@ -633,8 +637,8 @@ async function hydrateFromBackend() {
     runtimeData.useBackend = true;
     runtimeData.isAuthenticated = Boolean(bootstrap.session?.isAuthenticated);
     runtimeData.userId = bootstrap.session?.userId || null;
-    runtimeData.googleAuthEnabled = Boolean(bootstrap.features?.googleAuth?.enabled);
     runtimeData.googleClientId = String(bootstrap.features?.googleAuth?.clientId || "");
+    runtimeData.googleAuthEnabled = Boolean(bootstrap.features?.googleAuth?.enabled) && isValidGoogleClientId(runtimeData.googleClientId);
     runtimeData.cart = Array.isArray(bootstrap.cart) ? bootstrap.cart : [...DEFAULT_CART];
     runtimeData.favorites = Array.isArray(bootstrap.favorites) ? bootstrap.favorites : [...DEFAULT_FAVORITES];
     runtimeData.profile = bootstrap.profile ? { ...DEFAULT_PROFILE, ...bootstrap.profile } : { ...DEFAULT_PROFILE };
@@ -697,8 +701,8 @@ function applyRuntimePatch(payload) {
   }
 
   if (payload.features?.googleAuth) {
-    runtimeData.googleAuthEnabled = Boolean(payload.features.googleAuth.enabled);
     runtimeData.googleClientId = String(payload.features.googleAuth.clientId || "");
+    runtimeData.googleAuthEnabled = Boolean(payload.features.googleAuth.enabled) && isValidGoogleClientId(runtimeData.googleClientId);
   }
 
   if (Array.isArray(payload.cart) && runtimeData.isAuthenticated) {
@@ -1493,7 +1497,7 @@ function renderGoogleLogin() {
     return;
   }
 
-  const canUseGoogle = runtimeData.useBackend && runtimeData.googleAuthEnabled && runtimeData.googleClientId;
+  const canUseGoogle = runtimeData.useBackend && runtimeData.googleAuthEnabled && isValidGoogleClientId(runtimeData.googleClientId);
   const showGoogleSection = !getIsAuthenticated() && runtimeData.useBackend;
   wrapper.hidden = !showGoogleSection;
 

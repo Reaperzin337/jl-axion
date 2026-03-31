@@ -27,7 +27,8 @@ const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "jlaxion.sid";
 const SESSION_REVISION = 2;
 const ROOT_FILE_CACHE_CONTROL = "no-store, max-age=0";
 const GOOGLE_CLIENT_ID = String(process.env.GOOGLE_CLIENT_ID || "").trim();
-const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
+const HAS_VALID_GOOGLE_CLIENT_ID = /\.apps\.googleusercontent\.com$/i.test(GOOGLE_CLIENT_ID);
+const googleClient = HAS_VALID_GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
 const HTML_FILES = new Set([
   "index.html",
@@ -361,6 +362,9 @@ async function startServer() {
 
   const app = express();
   const isProduction = process.env.NODE_ENV === "production";
+  if (GOOGLE_CLIENT_ID && !HAS_VALID_GOOGLE_CLIENT_ID) {
+    console.warn("GOOGLE_CLIENT_ID invalido: use o Client ID Web que termina com .apps.googleusercontent.com");
+  }
   const useSQLiteSessionStore = !isProduction || process.env.USE_SQLITE_SESSION_STORE === "true";
   const sessionStore = useSQLiteSessionStore
     ? new SQLiteStore({
@@ -662,7 +666,7 @@ async function startServer() {
 
   app.post("/api/auth/google", async (req, res, next) => {
     try {
-      if (!googleClient || !GOOGLE_CLIENT_ID) {
+      if (!googleClient || !HAS_VALID_GOOGLE_CLIENT_ID) {
         res.status(503).json({ message: "Login via Google ainda nao esta configurado." });
         return;
       }
@@ -1815,7 +1819,7 @@ async function buildBootstrapResponse(req) {
     },
     features: {
       googleAuth: {
-        enabled: Boolean(GOOGLE_CLIENT_ID),
+        enabled: Boolean(HAS_VALID_GOOGLE_CLIENT_ID),
         clientId: GOOGLE_CLIENT_ID
       }
     },

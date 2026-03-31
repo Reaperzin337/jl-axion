@@ -8396,8 +8396,9 @@ body::after {
 
 /* March 31 final mobile polish */
 @media (max-width: 900px) {
+  html,
   body {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   .top-strip {
@@ -8531,7 +8532,7 @@ body::after {
     scrollbar-width: none;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-x;
+    touch-action: auto;
   }
 
   .shop-nav::-webkit-scrollbar {
@@ -8782,16 +8783,16 @@ body::after {
   body[data-page="promotions"] .product-grid--commerce,
   body[data-page="product"] .product-grid--compact,
   body[data-page="cart"] .product-grid--compact {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
     gap: 12px;
-    padding: 2px 2px 12px;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-x;
+    padding: 0;
+    scroll-snap-type: none;
+    scrollbar-width: auto;
+    overscroll-behavior-x: auto;
+    -webkit-overflow-scrolling: auto;
+    touch-action: auto;
   }
 
   body[data-page="home"] .department-grid--commerce::-webkit-scrollbar,
@@ -8799,7 +8800,7 @@ body::after {
   body[data-page="promotions"] .product-grid--commerce::-webkit-scrollbar,
   body[data-page="product"] .product-grid--compact::-webkit-scrollbar,
   body[data-page="cart"] .product-grid--compact::-webkit-scrollbar {
-    display: none;
+    display: initial;
   }
 
   body[data-page="home"] .department-grid--commerce > *,
@@ -8807,24 +8808,47 @@ body::after {
   body[data-page="promotions"] .product-grid--commerce > *,
   body[data-page="product"] .product-grid--compact > *,
   body[data-page="cart"] .product-grid--compact > * {
-    flex: 0 0 min(84vw, 286px);
-    width: min(84vw, 286px);
+    flex: initial;
+    width: auto;
     min-width: 0;
-    scroll-snap-align: start;
+    scroll-snap-align: unset;
   }
 
   .department-grid,
   .product-grid,
   .product-grid--compact {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   body[data-page="category"] .department-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .product-card,
+  .department-card,
+  .department-card--commerce {
+    min-width: 0;
   }
 
   .product-media {
-    min-height: 190px;
+    min-height: 154px;
+  }
+
+  .product-card__body,
+  .department-card__body {
+    gap: 8px;
+  }
+
+  .product-card .price-block__primary,
+  .product-price__primary {
+    font-size: 1.1rem;
+  }
+
+  .product-card .price-block__secondary,
+  .product-price__secondary,
+  .product-card p,
+  .department-card p {
+    font-size: 0.82rem;
   }
 
   .product-stage-media {
@@ -8885,6 +8909,18 @@ body::after {
   .promo-campaign-grid,
   .promo-combo-grid,
   .site-footer__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .department-grid,
+  .product-grid,
+  .product-grid--compact,
+  body[data-page="category"] .department-grid,
+  body[data-page="home"] .department-grid--commerce,
+  body[data-page="home"] .product-grid--commerce,
+  body[data-page="promotions"] .product-grid--commerce,
+  body[data-page="product"] .product-grid--compact,
+  body[data-page="cart"] .product-grid--compact {
     grid-template-columns: 1fr;
   }
 

@@ -6,6 +6,8 @@ Loja premium de utilidades e tecnologia com frontend multipagina, backend em Exp
 
 - Home, categorias, produto, favoritos, carrinho, conta e checkout
 - Backend com sessao, catalogo, favoritos, carrinho, perfil e pedidos
+- Alternancia entre tema escuro e tema claro direto no shell da loja
+- Login tradicional e estrutura pronta para login com Google
 - Painel admin em `/admin.html` para gerenciar produtos, fornecedores e pedidos
 - Projeto preparado para deploy com Docker e variaveis de ambiente
 - Base de dropshipping com fornecedor, SKU externo, custo e repasse manual
@@ -91,6 +93,18 @@ Observacoes:
 - `ADMIN_NAME`: nome exibido para a conta admin seed
 - `ADMIN_EMAIL`: e-mail da conta admin seed
 - `ADMIN_PASSWORD`: senha da conta admin seed
+- `GOOGLE_CLIENT_ID`: Client ID do Google Identity Services para habilitar login com Google
+
+## Login com Google
+
+Para ativar o botao do Google na tela de acesso:
+
+1. crie um Client ID Web no Google Cloud / Google Identity Services
+2. adicione o dominio da loja e `http://localhost:3000` como origens autorizadas
+3. preencha `GOOGLE_CLIENT_ID` no `.env`
+4. reinicie o servidor
+
+Sem esse `client_id`, a tela continua funcionando normalmente com e-mail e senha, mas o acesso via Google fica oculto.
 
 ## Estrutura principal
 

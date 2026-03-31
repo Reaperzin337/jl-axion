@@ -3,11 +3,13 @@ const session = require("express-session");
 const bcrypt = require("bcryptjs");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const sqlite3 = require("sqlite3");
 const SQLiteStore = require("connect-sqlite3")(session);
 const { open } = require("sqlite");
+const { OAuth2Client } = require("google-auth-library");
 
 const ROOT_DIR = __dirname;
 const DATA_DIR = process.env.DATA_DIR
@@ -24,6 +26,8 @@ const SESSION_DB_PATH = process.env.SESSION_DB_PATH
 const SESSION_COOKIE_NAME = process.env.SESSION_COOKIE_NAME || "jlaxion.sid";
 const SESSION_REVISION = 2;
 const ROOT_FILE_CACHE_CONTROL = "no-store, max-age=0";
+const GOOGLE_CLIENT_ID = String(process.env.GOOGLE_CLIENT_ID || "").trim();
+const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
 const HTML_FILES = new Set([
   "index.html",
@@ -46,6 +50,7 @@ const HTML_FILES = new Set([
   "admin.html",
   "styles.css",
   "app.js",
+  "theme-init.js",
   "admin.js",
   "robots.txt",
   "sitemap.xml",
@@ -403,11 +408,12 @@ async function startServer() {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://accounts.google.com"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:"],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", "https://accounts.google.com"],
         fontSrc: ["'self'", "data:"],
+        frameSrc: ["'self'", "https://accounts.google.com"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
@@ -447,6 +453,7 @@ async function startServer() {
   app.use("/api", sessionMiddleware);
   app.use("/api/auth/login", loginLimiter);
   app.use("/api/auth/register", loginLimiter);
+  app.use("/api/auth/google", loginLimiter);
   app.use("/api/admin", adminLimiter);
   app.use("/api", (_req, res, next) => {
     res.set("Cache-Control", "no-store");
@@ -649,6 +656,91 @@ async function startServer() {
         user: await getProfile(result.lastID)
       });
     } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/auth/google", async (req, res, next) => {
+    try {
+      if (!googleClient || !GOOGLE_CLIENT_ID) {
+        res.status(503).json({ message: "Login via Google ainda nao esta configurado." });
+        return;
+      }
+
+      const credential = String(req.body.credential || "").trim();
+
+      if (!credential) {
+        res.status(400).json({ message: "Nao recebemos o token do Google para continuar." });
+        return;
+      }
+
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: GOOGLE_CLIENT_ID
+      });
+      const payload = ticket.getPayload();
+      const googleId = String(payload?.sub || "").trim();
+      const email = String(payload?.email || "").trim().toLowerCase();
+      const name = String(payload?.name || "").trim();
+
+      if (!googleId || !email) {
+        res.status(400).json({ message: "Nao foi possivel confirmar os dados da sua conta Google." });
+        return;
+      }
+
+      if (payload?.email_verified !== true) {
+        res.status(400).json({ message: "Use uma conta Google com e-mail verificado para entrar." });
+        return;
+      }
+
+      let user = await db.get(
+        "SELECT * FROM users WHERE google_id = ? OR email = ? LIMIT 1",
+        googleId,
+        email
+      );
+
+      if (user) {
+        await db.run(
+          `UPDATE users
+           SET name = CASE WHEN trim(coalesce(name, '')) = '' THEN ? ELSE name END,
+               google_id = CASE WHEN coalesce(google_id, '') = '' THEN ? ELSE google_id END
+           WHERE id = ?`,
+          name || "Cliente JL AXION",
+          googleId,
+          user.id
+        );
+      } else {
+        const passwordHash = await bcrypt.hash(`google:${googleId}:${crypto.randomUUID()}`, 10);
+        const result = await db.run(
+          `INSERT INTO users (name, email, password_hash, role, phone, city, address, zip, google_id, auth_provider)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          name || "Cliente JL AXION",
+          email,
+          passwordHash,
+          "customer",
+          "",
+          "",
+          "",
+          "",
+          googleId,
+          "google"
+        );
+        user = { id: result.lastID };
+      }
+
+      const nextUser = await db.get("SELECT * FROM users WHERE google_id = ? OR email = ? LIMIT 1", googleId, email);
+      await establishSession(req, nextUser.id, true);
+
+      res.json({
+        message: "Login com Google concluido com sucesso.",
+        user: await getProfile(nextUser.id)
+      });
+    } catch (error) {
+      if (error?.message?.includes("Wrong number of segments") || error?.message?.includes("Token used too late")) {
+        res.status(400).json({ message: "Nao foi possivel validar o token do Google. Tente novamente." });
+        return;
+      }
+
       next(error);
     }
   });
@@ -1362,6 +1454,8 @@ async function initializeDatabase() {
       city TEXT DEFAULT '',
       address TEXT DEFAULT '',
       zip TEXT DEFAULT '',
+      google_id TEXT,
+      auth_provider TEXT NOT NULL DEFAULT 'password',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -1451,6 +1545,9 @@ async function initializeDatabase() {
   `);
 
   await ensureColumn(database, "users", "role", "TEXT NOT NULL DEFAULT 'customer'");
+  await ensureColumn(database, "users", "google_id", "TEXT");
+  await ensureColumn(database, "users", "auth_provider", "TEXT NOT NULL DEFAULT 'password'");
+  await database.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL AND google_id <> ''");
   await ensureColumn(database, "products", "fulfillment_mode", "TEXT NOT NULL DEFAULT 'own_stock'");
   await ensureColumn(database, "products", "supplier_id", "TEXT DEFAULT ''");
   await ensureColumn(database, "products", "supplier_sku", "TEXT DEFAULT ''");
@@ -1716,6 +1813,12 @@ async function buildBootstrapResponse(req) {
       isAdmin: profile.role === "admin",
       userId: req.currentUserId
     },
+    features: {
+      googleAuth: {
+        enabled: Boolean(GOOGLE_CLIENT_ID),
+        clientId: GOOGLE_CLIENT_ID
+      }
+    },
     products: await getProducts(),
     categories: await getCategories(),
     profile,
@@ -1763,7 +1866,7 @@ async function getSupplierById(supplierId) {
 
 async function getProfile(userId) {
   const row = await db.get(
-    "SELECT id, name, email, role, phone, city, address, zip, created_at FROM users WHERE id = ?",
+    "SELECT id, name, email, role, phone, city, address, zip, google_id, auth_provider, created_at FROM users WHERE id = ?",
     userId
   );
 
@@ -1776,6 +1879,7 @@ async function getProfile(userId) {
     city: row.city || "",
     address: row.address || "",
     zip: row.zip || "",
+    authProvider: row.auth_provider || (row.google_id ? "google" : "password"),
     memberSince: row.created_at
   };
 }

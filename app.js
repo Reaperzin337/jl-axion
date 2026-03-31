@@ -6,7 +6,8 @@ const STORAGE_KEYS = {
   accounts: "jlaxion-accounts",
   orders: "jlaxion-orders",
   pendingCategory: "jlaxion-pending-category",
-  flashToast: "jlaxion-flash-toast"
+  flashToast: "jlaxion-flash-toast",
+  theme: "jlaxion-theme"
 };
 
 let PRODUCTS = [
@@ -362,6 +363,9 @@ const runtimeData = {
   isAuthenticated: false,
   isNativeApp: false,
   userId: null,
+  theme: "dark",
+  googleAuthEnabled: false,
+  googleClientId: "",
   cart: [...DEFAULT_CART],
   favorites: [...DEFAULT_FAVORITES],
   profile: { ...DEFAULT_PROFILE },
@@ -373,6 +377,9 @@ let whatsappLastY = 0;
 let topbarResizeBound = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
+  applyTheme(document.documentElement.dataset.theme || getStoredTheme() || getSystemTheme(), {
+    persist: Boolean(getStoredTheme())
+  });
   applyEnvironmentClasses();
   seedData();
   restorePendingCategory();
@@ -386,6 +393,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindMenu();
   bindActions();
   renderAll();
+  syncThemeControls();
+  renderGoogleLogin();
 });
 
 function seedData() {
@@ -536,6 +545,75 @@ function removeTransientState(key) {
   return null;
 }
 
+function getSystemTheme() {
+  try {
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  } catch (error) {
+    return "dark";
+  }
+}
+
+function getStoredTheme() {
+  const storedTheme = readStorage(STORAGE_KEYS.theme);
+  return storedTheme === "light" || storedTheme === "dark" ? storedTheme : null;
+}
+
+function getResolvedTheme(theme) {
+  return theme === "light" ? "light" : "dark";
+}
+
+function updateThemeColor(theme = runtimeData.theme) {
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute("content", theme === "light" ? "#eff5ff" : "#58c2ff");
+  }
+}
+
+function syncThemeControls() {
+  const nextTheme = runtimeData.theme === "light" ? "dark" : "light";
+  const iconMarkup = icon(nextTheme === "light" ? "sun" : "moon");
+
+  document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    button.setAttribute("aria-label", nextTheme === "light" ? "Ativar tema claro" : "Ativar tema escuro");
+    button.setAttribute("aria-pressed", String(runtimeData.theme === "light"));
+    button.dataset.theme = runtimeData.theme;
+
+    const iconHost = button.querySelector("[data-theme-icon]");
+    if (iconHost) {
+      iconHost.innerHTML = iconMarkup;
+    }
+
+    const label = button.querySelector("[data-theme-label]");
+    if (label) {
+      label.textContent = nextTheme === "light" ? "Tema claro" : "Tema escuro";
+    }
+  });
+}
+
+function applyTheme(theme, options = {}) {
+  const { persist = true } = options;
+  const resolvedTheme = getResolvedTheme(theme);
+  runtimeData.theme = resolvedTheme;
+  document.documentElement.dataset.theme = resolvedTheme;
+  document.documentElement.style.colorScheme = resolvedTheme;
+  updateThemeColor(resolvedTheme);
+
+  if (persist) {
+    writeStorage(STORAGE_KEYS.theme, resolvedTheme);
+  }
+
+  syncThemeControls();
+  renderGoogleLogin();
+  return resolvedTheme;
+}
+
+function toggleTheme() {
+  const nextTheme = runtimeData.theme === "light" ? "dark" : "light";
+  applyTheme(nextTheme);
+  showToast(nextTheme === "light" ? "Tema claro ativado." : "Tema escuro ativado.");
+}
+
 async function hydrateFromBackend() {
   if (!window.location.protocol.startsWith("http")) {
     return;
@@ -555,6 +633,8 @@ async function hydrateFromBackend() {
     runtimeData.useBackend = true;
     runtimeData.isAuthenticated = Boolean(bootstrap.session?.isAuthenticated);
     runtimeData.userId = bootstrap.session?.userId || null;
+    runtimeData.googleAuthEnabled = Boolean(bootstrap.features?.googleAuth?.enabled);
+    runtimeData.googleClientId = String(bootstrap.features?.googleAuth?.clientId || "");
     runtimeData.cart = Array.isArray(bootstrap.cart) ? bootstrap.cart : [...DEFAULT_CART];
     runtimeData.favorites = Array.isArray(bootstrap.favorites) ? bootstrap.favorites : [...DEFAULT_FAVORITES];
     runtimeData.profile = bootstrap.profile ? { ...DEFAULT_PROFILE, ...bootstrap.profile } : { ...DEFAULT_PROFILE };
@@ -616,6 +696,11 @@ function applyRuntimePatch(payload) {
     runtimeData.userId = runtimeData.isAuthenticated ? (payload.session.userId || runtimeData.userId) : null;
   }
 
+  if (payload.features?.googleAuth) {
+    runtimeData.googleAuthEnabled = Boolean(payload.features.googleAuth.enabled);
+    runtimeData.googleClientId = String(payload.features.googleAuth.clientId || "");
+  }
+
   if (Array.isArray(payload.cart) && runtimeData.isAuthenticated) {
     runtimeData.cart = payload.cart;
   }
@@ -670,6 +755,7 @@ async function signOut() {
 
     runtimeData.isAuthenticated = false;
     runtimeData.userId = null;
+    window.google?.accounts?.id?.disableAutoSelect?.();
     refreshShellUi();
     showToast("Sessao encerrada.");
     window.setTimeout(() => {
@@ -909,6 +995,7 @@ function renderShell() {
           </form>
 
           <div class="header-actions">
+            ${themeActionMarkup}
             <a class="action-link" href="favorites.html">
               ${icon("heart")}
               <span>Favoritos</span>
@@ -957,8 +1044,8 @@ function renderShell() {
 
       <div class="drawer-spotlight">
         <span class="eyebrow">Comprar agora</span>
-        <h2>Casa, setup e energia em uma navegação mais direta.</h2>
-        <p>Entre pelas campanhas, departamentos ou pela busca principal e monte seu pedido com mais confiança.</p>
+        <h2>Casa, setup e energia em uma navegaÃ§Ã£o mais direta.</h2>
+        <p>Entre pelas campanhas, departamentos ou pela busca principal e monte seu pedido com mais confianÃ§a.</p>
         <div class="drawer-spotlight__actions">
           <a class="primary-btn" href="promotions.html">Ver ofertas</a>
           <a class="secondary-btn" href="index.html#catalogo">Ir para a vitrine</a>
@@ -978,6 +1065,17 @@ function renderShell() {
       </div>
 
       <div class="drawer__section">
+        <h2>Preferencias</h2>
+        <div class="drawer-link-list">
+          <div class="drawer-link drawer-link--static">
+            <span>Tema da loja</span>
+            <small>Escolha entre claro e escuro</small>
+            ${themeActionMarkup}
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer__section">
         <h2>Departamentos</h2>
         <div class="drawer-category-grid">
           ${getCategoryNames().map((category) => drawerCategoryCard(category)).join("")}
@@ -986,7 +1084,7 @@ function renderShell() {
 
       <div class="drawer-promo">
         <span class="eyebrow">Condicoes em destaque</span>
-        <h2>Frete, cupom e parcelamento em evidência</h2>
+        <h2>Frete, cupom e parcelamento em evidÃªncia</h2>
         <p>Entre nas promocoes para ver as oportunidades mais fortes da semana com produtos ja ligados a cada campanha.</p>
       </div>
     </aside>
@@ -1353,6 +1451,110 @@ function bindForms() {
   }
 }
 
+async function handleGoogleCredentialResponse(response) {
+  const credential = String(response?.credential || "").trim();
+
+  if (!credential) {
+    showToast("Nao foi possivel concluir o login com Google.");
+    return;
+  }
+
+  try {
+    const payload = await apiRequest("/api/auth/google", {
+      method: "POST",
+      body: { credential }
+    });
+
+    applyRuntimePatch(payload);
+    await refreshRuntimeData();
+    refreshShellUi();
+    queueFlashToast("Login com Google concluido", {
+      title: "Login efetuado com sucesso",
+      description: "Sua conta JL AXION foi liberada com o Google.",
+      tone: "auth-success",
+      duration: 4000,
+      dismissible: true
+    });
+
+    window.setTimeout(() => {
+      window.location.href = "account.html";
+    }, 220);
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+function renderGoogleLogin() {
+  const wrapper = document.querySelector("[data-google-login]");
+  const buttonHost = document.querySelector("[data-google-button]");
+  const status = document.querySelector("[data-google-status]");
+
+  if (!wrapper || !buttonHost) {
+    return;
+  }
+
+  const canUseGoogle = runtimeData.useBackend && runtimeData.googleAuthEnabled && runtimeData.googleClientId;
+  const showGoogleSection = !getIsAuthenticated() && runtimeData.useBackend;
+  wrapper.hidden = !showGoogleSection;
+
+  if (!showGoogleSection) {
+    buttonHost.innerHTML = "";
+    buttonHost.removeAttribute("data-google-rendered");
+    if (status) {
+      status.hidden = true;
+      status.textContent = "";
+    }
+    return;
+  }
+
+  if (!canUseGoogle) {
+    buttonHost.innerHTML = '<button type="button" class="secondary-btn auth-google__fallback" disabled>Google em configuracao</button>';
+    buttonHost.removeAttribute("data-google-rendered");
+    if (status) {
+      status.hidden = false;
+      status.textContent = "Assim que o Client ID da loja for conectado, essa opcao fica ativa automaticamente.";
+    }
+    return;
+  }
+
+  if (status) {
+    status.hidden = true;
+    status.textContent = "";
+  }
+
+  if (!window.google?.accounts?.id) {
+    return;
+  }
+
+  const renderKey = `${runtimeData.googleClientId}:${runtimeData.theme}`;
+
+  if (buttonHost.dataset.googleRendered === renderKey) {
+    return;
+  }
+
+  buttonHost.innerHTML = "";
+
+  window.google.accounts.id.initialize({
+    client_id: runtimeData.googleClientId,
+    callback: handleGoogleCredentialResponse,
+    ux_mode: "popup",
+    auto_select: false,
+    cancel_on_tap_outside: true
+  });
+
+  window.google.accounts.id.renderButton(buttonHost, {
+    type: "standard",
+    theme: runtimeData.theme === "light" ? "outline" : "filled_black",
+    size: "large",
+    shape: "pill",
+    text: "continue_with",
+    logo_alignment: "left",
+    width: Math.max(260, Math.min(buttonHost.clientWidth || 360, 420))
+  });
+
+  buttonHost.dataset.googleRendered = renderKey;
+}
+
 function bindActions() {
   document.addEventListener("click", async (event) => {
     const openAccountMenu = document.querySelector("[data-account-menu].is-open");
@@ -1389,6 +1591,12 @@ function bindActions() {
 
     if (action === "switch-auth-mode") {
       setAuthMode(target.dataset.authMode || "login");
+      return;
+    }
+
+    if (action === "toggle-theme") {
+      event.preventDefault();
+      toggleTheme();
       return;
     }
 
@@ -1544,6 +1752,8 @@ function refreshShellUi() {
   bindSearch();
   bindMenu();
   renderAll();
+  syncThemeControls();
+  renderGoogleLogin();
 }
 
 function updateCounts() {
@@ -1668,7 +1878,7 @@ function updateProfileText() {
   });
 
   document.querySelectorAll("[data-account-entry-label]").forEach((element) => {
-    element.textContent = isAuthenticated ? `Olá, ${firstName}` : "Login";
+    element.textContent = isAuthenticated ? `OlÃ¡, ${firstName}` : "Login";
   });
 
   document.querySelectorAll("[data-account-entry]").forEach((element) => {
@@ -1970,7 +2180,7 @@ function renderAccountPage() {
     <article class="order-item">
       <div>
         <strong>${order.id}</strong>
-        <p>${order.placedAt} • ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
+        <p>${order.placedAt} â€¢ ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
         <p>${order.summary}</p>
       </div>
       <div class="order-item__side">
@@ -2063,7 +2273,7 @@ function renderCategoryPage() {
         ${categoryProducts.slice(0, 3).map((product) => `
           <article class="category-spotlight-item">
             <strong>${product.name}</strong>
-            <span>${money.format(product.price)} • ${product.badge}</span>
+            <span>${money.format(product.price)} â€¢ ${product.badge}</span>
           </article>
         `).join("")}
       </div>
@@ -2281,7 +2491,7 @@ function renderCheckoutPage() {
           </div>
           <div class="checkout-item__meta">
             <strong>${item.product.name}</strong>
-            <span>${item.quantity} ${item.quantity === 1 ? "unidade" : "unidades"} • ${item.product.category}</span>
+            <span>${item.quantity} ${item.quantity === 1 ? "unidade" : "unidades"} â€¢ ${item.product.category}</span>
           </div>
           <strong class="checkout-item__price">${money.format(item.product.price * item.quantity)}</strong>
         </article>
@@ -2335,7 +2545,7 @@ function renderCheckoutPage() {
           statusTone: payment === "pix" ? "warning" : "success",
           total,
           itemCount: itemsCount,
-          summary: `${getDeliveryLabel(delivery)} • ${nextProfile.city}`,
+          summary: `${getDeliveryLabel(delivery)} â€¢ ${nextProfile.city}`,
           payment: getPaymentLabel(payment),
           items: cartProducts.map((item) => ({
             id: item.product.id,
@@ -3138,6 +3348,17 @@ function icon(name) {
         <path d="M7.15 7.15 16.85 16.85M16.85 7.15 7.15 16.85" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
       </svg>
     `,
+    sun: `
+      <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.1" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M12 3.7v2.25M12 18.05v2.25M20.3 12h-2.25M5.95 12H3.7M17.87 6.13l-1.59 1.59M7.72 16.28l-1.59 1.59M17.87 17.87l-1.59-1.59M7.72 7.72 6.13 6.13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    `,
+    moon: `
+      <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M17.5 14.9a6.45 6.45 0 0 1-7.97-8.39 7.7 7.7 0 1 0 7.97 8.39Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      </svg>
+    `,
     whatsapp: `
       <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M12 3.25a8.75 8.75 0 0 1 7.51 13.24A8.75 8.75 0 0 1 8.89 20.9l-3.76 1.1 1.07-3.62A8.75 8.75 0 0 1 12 3.25Z" fill="currentColor" fill-opacity="0.12"/>
@@ -3173,7 +3394,7 @@ function renderShell() {
   const greetingName = getGreetingName();
   const viewerProfile = getViewerProfile();
   const accountHref = isAuthenticated ? "account.html" : "login.html";
-  const accountLabel = isAuthenticated ? `Olá, ${greetingName}` : "Login";
+  const accountLabel = isAuthenticated ? `Ola, ${greetingName}` : "Login";
   const useCompactSearchCopy = runtimeData.isNativeApp || window.matchMedia("(max-width: 780px)").matches;
   const searchPlaceholder = useCompactSearchCopy
     ? "Buscar produtos"
@@ -3181,11 +3402,25 @@ function renderShell() {
   const headerDepartments = getCategoryNames().slice(0, 5);
   const accountEmail = isAuthenticated ? (viewerProfile.email || DEFAULT_PROFILE.email) : "";
   const accountInitial = greetingName.charAt(0).toUpperCase();
+  const nextThemeLabel = runtimeData.theme === "light" ? "Tema escuro" : "Tema claro";
+  const themeActionMarkup = `
+    <button
+      type="button"
+      class="action-link action-link--theme"
+      data-action="toggle-theme"
+      data-theme-toggle
+      aria-pressed="${runtimeData.theme === "light"}"
+      aria-label="${nextThemeLabel}"
+    >
+      <span class="theme-toggle__icon" data-theme-icon>${icon(runtimeData.theme === "light" ? "moon" : "sun")}</span>
+      <span class="theme-toggle__label" data-theme-label>${nextThemeLabel}</span>
+    </button>
+  `;
   const drawerAccountEntry = isAuthenticated
     ? drawerLink("account", "account.html", "Minha conta", "Perfil, pedidos e dados")
     : drawerLink("login", "login.html", "Minha conta", "Entre para acompanhar seus pedidos");
   const authDrawerEntry = isAuthenticated
-    ? drawerLink("account", "account.html", `Olá, ${greetingName}`, "Voltar para sua area")
+    ? drawerLink("account", "account.html", `Ola, ${greetingName}`, "Voltar para sua area")
     : "";
   const accountActionMarkup = isAuthenticated
     ? `
@@ -3201,7 +3436,7 @@ function renderShell() {
             <span class="account-trigger__label" data-account-entry-label>${escapeHtml(accountLabel)}</span>
             <span class="account-trigger__sub">Minha conta</span>
           </span>
-          <span class="account-trigger__caret" aria-hidden="true">▾</span>
+          <span class="account-trigger__caret" aria-hidden="true">&#9662;</span>
         </button>
 
         <div class="account-menu__panel" data-account-menu-panel>
@@ -3305,6 +3540,7 @@ function renderShell() {
           </form>
 
           <div class="header-actions">
+            ${themeActionMarkup}
             <a class="action-link" href="favorites.html">
               ${icon("heart")}
               <span>Favoritos</span>
@@ -3365,6 +3601,17 @@ function renderShell() {
           ${drawerLink("cart", "cart.html", "Carrinho", "Resumo e andamento da compra")}
           ${drawerAccountEntry}
           ${authDrawerEntry}
+        </div>
+      </div>
+
+      <div class="drawer__section">
+        <h2>Preferencias</h2>
+        <div class="drawer-link-list">
+          <div class="drawer-link drawer-link--static">
+            <span>Tema da loja</span>
+            <small>Escolha entre claro e escuro</small>
+            ${themeActionMarkup}
+          </div>
         </div>
       </div>
 
@@ -3650,6 +3897,7 @@ function renderLoginPage() {
 
   guestCard.hidden = isAuthenticated;
   loggedCard.hidden = !isAuthenticated;
+  renderGoogleLogin();
 }
 
 function renderAccountPage() {
@@ -3781,7 +4029,7 @@ function renderAccountPage() {
           <div class="account-order-highlight__head">
             <div>
               <strong>Pedido: ${latest.id}</strong>
-              <span>${latest.placedAt} • ${latest.itemCount} ${latest.itemCount === 1 ? "item" : "itens"}</span>
+              <span>${latest.placedAt} â€¢ ${latest.itemCount} ${latest.itemCount === 1 ? "item" : "itens"}</span>
             </div>
             <span class="status-chip${latest.statusTone === "success" ? " status-chip--success" : ""}${latest.statusTone === "warning" ? " status-chip--warning" : ""}">${latest.status}</span>
           </div>
@@ -3809,7 +4057,7 @@ function renderAccountPage() {
         <article class="order-item">
           <div>
             <strong>${order.id}</strong>
-            <p>${order.placedAt} • ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
+            <p>${order.placedAt} â€¢ ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
             <p>${order.summary}</p>
           </div>
           <div class="order-item__side">
@@ -4417,7 +4665,7 @@ function buildAccountOrderHighlightMarkup(order) {
       <div class="account-order-highlight__head">
         <div>
           <strong>Pedido: ${order.id}</strong>
-          <span>${order.placedAt} • ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</span>
+          <span>${order.placedAt} â€¢ ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</span>
         </div>
         <span class="status-chip${order.statusTone === "success" ? " status-chip--success" : ""}${order.statusTone === "warning" ? " status-chip--warning" : ""}">${order.status}</span>
       </div>
@@ -4448,7 +4696,7 @@ function buildAccountOrdersListMarkup(orders, limit = orders.length) {
     <article class="order-item">
       <div>
         <strong>${order.id}</strong>
-        <p>${order.placedAt} • ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
+        <p>${order.placedAt} â€¢ ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
         <p>${order.summary}</p>
       </div>
       <div class="order-item__side">
@@ -4767,3 +5015,4 @@ function renderAll() {
   renderCheckoutPage();
   renderProductPage();
 }
+

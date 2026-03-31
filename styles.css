@@ -9341,3 +9341,235 @@ body::after {
     grid-auto-columns: minmax(224px, 84vw) !important;
   }
 }
+
+html[data-theme="light"] {
+  --bg: #eff4fb;
+  --bg-deep: #f8fbff;
+  --bg-mid: #eef4fb;
+  --bg-surface: #ffffff;
+  --surface: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 255, 0.98));
+  --border: rgba(82, 120, 163, 0.18);
+  --text: #10233a;
+  --muted: #59708c;
+  --primary: #1d93ff;
+  --secondary: #ff9a36;
+  --accent: #0f2238;
+  --warning: #fff1de;
+  --primary-ink: #ffffff;
+  --secondary-ink: #2f1905;
+  --shadow: 0 20px 38px rgba(37, 78, 128, 0.12);
+}
+
+html[data-theme="light"] body {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(var(--glow-blue), 0.12), transparent 24%),
+    radial-gradient(circle at 88% 16%, rgba(var(--glow-orange), 0.08), transparent 20%),
+    linear-gradient(180deg, #f7fbff 0%, #eef4fb 34%, #f8fbff 100%);
+}
+
+html[data-theme="light"] body::before {
+  opacity: 0.09;
+}
+
+html[data-theme="light"] body::after {
+  opacity: 0.12;
+}
+
+html[data-theme="light"] .site-topbar,
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .site-header__lower,
+html[data-theme="light"] .drawer,
+html[data-theme="light"] .site-footer {
+  background-color: rgba(248, 251, 255, 0.94);
+  border-color: rgba(82, 120, 163, 0.14);
+  backdrop-filter: blur(20px);
+}
+
+html[data-theme="light"] .content-card,
+html[data-theme="light"] .product-card,
+html[data-theme="light"] .benefit-card,
+html[data-theme="light"] .coupon-card,
+html[data-theme="light"] .summary-card,
+html[data-theme="light"] .promo-code-card,
+html[data-theme="light"] .promo-showcase,
+html[data-theme="light"] .promo-combo-card,
+html[data-theme="light"] .trust-card,
+html[data-theme="light"] .campaign-banner,
+html[data-theme="light"] .campaign-card,
+html[data-theme="light"] .drawer-category-card,
+html[data-theme="light"] .drawer__hero,
+html[data-theme="light"] .drawer__meta-card,
+html[data-theme="light"] .cart-item,
+html[data-theme="light"] .checkout-form-card,
+html[data-theme="light"] .checkout-summary-card,
+html[data-theme="light"] .account-shortcut-card,
+html[data-theme="light"] .auth-card,
+html[data-theme="light"] .auth-stage,
+html[data-theme="light"] .account-overview-card,
+html[data-theme="light"] .account-panel-card,
+html[data-theme="light"] .empty-state {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 255, 0.96));
+  border-color: rgba(91, 126, 166, 0.16);
+  box-shadow: 0 18px 34px rgba(37, 78, 128, 0.08);
+}
+
+html[data-theme="light"] .site-search,
+html[data-theme="light"] .action-link,
+html[data-theme="light"] .shop-nav__link,
+html[data-theme="light"] .shop-nav__pill,
+html[data-theme="light"] .input,
+html[data-theme="light"] .ghost-btn,
+html[data-theme="light"] .secondary-btn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(241, 247, 255, 0.92));
+  border-color: rgba(88, 124, 166, 0.18);
+  color: var(--text);
+}
+
+html[data-theme="light"] .site-search__input,
+html[data-theme="light"] .input,
+html[data-theme="light"] textarea,
+html[data-theme="light"] select {
+  color: var(--text);
+}
+
+html[data-theme="light"] .site-search__input::placeholder,
+html[data-theme="light"] .input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: #75869d;
+}
+
+html[data-theme="light"] .hero-perks span,
+html[data-theme="light"] .category-row--filters > *,
+html[data-theme="light"] .top-strip__item,
+html[data-theme="light"] .account-shortcut-card span:last-child,
+html[data-theme="light"] .helper-text,
+html[data-theme="light"] .header-note span,
+html[data-theme="light"] .drawer-link small,
+html[data-theme="light"] .drawer-category-card small {
+  color: #617690;
+}
+
+html[data-theme="light"] .top-strip__inner {
+  color: #23374f;
+}
+
+html[data-theme="light"] .drawer-link,
+html[data-theme="light"] .drawer-category-card,
+html[data-theme="light"] .drawer-link--static {
+  background: rgba(255, 255, 255, 0.74);
+  border-color: rgba(91, 126, 166, 0.16);
+}
+
+html[data-theme="light"] .drawer-link:hover,
+html[data-theme="light"] .drawer-category-card:hover,
+html[data-theme="light"] .account-shortcut-card:hover {
+  border-color: rgba(29, 147, 255, 0.28);
+}
+
+html[data-theme="light"] .account-menu__panel {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(91, 126, 166, 0.18);
+  box-shadow: 0 20px 38px rgba(37, 78, 128, 0.14);
+}
+
+html[data-theme="light"] .account-menu__link {
+  color: var(--text);
+}
+
+html[data-theme="light"] .account-menu__link:hover,
+html[data-theme="light"] .account-menu__link:focus-visible,
+html[data-theme="light"] .account-menu__link--strong {
+  background: rgba(29, 147, 255, 0.08);
+}
+
+html[data-theme="light"] .whatsapp-float {
+  background: rgba(248, 251, 255, 0.92);
+  border-color: rgba(29, 147, 255, 0.16);
+}
+
+.action-link--theme {
+  gap: 10px;
+}
+
+.theme-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle__icon .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.drawer-link--static {
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: 10px;
+}
+
+.drawer-link--static .action-link--theme {
+  justify-self: start;
+}
+
+.auth-google {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(var(--glow-blue), 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(var(--glow-blue), 0.05));
+}
+
+.auth-google__copy {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-google__copy strong {
+  font-size: 1rem;
+}
+
+.auth-google__copy span {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.auth-google__button {
+  width: 100%;
+  min-height: 44px;
+}
+
+.auth-google__fallback {
+  width: 100%;
+  justify-content: center;
+  opacity: 0.94;
+}
+
+.auth-google__button > div,
+.auth-google__button iframe {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.auth-google__status {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+html[data-theme="light"] .auth-google {
+  background: linear-gradient(180deg, rgba(29, 147, 255, 0.04), rgba(255, 255, 255, 0.9));
+  border-color: rgba(29, 147, 255, 0.16);
+}
+
+@media (max-width: 900px) {
+  .header-actions > .action-link--theme .theme-toggle__label {
+    display: none !important;
+  }
+
+  .header-actions > .action-link--theme .theme-toggle__icon {
+    display: inline-flex !important;
+  }
+}

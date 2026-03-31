@@ -566,11 +566,24 @@ function isValidGoogleClientId(clientId) {
   return /\.apps\.googleusercontent\.com$/i.test(String(clientId || "").trim());
 }
 
+function persistThemePreference(theme) {
+  const resolvedTheme = getResolvedTheme(theme);
+  writeStorage(STORAGE_KEYS.theme, resolvedTheme);
+
+  try {
+    document.cookie = `jlaxion_theme=${encodeURIComponent(resolvedTheme)}; path=/; max-age=31536000; SameSite=Lax`;
+  } catch (error) {
+    return resolvedTheme;
+  }
+
+  return resolvedTheme;
+}
+
 function updateThemeColor(theme = runtimeData.theme) {
   const metaThemeColor = document.querySelector('meta[name="theme-color"]');
 
   if (metaThemeColor) {
-    metaThemeColor.setAttribute("content", theme === "light" ? "#eff5ff" : "#58c2ff");
+    metaThemeColor.setAttribute("content", theme === "light" ? "#f7fbff" : "#58c2ff");
   }
 }
 
@@ -604,7 +617,7 @@ function applyTheme(theme, options = {}) {
   updateThemeColor(resolvedTheme);
 
   if (persist) {
-    writeStorage(STORAGE_KEYS.theme, resolvedTheme);
+    persistThemePreference(resolvedTheme);
   }
 
   syncThemeControls();

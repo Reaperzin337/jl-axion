@@ -9727,9 +9727,9 @@ html[data-theme="light"] {
 html[data-theme="light"] body {
   color: var(--text);
   background:
-    radial-gradient(circle at 10% 10%, rgba(var(--glow-blue), 0.1), transparent 22%),
-    radial-gradient(circle at 92% 18%, rgba(var(--glow-orange), 0.07), transparent 18%),
-    linear-gradient(180deg, #f9fbff 0%, #edf3fa 42%, #e7eef7 100%);
+    radial-gradient(circle at 10% 10%, rgba(var(--glow-blue), 0.08), transparent 22%),
+    radial-gradient(circle at 92% 18%, rgba(var(--glow-orange), 0.05), transparent 18%),
+    linear-gradient(180deg, #fbfdff 0%, #eef4fb 38%, #e6edf7 100%);
 }
 
 html[data-theme="light"] body::before {
@@ -9762,6 +9762,20 @@ html[data-theme="light"] .secondary-btn {
   border-color: rgba(92, 124, 166, 0.18);
   color: #12243a;
   box-shadow: 0 10px 20px rgba(37, 78, 128, 0.06);
+}
+
+html[data-theme="light"] .action-link:hover,
+html[data-theme="light"] .shop-nav__link:hover,
+html[data-theme="light"] .shop-nav__pill:hover {
+  border-color: rgba(22, 127, 242, 0.22);
+  box-shadow: 0 14px 28px rgba(22, 127, 242, 0.08);
+}
+
+html[data-theme="light"] .shop-nav__link.is-active,
+html[data-theme="light"] .shop-nav__pill.is-active {
+  background: linear-gradient(180deg, rgba(229, 241, 255, 0.98), rgba(214, 233, 255, 0.96));
+  border-color: rgba(22, 127, 242, 0.2);
+  color: #12365d;
 }
 
 html[data-theme="light"] .site-search {
@@ -9808,6 +9822,15 @@ html[data-theme="light"] .product-card {
   box-shadow: 0 14px 28px rgba(46, 79, 120, 0.08);
 }
 
+html[data-theme="light"] .benefit-card,
+html[data-theme="light"] .trust-card,
+html[data-theme="light"] .summary-card,
+html[data-theme="light"] .promo-code-card,
+html[data-theme="light"] .account-shortcut-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.96));
+}
+
 html[data-theme="light"] .commerce-hero__main,
 html[data-theme="light"] .promo-hero__main,
 html[data-theme="light"] .offer-hub__spotlight,
@@ -9823,6 +9846,16 @@ html[data-theme="light"] .membership-card {
     linear-gradient(160deg, rgba(14, 27, 44, 0.98), rgba(10, 20, 33, 0.98));
   border-color: rgba(90, 141, 212, 0.18);
   box-shadow: 0 20px 42px rgba(13, 28, 47, 0.16);
+}
+
+html[data-theme="light"] .hero-showcase-card__tag,
+html[data-theme="light"] .campaign-chip,
+html[data-theme="light"] .mini-pill,
+html[data-theme="light"] .promo-showcase__tag,
+html[data-theme="light"] .campaign-tile__eyebrow {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(134, 181, 235, 0.2);
+  color: #eaf4ff;
 }
 
 html[data-theme="light"] body[data-page="home"] .commerce-hero__copy h1,
@@ -9861,6 +9894,22 @@ html[data-theme="light"] .hero-perks span {
   background: rgba(22, 127, 242, 0.08);
   border-color: rgba(22, 127, 242, 0.14);
   color: #214f7d;
+}
+
+html[data-theme="light"] .section-heading p,
+html[data-theme="light"] .section-heading--commerce p,
+html[data-theme="light"] .section-heading--stacked p,
+html[data-theme="light"] .helper-text,
+html[data-theme="light"] .page-hero p,
+html[data-theme="light"] .account-center__intro p {
+  color: #627a95;
+}
+
+html[data-theme="light"] .product-card:hover,
+html[data-theme="light"] .department-card:hover,
+html[data-theme="light"] .account-shortcut-card:hover {
+  border-color: rgba(22, 127, 242, 0.22);
+  box-shadow: 0 18px 32px rgba(46, 79, 120, 0.1);
 }
 
 html[data-theme="light"] .auth-google {

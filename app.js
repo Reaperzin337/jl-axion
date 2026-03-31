@@ -992,7 +992,7 @@ function renderShell() {
           </div>
 
           <form class="site-header__search" data-site-search-form role="search" aria-label="Buscar produtos na JL AXION">
-            <label class="site-search" for="site-search-input">
+            <div class="site-search">
               <span class="site-search__icon" aria-hidden="true">${icon("search")}</span>
               <input
                 id="site-search-input"
@@ -1003,12 +1003,12 @@ function renderShell() {
                 enterkeyhint="search"
                 value="${escapeAttribute(state.searchLabel)}"
                 data-search-input
+                aria-label="Buscar produtos na JL AXION"
               >
-            </label>
-            <button type="submit" class="site-search__submit" aria-label="Buscar">
+              <button type="submit" class="site-search__submit" aria-label="Buscar">
               <span class="site-search__submit-icon" aria-hidden="true">${icon("search")}</span>
-              <span class="site-search__submit-label">Buscar</span>
             </button>
+            </div>
           </form>
 
           <div class="header-actions">

@@ -8962,6 +8962,35 @@ body::after {
     max-width: 100% !important;
   }
 
+  .commerce-page > *,
+  .promo-hero__main > *,
+  .commerce-hero__main > *,
+  .offer-hub > *,
+  .campaign-strip > *,
+  .promo-campaign-grid > *,
+  .promo-combo-grid > *,
+  .trust-band > *,
+  .section-heading > *,
+  .hero-showcase-grid > *,
+  .promo-hero__visual > *,
+  .commerce-hero__visual > *,
+  .commerce-hero__side > * {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .section-heading--commerce,
+  .section-heading--stacked {
+    display: grid !important;
+    gap: 8px !important;
+  }
+
+  .section-heading--commerce > *,
+  .section-heading--stacked > * {
+    min-width: 0 !important;
+  }
+
   body[data-page="home"] .commerce-hero__main,
   body[data-page="promotions"] .promo-hero__main,
   body[data-page="home"] .offer-hub,
@@ -9102,6 +9131,18 @@ body::after {
   body[data-page="login"] .auth-stage p,
   body[data-page="account"] .page-hero p {
     font-size: 0.92rem !important;
+  }
+
+  body[data-page="promotions"] .promo-hero__copy h1,
+  body[data-page="promotions"] .promo-hero__copy p,
+  body[data-page="promotions"] .promo-code-card,
+  body[data-page="promotions"] .campaign-banner,
+  body[data-page="promotions"] .promo-combo-card,
+  body[data-page="promotions"] .promo-band,
+  body[data-page="promotions"] .section-heading.section-heading--commerce {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
 }
 

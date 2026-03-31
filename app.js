@@ -993,7 +993,6 @@ function renderShell() {
 
           <form class="site-header__search" data-site-search-form role="search" aria-label="Buscar produtos na JL AXION">
             <div class="site-search">
-              <span class="site-search__icon" aria-hidden="true">${icon("search")}</span>
               <input
                 id="site-search-input"
                 type="search"
@@ -1006,8 +1005,8 @@ function renderShell() {
                 aria-label="Buscar produtos na JL AXION"
               >
               <button type="submit" class="site-search__submit" aria-label="Buscar">
-              <span class="site-search__submit-icon" aria-hidden="true">${icon("search")}</span>
-            </button>
+                <span class="site-search__submit-icon" aria-hidden="true">${icon("search")}</span>
+              </button>
             </div>
           </form>
 
@@ -1895,7 +1894,7 @@ function updateProfileText() {
   });
 
   document.querySelectorAll("[data-account-entry-label]").forEach((element) => {
-    element.textContent = isAuthenticated ? `OlÃ¡, ${firstName}` : "Login";
+    element.textContent = isAuthenticated ? `Ola, ${firstName}` : "Login";
   });
 
   document.querySelectorAll("[data-account-entry]").forEach((element) => {

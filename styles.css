@@ -8948,3 +8948,173 @@ body::after {
     grid-column: auto;
   }
 }
+
+@media (max-width: 900px) {
+  html,
+  body,
+  [data-site-shell],
+  .site-topbar,
+  .site-header,
+  .page,
+  .commerce-page,
+  .section,
+  .section > * {
+    max-width: 100% !important;
+  }
+
+  body[data-page="home"] .commerce-hero__main,
+  body[data-page="promotions"] .promo-hero__main,
+  body[data-page="home"] .offer-hub,
+  body[data-page="home"] .campaign-strip,
+  body[data-page="promotions"] .promo-campaign-grid,
+  body[data-page="promotions"] .promo-combo-grid,
+  body[data-page="product"] .product-detail-grid,
+  body[data-page="cart"] .cart-layout,
+  body[data-page="checkout"] .checkout-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  body[data-page="home"] .hero-showcase-grid,
+  body[data-page="promotions"] .promo-hero__visual > .promo-showcase:nth-of-type(2) {
+    display: none !important;
+  }
+
+  body[data-page="home"] .commerce-hero__visual,
+  body[data-page="promotions"] .promo-hero__visual,
+  body[data-page="home"] .commerce-hero__side {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  body[data-page="home"] .cta-row,
+  body[data-page="promotions"] .cta-row,
+  body[data-page="product"] .cta-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  body[data-page="home"] .cta-row > *,
+  body[data-page="promotions"] .cta-row > *,
+  body[data-page="product"] .cta-row > * {
+    width: 100% !important;
+  }
+
+  body[data-page="home"] .hero-perks,
+  body[data-page="promotions"] .hero-perks,
+  body[data-page="home"] .category-row--filters,
+  body[data-page="promotions"] .category-row--filters,
+  .shop-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-bottom: 4px !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+    touch-action: pan-x !important;
+  }
+
+  body[data-page="home"] .hero-perks::-webkit-scrollbar,
+  body[data-page="promotions"] .hero-perks::-webkit-scrollbar,
+  body[data-page="home"] .category-row--filters::-webkit-scrollbar,
+  body[data-page="promotions"] .category-row--filters::-webkit-scrollbar,
+  .shop-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  body[data-page="home"] .hero-perks span,
+  body[data-page="promotions"] .hero-perks span,
+  body[data-page="home"] .category-row--filters > *,
+  body[data-page="promotions"] .category-row--filters > *,
+  .shop-nav > * {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  body[data-page="home"] .department-grid--commerce,
+  body[data-page="home"] .product-grid--commerce,
+  body[data-page="promotions"] .product-grid--commerce,
+  body[data-page="category"] .product-grid,
+  body[data-page="product"] .product-grid--compact,
+  body[data-page="cart"] .product-grid--compact,
+  body[data-page="favorites"] .product-grid,
+  body[data-page="home"] .department-grid,
+  body[data-page="category"] .department-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  body[data-page="home"] .department-grid--commerce > *,
+  body[data-page="home"] .product-grid--commerce > *,
+  body[data-page="promotions"] .product-grid--commerce > *,
+  body[data-page="category"] .product-grid > *,
+  body[data-page="product"] .product-grid--compact > *,
+  body[data-page="cart"] .product-grid--compact > *,
+  body[data-page="favorites"] .product-grid > *,
+  body[data-page="home"] .department-grid > *,
+  body[data-page="category"] .department-grid > * {
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  body[data-page="home"] .product-card,
+  body[data-page="promotions"] .product-card,
+  body[data-page="category"] .product-card,
+  body[data-page="product"] .product-card,
+  body[data-page="cart"] .product-card,
+  body[data-page="favorites"] .product-card,
+  body[data-page="home"] .department-card,
+  body[data-page="category"] .department-card {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 12px !important;
+  }
+
+  body[data-page="home"] .product-media,
+  body[data-page="promotions"] .product-media,
+  body[data-page="category"] .product-media,
+  body[data-page="favorites"] .product-media {
+    min-height: 140px !important;
+  }
+
+  body[data-page="home"] .commerce-hero__copy h1,
+  body[data-page="promotions"] .promo-hero__copy h1,
+  body[data-page="category"] .page-hero h1,
+  body[data-page="product"] .page-hero h1,
+  body[data-page="login"] .auth-stage h1,
+  body[data-page="account"] .page-hero h1 {
+    font-size: clamp(1.72rem, 7.2vw, 2.2rem) !important;
+    line-height: 1.06 !important;
+  }
+
+  body[data-page="home"] .commerce-hero__copy p,
+  body[data-page="promotions"] .promo-hero__copy p,
+  body[data-page="category"] .page-hero p,
+  body[data-page="product"] .page-hero p,
+  body[data-page="login"] .auth-stage p,
+  body[data-page="account"] .page-hero p {
+    font-size: 0.92rem !important;
+  }
+}
+
+@media (max-width: 520px) {
+  body[data-page="home"] .department-grid--commerce,
+  body[data-page="home"] .product-grid--commerce,
+  body[data-page="promotions"] .product-grid--commerce,
+  body[data-page="category"] .product-grid,
+  body[data-page="product"] .product-grid--compact,
+  body[data-page="cart"] .product-grid--compact,
+  body[data-page="favorites"] .product-grid,
+  body[data-page="home"] .department-grid,
+  body[data-page="category"] .department-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

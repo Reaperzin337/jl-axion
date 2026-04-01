@@ -455,16 +455,6 @@ function writeStorage(key, value) {
   return value;
 }
 
-function removeStorage(key) {
-  try {
-    window.localStorage.removeItem(key);
-  } catch (error) {
-    return null;
-  }
-
-  return true;
-}
-
 function getLocalAccounts() {
   const accounts = readStorage(STORAGE_KEYS.accounts);
   return Array.isArray(accounts) ? accounts : [];
@@ -923,194 +913,6 @@ function drainFlashToast() {
   showToast(payload.message, payload);
 }
 
-function renderShell() {
-  const shell = document.querySelector("[data-site-shell]");
-
-  if (!shell) {
-    return;
-  }
-
-  const isAuthenticated = getIsAuthenticated();
-  const greetingName = getGreetingName();
-  const accountHref = isAuthenticated ? "account.html" : "login.html";
-  const accountLabel = isAuthenticated ? `Ola, ${greetingName}` : "Login";
-  const accountNavPage = isAuthenticated ? "account" : "login";
-  const useCompactSearchCopy = runtimeData.isNativeApp || window.matchMedia("(max-width: 780px)").matches;
-  const searchPlaceholder = useCompactSearchCopy
-    ? "Buscar produtos"
-    : "Buscar carregadores, lampadas, cabos, som...";
-  const drawerAccountEntry = isAuthenticated
-    ? drawerLink("account", "account.html", "Minha conta", "Perfil e pedidos")
-    : drawerLink("login", "login.html", "Minha conta", "Entre para acessar seus dados");
-  const authDrawerEntry = isAuthenticated
-    ? drawerLink("account", "account.html", `Ola, ${greetingName}`, "Perfil, pedidos e dados salvos")
-    : "";
-  const footerMarkup = `
-    <footer class="site-footer" data-global-footer>
-      <div class="site-footer__inner">
-        <div class="site-footer__block">
-          <strong>JL AXION</strong>
-          <span>Utilidades e tecnologia para casa, setup, energia, iluminacao e rotina com uma leitura mais comercial e mais clara.</span>
-        </div>
-        <div class="site-footer__block">
-          <strong>Compra com mais confianca</strong>
-          <span>Frete destacado, parcelamento visivel, promocoes objetivas e paginas pensadas para decidir rapido.</span>
-        </div>
-        <div class="site-footer__block">
-          <strong>Atendimento e conta</strong>
-          <span>Carrinho, favoritos, login, checkout e historico conectados para a loja crescer sem perder organizacao.</span>
-        </div>
-      </div>
-    </footer>
-  `;
-
-  shell.innerHTML = `
-    <div class="top-strip">
-      <div class="top-strip__inner">
-        <span class="top-strip__item">Frete gratis acima de R$ 600</span>
-        <span class="top-strip__item">Ate 10x sem juros</span>
-        <span class="top-strip__item">Ofertas da semana</span>
-        <span class="top-strip__item">Casa, setup, energia e utilidades</span>
-      </div>
-    </div>
-
-    <header class="site-header">
-      <div class="site-header__inner">
-        <div class="site-header__top">
-          <div class="brand-cluster">
-            <button type="button" class="menu-toggle" data-menu-button aria-label="Abrir menu">
-              <span class="menu-icon">
-                <span></span>
-                <span></span>
-                <span></span>
-              </span>
-            </button>
-
-            <a class="brand" href="index.html" aria-label="Ir para a home da JL AXION">
-              <img class="brand__logo" src="assets/jl-axion-lockup.svg?v=20260330h" alt="JL AXION">
-            </a>
-          </div>
-
-          <form class="site-header__search" data-site-search-form role="search" aria-label="Buscar produtos na JL AXION">
-            <div class="site-search">
-              <input
-                id="site-search-input"
-                type="search"
-                class="site-search__input"
-                placeholder="${searchPlaceholder}"
-                autocomplete="off"
-                enterkeyhint="search"
-                value="${escapeAttribute(state.searchLabel)}"
-                data-search-input
-                aria-label="Buscar produtos na JL AXION"
-              >
-              <button type="submit" class="site-search__submit" aria-label="Buscar">
-                <span class="site-search__submit-icon" aria-hidden="true">${icon("search")}</span>
-              </button>
-            </div>
-          </form>
-
-          <div class="header-actions">
-            ${themeActionMarkup}
-            <a class="action-link" href="favorites.html">
-              ${icon("heart")}
-              <span>Favoritos</span>
-              <span class="count-badge" data-favorites-count>0</span>
-            </a>
-            <a class="action-link" href="cart.html">
-              ${icon("cart")}
-              <span>Carrinho</span>
-              <span class="count-badge" data-cart-count>0</span>
-            </a>
-            <a class="action-link action-link--account" href="${accountHref}" data-account-entry>
-              ${icon("user")}
-              <span data-account-entry-label>${accountLabel}</span>
-            </a>
-          </div>
-        </div>
-
-        <div class="site-header__navrow">
-          <nav class="nav-links" aria-label="Navegacao principal">
-            <a class="nav-link nav-link--highlight" href="promotions.html">Ofertas</a>
-            ${navLink("home", "index.html", "Inicio")}
-            ${navLink("promotions", "promotions.html", "Promocoes")}
-            ${navLink("favorites", "favorites.html", "Favoritos")}
-            ${navLink("cart", "cart.html", "Carrinho")}
-            ${navLink(accountNavPage, accountHref, "Minha conta")}
-          </nav>
-          <div class="nav-meta">
-            <a class="nav-sale-link" href="promotions.html">Campanha da semana</a>
-            <span class="nav-meta__text">Desconto, frete e parcelamento em leitura comercial forte</span>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <div class="drawer-overlay" data-menu-overlay></div>
-
-    <aside class="drawer" data-menu-drawer aria-hidden="true">
-      <div class="drawer__header">
-        <a class="brand" href="index.html">
-          <img class="brand__logo" src="assets/jl-axion-lockup.svg?v=20260330h" alt="JL AXION">
-        </a>
-        <button type="button" class="icon-button drawer__close" data-menu-close aria-label="Fechar menu">
-          ${icon("close")}
-        </button>
-      </div>
-
-      <div class="drawer-spotlight">
-        <span class="eyebrow">Comprar agora</span>
-        <h2>Casa, setup e energia em uma navegaÃ§Ã£o mais direta.</h2>
-        <p>Entre pelas campanhas, departamentos ou pela busca principal e monte seu pedido com mais confianÃ§a.</p>
-        <div class="drawer-spotlight__actions">
-          <a class="primary-btn" href="promotions.html">Ver ofertas</a>
-          <a class="secondary-btn" href="index.html#catalogo">Ir para a vitrine</a>
-        </div>
-      </div>
-
-      <div class="drawer__section">
-        <h2>Navegacao rapida</h2>
-        <div class="drawer__group">
-          ${drawerLink("home", "index.html", "Inicio", "Vitrine e categorias")}
-          ${drawerLink("promotions", "promotions.html", "Promocoes", "Cupons, frete e combos")}
-          ${drawerLink("favorites", "favorites.html", "Favoritos", "Lista de desejos")}
-          ${drawerLink("cart", "cart.html", "Carrinho", "Resumo da compra")}
-          ${drawerAccountEntry}
-          ${authDrawerEntry}
-        </div>
-      </div>
-
-      <div class="drawer__section">
-        <h2>Preferencias</h2>
-        <div class="drawer-link-list">
-          <div class="drawer-link drawer-link--static">
-            <span>Tema da loja</span>
-            <small>Escolha entre claro e escuro</small>
-            ${themeActionMarkup}
-          </div>
-        </div>
-      </div>
-
-      <div class="drawer__section">
-        <h2>Departamentos</h2>
-        <div class="drawer-category-grid">
-          ${getCategoryNames().map((category) => drawerCategoryCard(category)).join("")}
-        </div>
-      </div>
-
-      <div class="drawer-promo">
-        <span class="eyebrow">Condicoes em destaque</span>
-        <h2>Frete, cupom e parcelamento em evidÃªncia</h2>
-        <p>Entre nas promocoes para ver as oportunidades mais fortes da semana com produtos ja ligados a cada campanha.</p>
-      </div>
-    </aside>
-  `;
-
-  mountGlobalFooter(footerMarkup);
-  updateCounts();
-  updateProfileText();
-}
-
 function mountGlobalFooter(markup) {
   document.querySelector("[data-global-footer]")?.remove();
   const main = document.querySelector("main.page, main");
@@ -1123,11 +925,6 @@ function mountGlobalFooter(markup) {
   document.body.insertAdjacentHTML("beforeend", markup);
 }
 
-function navLink(page, href, label) {
-  const active = document.body.dataset.page === page;
-  return `<a class="nav-link${active ? " is-active" : ""}" href="${href}"${active ? ' aria-current="page"' : ""}>${label}</a>`;
-}
-
 function drawerLink(page, href, label, subtitle) {
   const active = document.body.dataset.page === page;
   return `
@@ -1135,24 +932,6 @@ function drawerLink(page, href, label, subtitle) {
       <span>${label}</span>
       <small>${subtitle}</small>
     </a>
-  `;
-}
-
-function drawerCategoryCard(category) {
-  const meta = getCategoryMeta(category);
-  const productCount = getCategoryProducts(category).length;
-
-  return `
-    <button type="button" class="drawer-category-card" data-action="open-category" data-category="${category}">
-      <span class="drawer-category-card__lead">
-        <span class="drawer-category-card__code">${meta.code}</span>
-        <span class="drawer-category-card__meta">
-          <strong>${category}</strong>
-          <small>${meta.badge}</small>
-        </span>
-      </span>
-      <span class="drawer-category-card__count">${productCount} ${productCount === 1 ? "item" : "itens"}</span>
-    </button>
   `;
 }
 
@@ -1749,20 +1528,6 @@ function setAuthMode(mode) {
   });
 }
 
-function renderAll() {
-  updateCounts();
-  updateProfileText();
-  renderHomeCollections();
-  renderHomeProducts();
-  renderPromotionProducts();
-  renderCartPage();
-  renderFavoritePage();
-  renderAccountPage();
-  renderCategoryPage();
-  renderCheckoutPage();
-  renderProductPage();
-}
-
 function refreshShellUi() {
   renderShell();
   bindSearch();
@@ -1987,57 +1752,6 @@ function scrollToCatalog() {
   }
 }
 
-function renderHomeProducts() {
-  const container = document.querySelector("[data-featured-products]");
-  const meta = document.querySelector("[data-catalog-meta]");
-
-  if (!container) {
-    return;
-  }
-
-  const results = PRODUCTS.filter((product) => {
-    const matchesCategory = state.category === "Todos" || product.category === state.category;
-    const needle = `${product.name} ${product.category} ${product.description}`.toLowerCase();
-    const matchesSearch = !state.search || needle.includes(state.search);
-    return matchesCategory && matchesSearch;
-  });
-
-  updateCategoryButtons();
-
-  if (!results.length) {
-    if (meta) {
-      meta.textContent = "Nenhum item combinou com os filtros atuais. Ajuste a busca para voltar a explorar a vitrine.";
-    }
-
-    container.innerHTML = emptyState(
-      "Nenhum produto encontrado",
-      "Ajuste a pesquisa ou volte para todos os itens da vitrine.",
-      '<button type="button" class="secondary-btn" data-action="clear-search">Limpar filtros</button>'
-    );
-    return;
-  }
-
-  const visibleResults = !state.search && state.category === "Todos"
-    ? results.slice(0, 8)
-    : results;
-
-  if (meta) {
-    meta.textContent = buildCatalogMeta(results.length, visibleResults.length);
-  }
-
-  container.innerHTML = visibleResults.map((product) => productCard(product)).join("");
-}
-
-function renderPromotionProducts() {
-  const container = document.querySelector("[data-promo-products]");
-
-  if (!container) {
-    return;
-  }
-
-  container.innerHTML = getPromotionalProducts().slice(0, 8).map((product) => productCard(product, { promo: true })).join("");
-}
-
 function renderCartPage() {
   const itemsContainer = document.querySelector("[data-cart-items]");
   const summaryContainer = document.querySelector("[data-cart-summary]");
@@ -2149,64 +1863,6 @@ function renderFavoritePage() {
   }
 }
 
-function renderAccountPage() {
-  const orderList = document.querySelector("[data-order-list]");
-  const accountForm = document.querySelector("[data-account-form]");
-  const authActions = document.querySelector("[data-account-auth-actions]");
-
-  if (!orderList) {
-    return;
-  }
-
-  if (!getIsAuthenticated()) {
-    if (authActions) {
-      authActions.innerHTML = "";
-    }
-
-    if (accountForm) {
-      accountForm.querySelectorAll("input, button").forEach((element) => {
-        element.disabled = true;
-      });
-    }
-
-    orderList.innerHTML = emptyState(
-      "Sua conta ainda nao foi acessada",
-      "Entre com seu e-mail e senha para acompanhar pedidos, editar seus dados e usar a area do cliente de forma completa.",
-      '<a class="primary-btn" href="login.html">Entrar agora</a>'
-    );
-    return;
-  }
-
-  if (authActions) {
-    authActions.innerHTML = '<button type="button" class="ghost-btn primary-btn--full" data-action="logout">Sair da conta</button>';
-  }
-
-  const orders = getOrders();
-
-  if (!orders.length) {
-    orderList.innerHTML = emptyState(
-      "Nenhum pedido por enquanto",
-      "Quando voce finalizar a compra no checkout, o pedido vai aparecer aqui automaticamente.",
-      '<a class="secondary-btn" href="index.html">Voltar para a vitrine</a>'
-    );
-    return;
-  }
-
-  orderList.innerHTML = orders.slice(0, 4).map((order) => `
-    <article class="order-item">
-      <div>
-        <strong>${order.id}</strong>
-        <p>${order.placedAt} â€¢ ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
-        <p>${order.summary}</p>
-      </div>
-      <div class="order-item__side">
-        <strong>${money.format(order.total)}</strong>
-        <span class="status-chip${order.statusTone === "success" ? " status-chip--success" : ""}${order.statusTone === "warning" ? " status-chip--warning" : ""}">${order.status}</span>
-      </div>
-    </article>
-  `).join("");
-}
-
 function renderCategoryPage() {
   const productsContainer = document.querySelector("[data-category-products]");
 
@@ -2289,7 +1945,7 @@ function renderCategoryPage() {
         ${categoryProducts.slice(0, 3).map((product) => `
           <article class="category-spotlight-item">
             <strong>${product.name}</strong>
-            <span>${money.format(product.price)} â€¢ ${product.badge}</span>
+            <span>${money.format(product.price)} • ${product.badge}</span>
           </article>
         `).join("")}
       </div>
@@ -2507,7 +2163,7 @@ function renderCheckoutPage() {
           </div>
           <div class="checkout-item__meta">
             <strong>${item.product.name}</strong>
-            <span>${item.quantity} ${item.quantity === 1 ? "unidade" : "unidades"} â€¢ ${item.product.category}</span>
+          <span>${item.quantity} ${item.quantity === 1 ? "unidade" : "unidades"} • ${item.product.category}</span>
           </div>
           <strong class="checkout-item__price">${money.format(item.product.price * item.quantity)}</strong>
         </article>
@@ -2561,7 +2217,7 @@ function renderCheckoutPage() {
           statusTone: payment === "pix" ? "warning" : "success",
           total,
           itemCount: itemsCount,
-          summary: `${getDeliveryLabel(delivery)} â€¢ ${nextProfile.city}`,
+          summary: `${getDeliveryLabel(delivery)} • ${nextProfile.city}`,
           payment: getPaymentLabel(payment),
           items: cartProducts.map((item) => ({
             id: item.product.id,
@@ -2789,76 +2445,6 @@ function getProductSpecs(product, installmentCount, installmentValue) {
   ];
 }
 
-function productCard(product, options = {}) {
-  const favorites = getFavorites();
-  const isFavorite = favorites.includes(product.id);
-  const showDiscount = options.promo && typeof product.oldPrice === "number";
-  const discount = showDiscount ? percentage(product.oldPrice, product.price) : null;
-  const savings = productSavings(product);
-  const installmentCount = product.price >= 300 ? 10 : 6;
-  const installmentValue = money.format(product.price / installmentCount);
-  const detailsHref = `product.html?id=${encodeURIComponent(product.id)}`;
-  const [primarySignal, secondarySignal] = getProductSignals(product);
-  const reviewCount = product.reviews || 0;
-  const reviewLabel = `${reviewCount} ${reviewCount === 1 ? "avaliacao" : "avaliacoes"}`;
-  const footerNote = options.promo ? "Oferta ativa nesta campanha" : "Preco, envio e CTA em leitura clara";
-
-  return `
-    <article class="product-card">
-      <a class="product-media" href="${detailsHref}" aria-label="Abrir detalhes de ${product.name}">
-        <img src="${product.image}" alt="${product.name}">
-        <span class="product-badge">${options.promo ? "Oferta" : product.badge}</span>
-        ${discount ? `<span class="discount-badge">-${discount}%</span>` : ""}
-      </a>
-
-      <div class="product-top">
-        <div class="product-copy">
-          <span class="product-category">${product.category}</span>
-          <h3><a class="product-title-link" href="${detailsHref}">${product.name}</a></h3>
-        </div>
-
-        <button type="button" class="icon-button${isFavorite ? " is-active" : ""}" data-action="toggle-favorite" data-id="${product.id}" aria-label="Favoritar ${product.name}">
-          ${icon("heart")}
-        </button>
-      </div>
-
-      <div class="product-signal-row">
-        <span class="product-signal product-signal--accent">${primarySignal}</span>
-        <span class="product-signal">${secondarySignal}</span>
-      </div>
-
-      <p class="product-description">${product.description}</p>
-
-      <div class="product-meta-row">
-        <span class="rating-pill">${String(product.rating || 4.8).replace(".", ",")} &#9733;</span>
-        <span class="shipping-pill">${product.shipping || "Frete rapido"}</span>
-      </div>
-
-      <div class="price-row">
-        <div class="product-price-stack">
-          <strong>${money.format(product.price)}</strong>
-          <div class="product-price-meta">
-            ${product.oldPrice ? `<del>${money.format(product.oldPrice)}</del>` : ""}
-            <span>${savings ? `Economize ${money.format(savings)}` : "Preco forte da categoria"}</span>
-          </div>
-        </div>
-      </div>
-
-      <p class="product-installment">ou ${installmentCount}x de ${installmentValue} sem juros no cartao</p>
-
-      <div class="product-actions">
-        <button type="button" class="primary-btn" data-action="add-to-cart" data-id="${product.id}">Comprar agora</button>
-        <a class="secondary-btn" href="${detailsHref}">Ver detalhes</a>
-      </div>
-
-      <div class="product-footer-note">
-        <span>${reviewLabel}</span>
-        <span>${footerNote}</span>
-      </div>
-    </article>
-  `;
-}
-
 function getCategoryMeta(category) {
   const fallbackCategory = getCategoryNames()[0] || Object.keys(CATEGORY_META)[0];
   return CATEGORY_META[category] || CATEGORY_META[fallbackCategory];
@@ -2880,85 +2466,8 @@ function getCategoryNames() {
   return names;
 }
 
-function renderHomeCollections() {
-  const categoryContainer = document.querySelector("[data-home-categories]");
-  const filterContainer = document.querySelector("[data-home-filters]");
-
-  if (categoryContainer) {
-    categoryContainer.innerHTML = getCategoryNames().map((category) => homeCategoryCard(category)).join("");
-  }
-
-  if (filterContainer) {
-    filterContainer.innerHTML = [
-      '<button type="button" class="filter-chip" data-action="set-category" data-category="Todos">Todos</button>',
-      ...getCategoryNames().map((category) => `<button type="button" class="filter-chip" data-action="set-category" data-category="${category}">${category}</button>`)
-    ].join("");
-  }
-}
-
-function buildCatalogMeta(totalResults, visibleResults) {
-  const itemLabel = totalResults === 1 ? "item" : "itens";
-
-  if (state.search && state.category !== "Todos") {
-    return `${totalResults} ${itemLabel} em ${state.category} para "${state.searchLabel}", com foco em preco, parcelamento e acao de compra.`;
-  }
-
-  if (state.search) {
-    return `${totalResults} ${itemLabel} encontrados para "${state.searchLabel}" na vitrine principal da JL AXION.`;
-  }
-
-  if (state.category !== "Todos") {
-    return `${totalResults} ${itemLabel} disponiveis em ${state.category}, organizados para decidir rapido e comprar melhor.`;
-  }
-
-  if (visibleResults < totalResults) {
-    return `${visibleResults} destaques iniciais entre ${totalResults} itens da loja para entrar pelas melhores oportunidades do momento.`;
-  }
-
-  return `${totalResults} itens com preco forte, envio claro e leitura comercial mais objetiva.`;
-}
-
 function buildCategoryHref(category) {
   return `category.html?name=${encodeURIComponent(category)}`;
-}
-
-function categoryLinkCard(category) {
-  const meta = getCategoryMeta(category);
-  const productCount = getCategoryProducts(category).length;
-
-  return `
-    <a class="department-card department-card--link" href="${buildCategoryHref(category)}">
-      <span class="department-icon">${meta.code}</span>
-      <strong>${category}</strong>
-      <p>${meta.homeBenefit || `${productCount} itens com leitura mais clara para ${category.toLowerCase()}.`}</p>
-      <div class="department-card__foot">
-        <span class="department-meta-pill">${productCount} ${productCount === 1 ? "item" : "itens"}</span>
-        <span class="department-link">Ver departamento</span>
-      </div>
-    </a>
-  `;
-}
-
-function homeCategoryCard(category) {
-  const meta = getCategoryMeta(category);
-  const productCount = getCategoryProducts(category).length;
-
-  return `
-    <button type="button" class="department-card department-card--home" data-action="open-category" data-category="${category}">
-      <div class="department-card__head">
-        <span class="department-icon">${meta.code}</span>
-        <span class="department-kicker">${meta.badge}</span>
-      </div>
-      <div class="department-card__body">
-        <strong>${category}</strong>
-        <p>${meta.homeBenefit || meta.subtitle}</p>
-      </div>
-      <div class="department-card__foot">
-        <span class="department-meta-pill">${productCount} ${productCount === 1 ? "item" : "itens"}</span>
-        <span class="department-link">Comprar agora</span>
-      </div>
-    </button>
-  `;
 }
 
 function productSavings(product) {
@@ -3536,8 +3045,7 @@ function renderShell() {
           </div>
 
           <form class="site-header__search" data-site-search-form role="search" aria-label="Buscar produtos na JL AXION">
-            <label class="site-search" for="site-search-input">
-              <span class="site-search__icon" aria-hidden="true">${icon("search")}</span>
+            <div class="site-search">
               <input
                 id="site-search-input"
                 type="search"
@@ -3547,12 +3055,13 @@ function renderShell() {
                 enterkeyhint="search"
                 value="${escapeAttribute(state.searchLabel)}"
                 data-search-input
+                aria-label="Buscar produtos na JL AXION"
               >
-            </label>
-            <button type="submit" class="site-search__submit" aria-label="Buscar">
-              <span class="site-search__submit-icon" aria-hidden="true">${icon("search")}</span>
-              <span class="site-search__submit-label">Buscar</span>
-            </button>
+              <button type="submit" class="site-search__submit" aria-label="Buscar">
+                <span class="site-search__submit-icon" aria-hidden="true">${icon("search")}</span>
+                <span class="site-search__submit-label">Buscar</span>
+              </button>
+            </div>
           </form>
 
           <div class="header-actions">
@@ -3916,241 +3425,6 @@ function renderLoginPage() {
   renderGoogleLogin();
 }
 
-function renderAccountPage() {
-  const root = document.querySelector("[data-account-root]");
-  const orderList = document.querySelector("[data-order-list]");
-  const accountForm = document.querySelector("[data-account-form]");
-  const authActions = document.querySelector("[data-account-auth-actions]");
-  const profileLink = document.querySelector("[data-account-profile-link]");
-  const overviewTitle = document.querySelector("[data-account-overview-title]");
-  const overviewSubtitle = document.querySelector("[data-account-overview-subtitle]");
-  const latestOrder = document.querySelector("[data-account-latest-order]");
-  const addressCard = document.querySelector("[data-account-address-card]");
-  const walletCard = document.querySelector("[data-account-wallet]");
-  const protocolsCard = document.querySelector("[data-account-protocols]");
-  const reviewsCard = document.querySelector("[data-account-reviews]");
-  const drawsCard = document.querySelector("[data-account-draws]");
-
-  if (!root || !orderList) {
-    return;
-  }
-
-  const isAuthenticated = getIsAuthenticated();
-
-  if (!isAuthenticated) {
-    if (profileLink) {
-      profileLink.hidden = true;
-    }
-
-    if (overviewTitle) {
-      overviewTitle.textContent = "Entre na sua conta";
-    }
-
-    if (overviewSubtitle) {
-      overviewSubtitle.textContent = "Use seu e-mail e senha para acompanhar pedidos, dados e enderecos com mais praticidade.";
-    }
-
-    if (authActions) {
-      authActions.innerHTML = '<a class="primary-btn" href="login.html">Entrar agora</a>';
-    }
-
-    if (accountForm) {
-      accountForm.querySelectorAll("input, button").forEach((element) => {
-        element.disabled = true;
-      });
-    }
-
-    if (latestOrder) {
-      latestOrder.innerHTML = emptyState(
-        "Sua central ainda nao foi ativada",
-        "Entre com seu e-mail e senha para liberar pedidos, atalhos e dados do cliente.",
-        '<a class="primary-btn" href="login.html">Entrar para liberar a conta</a>'
-      );
-    }
-
-    orderList.innerHTML = emptyState(
-      "Sem historico visivel",
-      "Quando voce acessar sua conta, seus pedidos recentes vao aparecer aqui com status, resumo e valor total.",
-      '<a class="secondary-btn" href="login.html">Fazer login</a>'
-    );
-
-    if (addressCard) {
-      addressCard.innerHTML = emptyState(
-        "Endereco bloqueado",
-        "Entre na conta para editar seu endereco principal e acelerar futuras compras.",
-        ""
-      );
-    }
-
-    if (walletCard) {
-      walletCard.innerHTML = emptyState(
-        "Carteira indisponivel",
-        "Sua area de cupons e saldo aparece depois do acesso.",
-        ""
-      );
-    }
-
-    if (protocolsCard) {
-      protocolsCard.innerHTML = emptyState(
-        "Sem protocolos ativos",
-        "Use sua conta para acompanhar chamados e atendimento.",
-        ""
-      );
-    }
-
-    if (reviewsCard) {
-      reviewsCard.innerHTML = emptyState(
-        "Sem avaliacoes no momento",
-        "Depois das compras, suas opinioes ficam reunidas aqui.",
-        ""
-      );
-    }
-
-    if (drawsCard) {
-      drawsCard.innerHTML = emptyState(
-        "Sorteios indisponiveis",
-        "Campanhas e beneficios aparecem quando sua conta estiver ativa.",
-        ""
-      );
-    }
-
-    return;
-  }
-
-  const profile = getProfile();
-
-  if (profileLink) {
-    profileLink.hidden = false;
-  }
-
-  if (overviewTitle) {
-    overviewTitle.innerHTML = `Bem-vindo, <span>${escapeHtml(profile.name || "Cliente JL AXION")}</span>`;
-  }
-
-  if (overviewSubtitle) {
-    overviewSubtitle.textContent = profile.email || "cliente@jlaxion.com.br";
-  }
-
-  if (authActions) {
-    authActions.innerHTML = '<button type="button" class="ghost-btn" data-action="logout">Sair</button>';
-  }
-
-  const orders = getOrders();
-  const latest = orders[0] || null;
-
-  if (latestOrder) {
-    latestOrder.innerHTML = latest
-      ? `
-        <article class="account-order-highlight">
-          <div class="account-order-highlight__head">
-            <div>
-              <strong>Pedido: ${latest.id}</strong>
-              <span>${latest.placedAt} â€¢ ${latest.itemCount} ${latest.itemCount === 1 ? "item" : "itens"}</span>
-            </div>
-            <span class="status-chip${latest.statusTone === "success" ? " status-chip--success" : ""}${latest.statusTone === "warning" ? " status-chip--warning" : ""}">${latest.status}</span>
-          </div>
-          <div class="account-order-highlight__body">
-            <p>${latest.summary}</p>
-            <div class="account-order-highlight__meta">
-              <strong>${money.format(latest.total)}</strong>
-              <span>${latest.payment || "Pagamento em analise"}</span>
-            </div>
-          </div>
-          <div class="account-order-highlight__actions">
-            <a class="secondary-btn" href="account-orders.html">Ver historico completo</a>
-          </div>
-        </article>
-      `
-      : emptyState(
-        "Nenhum pedido por enquanto",
-        "Quando voce finalizar a compra no checkout, o resumo do pedido mais recente aparecera aqui.",
-        '<a class="primary-btn" href="index.html">Explorar a vitrine</a>'
-      );
-  }
-
-  orderList.innerHTML = orders.length
-    ? orders.slice(0, 5).map((order) => `
-        <article class="order-item">
-          <div>
-            <strong>${order.id}</strong>
-            <p>${order.placedAt} â€¢ ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
-            <p>${order.summary}</p>
-          </div>
-          <div class="order-item__side">
-            <strong>${money.format(order.total)}</strong>
-            <span class="status-chip${order.statusTone === "success" ? " status-chip--success" : ""}${order.statusTone === "warning" ? " status-chip--warning" : ""}">${order.status}</span>
-          </div>
-        </article>
-      `).join("")
-    : emptyState(
-        "Nenhum pedido por enquanto",
-        "Quando voce finalizar a compra no checkout, o historico completo vai aparecer aqui automaticamente.",
-        '<a class="secondary-btn" href="index.html">Voltar para a vitrine</a>'
-      );
-
-  if (addressCard) {
-    addressCard.innerHTML = `
-      <article class="account-mini-panel">
-        <strong>${profile.address || DEFAULT_PROFILE.address}</strong>
-        <span>${profile.city || DEFAULT_PROFILE.city}</span>
-        <span>CEP ${profile.zip || DEFAULT_PROFILE.zip}</span>
-      </article>
-    `;
-  }
-
-  if (walletCard) {
-    walletCard.innerHTML = `
-      <article class="account-mini-panel">
-        <strong>AXION15 disponivel</strong>
-        <span>Use em campanhas selecionadas enquanto a oferta estiver ativa.</span>
-      </article>
-    `;
-  }
-
-  if (protocolsCard) {
-    protocolsCard.innerHTML = `
-      <article class="account-mini-panel">
-        <strong>Nenhum protocolo aberto</strong>
-        <span>Seu atendimento fica organizado aqui quando houver suporte ou troca.</span>
-      </article>
-    `;
-  }
-
-  if (reviewsCard) {
-    reviewsCard.innerHTML = `
-      <article class="account-mini-panel">
-        <strong>Ainda sem avaliacoes publicadas</strong>
-        <span>Depois das compras, voce podera avaliar produtos e acompanhar suas opinioes.</span>
-      </article>
-    `;
-  }
-
-  if (drawsCard) {
-    drawsCard.innerHTML = `
-      <article class="account-mini-panel">
-        <strong>Campanhas em preparacao</strong>
-        <span>Sorteios e beneficios sazonais vao aparecer aqui quando estiverem ativos.</span>
-      </article>
-    `;
-  }
-}
-
-function renderAll() {
-  updateCounts();
-  updateProfileText();
-  renderLoginPage();
-  renderHomeCollections();
-  renderHomeProducts();
-  renderHomeShelves();
-  renderPromotionProducts();
-  renderCartPage();
-  renderFavoritePage();
-  renderAccountPage();
-  renderCategoryPage();
-  renderCheckoutPage();
-  renderProductPage();
-}
-
 function getAccountOrderStageCount(order) {
   if (!order) {
     return 0;
@@ -4167,22 +3441,6 @@ function getAccountOrderStageCount(order) {
   return 1;
 }
 
-function buildAccountOrderProgressMarkup(order) {
-  const activeStages = getAccountOrderStageCount(order);
-  const steps = ["Recebido", "Em preparo", "Concluido"];
-
-  return `
-    <div class="account-order-progress" aria-label="Andamento do pedido">
-      ${steps.map((step, index) => `
-        <div class="account-order-progress__step${index < activeStages ? " is-active" : ""}">
-          <span class="account-order-progress__dot"></span>
-          <small>${step}</small>
-        </div>
-      `).join("")}
-    </div>
-  `;
-}
-
 function buildAccountOrderHighlightMarkup(order) {
   if (!order) {
     return emptyState(
@@ -4197,491 +3455,7 @@ function buildAccountOrderHighlightMarkup(order) {
       <div class="account-order-highlight__head">
         <div>
           <strong>Pedido: ${order.id}</strong>
-          <span>${order.placedAt} &bull; ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</span>
-        </div>
-        <span class="status-chip${order.statusTone === "success" ? " status-chip--success" : ""}${order.statusTone === "warning" ? " status-chip--warning" : ""}">${order.status}</span>
-      </div>
-      ${buildAccountOrderProgressMarkup(order)}
-      <div class="account-order-meta-grid">
-        <article class="account-order-meta-item">
-          <span>Total pago</span>
-          <strong>${money.format(order.total)}</strong>
-        </article>
-        <article class="account-order-meta-item">
-          <span>Pagamento</span>
-          <strong>${order.payment || "Em analise"}</strong>
-        </article>
-        <article class="account-order-meta-item">
-          <span>Entrega</span>
-          <strong>${order.summary}</strong>
-        </article>
-      </div>
-      <div class="account-order-highlight__body">
-        <p>Seu pedido fica organizado aqui com leitura rapida de status, valor e entrega.</p>
-      </div>
-      <div class="account-order-highlight__actions">
-        <a class="secondary-btn" href="account-orders.html">Ver historico completo</a>
-      </div>
-    </article>
-  `;
-}
-
-function buildAccountOrdersListMarkup(orders, limit = orders.length) {
-  if (!orders.length) {
-    return emptyState(
-      "Nenhum pedido por enquanto",
-      "Quando voce finalizar a compra no checkout, o historico completo vai aparecer aqui automaticamente.",
-      '<a class="secondary-btn" href="index.html">Voltar para a vitrine</a>'
-    );
-  }
-
-  return orders.slice(0, limit).map((order) => `
-    <article class="order-item">
-      <div class="order-item__main">
-        <strong>${order.id}</strong>
-        <p>${order.placedAt} &bull; ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
-        <p>${order.summary}</p>
-      </div>
-      <div class="order-item__side">
-        <span class="status-chip${order.statusTone === "success" ? " status-chip--success" : ""}${order.statusTone === "warning" ? " status-chip--warning" : ""}">${order.status}</span>
-        <strong>${money.format(order.total)}</strong>
-        <small class="order-item__payment">${order.payment || "Pagamento em analise"}</small>
-      </div>
-    </article>
-  `).join("");
-}
-
-function renderAccountPage() {
-  const root = document.querySelector("[data-account-root]");
-  const orderList = document.querySelector("[data-order-list]");
-  const authActions = document.querySelector("[data-account-auth-actions]");
-  const profileLink = document.querySelector("[data-account-profile-link]");
-  const overviewTitle = document.querySelector("[data-account-overview-title]");
-  const overviewSubtitle = document.querySelector("[data-account-overview-subtitle]");
-  const latestOrder = document.querySelector("[data-account-latest-order]");
-
-  if (!root || !orderList) {
-    return;
-  }
-
-  if (!getIsAuthenticated()) {
-    if (profileLink) {
-      profileLink.hidden = true;
-    }
-
-    if (overviewTitle) {
-      overviewTitle.textContent = "Entre na sua conta";
-    }
-
-    if (overviewSubtitle) {
-      overviewSubtitle.textContent = "Use seu e-mail e senha para acompanhar pedidos, dados e enderecos com mais praticidade.";
-    }
-
-    if (authActions) {
-      authActions.innerHTML = '<a class="primary-btn" href="login.html">Entrar agora</a>';
-    }
-
-    if (latestOrder) {
-      latestOrder.innerHTML = emptyState(
-        "Sua central ainda nao foi ativada",
-        "Entre com seu e-mail e senha para liberar seus atalhos, pedidos e dados do cliente.",
-        '<a class="primary-btn" href="login.html">Entrar para liberar a conta</a>'
-      );
-    }
-
-    orderList.innerHTML = emptyState(
-      "Sem pedidos visiveis",
-      "Depois do acesso, seus pedidos recentes vao aparecer aqui com status, resumo e valor total.",
-      '<a class="secondary-btn" href="login.html">Fazer login</a>'
-    );
-    return;
-  }
-
-  const profile = getProfile();
-
-  if (profileLink) {
-    profileLink.hidden = false;
-  }
-
-  if (overviewTitle) {
-    overviewTitle.innerHTML = `Bem-vindo, <span>${escapeHtml(profile.name || DEFAULT_PROFILE.name)}</span>`;
-  }
-
-  if (overviewSubtitle) {
-    overviewSubtitle.textContent = profile.email || DEFAULT_PROFILE.email;
-  }
-
-  if (authActions) {
-    authActions.innerHTML = '<button type="button" class="ghost-btn" data-action="logout">Sair</button>';
-  }
-
-  const orders = getOrders();
-  const latest = orders[0] || null;
-
-  if (latestOrder) {
-    latestOrder.innerHTML = buildAccountOrderHighlightMarkup(latest);
-  }
-
-  orderList.innerHTML = buildAccountOrdersListMarkup(orders, 3);
-}
-
-function renderAccountOrdersPage() {
-  const highlight = document.querySelector("[data-account-order-highlight-page]");
-  const list = document.querySelector("[data-account-orders-page]");
-  const count = document.querySelector("[data-account-orders-count]");
-  const status = document.querySelector("[data-account-orders-status]");
-  const total = document.querySelector("[data-account-orders-total]");
-
-  if (!highlight && !list && !count && !status && !total) {
-    return;
-  }
-
-  if (!getIsAuthenticated()) {
-    if (count) {
-      count.textContent = "0";
-    }
-
-    if (status) {
-      status.textContent = "Sem pedidos";
-    }
-
-    if (total) {
-      total.textContent = money.format(0);
-    }
-
-    if (highlight) {
-      highlight.innerHTML = emptyState(
-        "Seus pedidos aparecem aqui",
-        "Entre na conta para acompanhar status, historico e valores da sua compra.",
-        '<a class="primary-btn" href="login.html">Entrar agora</a>'
-      );
-    }
-
-    if (list) {
-      list.innerHTML = emptyState(
-        "Sem historico visivel",
-        "Apos o login, os pedidos ficam reunidos nesta pagina com leitura mais clara.",
-        '<a class="secondary-btn" href="login.html">Fazer login</a>'
-      );
-    }
-    return;
-  }
-
-  const orders = getOrders();
-  const latest = orders[0] || null;
-  const orderTotal = orders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-
-  if (count) {
-    count.textContent = String(orders.length);
-  }
-
-  if (status) {
-    status.textContent = latest ? latest.status : "Sem pedidos";
-  }
-
-  if (total) {
-    total.textContent = money.format(orderTotal);
-  }
-
-  if (highlight) {
-    highlight.innerHTML = buildAccountOrderHighlightMarkup(latest);
-  }
-
-  if (list) {
-    list.innerHTML = buildAccountOrdersListMarkup(orders);
-  }
-}
-
-function renderAccountProfilePage() {
-  const summary = document.querySelector("[data-account-profile-summary]");
-  const pageForm = document.body.dataset.page === "account-profile" ? document.querySelector("[data-account-form]") : null;
-  const completion = document.querySelector("[data-account-profile-completion]");
-  const contact = document.querySelector("[data-account-profile-contact]");
-  const shipping = document.querySelector("[data-account-profile-shipping]");
-
-  if (!summary && !pageForm && !completion && !contact && !shipping) {
-    return;
-  }
-
-  if (!getIsAuthenticated()) {
-    if (completion) {
-      completion.textContent = "0%";
-    }
-
-    if (contact) {
-      contact.textContent = "Sem contato";
-    }
-
-    if (shipping) {
-      shipping.textContent = "Revisar dados";
-    }
-
-    if (summary) {
-      summary.innerHTML = emptyState(
-        "Sua conta ainda nao esta ativa",
-        "Entre para visualizar e editar seus dados principais.",
-        '<a class="primary-btn" href="login.html">Entrar agora</a>'
-      );
-    }
-
-    if (pageForm) {
-      pageForm.querySelectorAll("input, button").forEach((element) => {
-        element.disabled = true;
-      });
-    }
-    return;
-  }
-
-  const profile = getProfile();
-  const profileFields = ["name", "email", "phone", "city", "address", "zip"];
-  const filledFields = profileFields.filter((field) => String(profile[field] || "").trim()).length;
-  const completionRatio = Math.round((filledFields / profileFields.length) * 100);
-
-  if (completion) {
-    completion.textContent = `${completionRatio}%`;
-  }
-
-  if (contact) {
-    contact.textContent = profile.phone || profile.email || "Adicionar contato";
-  }
-
-  if (shipping) {
-    shipping.textContent = profile.address && profile.zip ? "Pronto para checkout" : "Completar entrega";
-  }
-
-  if (summary) {
-    summary.innerHTML = `
-      <article class="account-mini-panel">
-        <div class="account-profile-summary">
-          <div class="account-profile-summary__row">
-            <span>Nome</span>
-            <strong>${profile.name || DEFAULT_PROFILE.name}</strong>
-          </div>
-          <div class="account-profile-summary__row">
-            <span>E-mail</span>
-            <strong>${profile.email || DEFAULT_PROFILE.email}</strong>
-          </div>
-          <div class="account-profile-summary__row">
-            <span>Telefone</span>
-            <strong>${profile.phone || DEFAULT_PROFILE.phone}</strong>
-          </div>
-          <div class="account-profile-summary__row">
-            <span>Cidade</span>
-            <strong>${profile.city || DEFAULT_PROFILE.city}</strong>
-          </div>
-          <div class="account-profile-summary__row">
-            <span>Endereco</span>
-            <strong>${profile.address || DEFAULT_PROFILE.address}</strong>
-          </div>
-          <div class="account-profile-summary__row">
-            <span>CEP</span>
-            <strong>${profile.zip || DEFAULT_PROFILE.zip}</strong>
-          </div>
-        </div>
-      </article>
-    `;
-  }
-}
-
-function renderAccountAddressesPage() {
-  const summary = document.querySelector("[data-account-address-summary-page]");
-
-  if (!summary) {
-    return;
-  }
-
-  if (!getIsAuthenticated()) {
-    summary.innerHTML = emptyState(
-      "Endereco indisponivel",
-      "Entre na conta para visualizar os dados principais de entrega.",
-      '<a class="primary-btn" href="login.html">Entrar agora</a>'
-    );
-    return;
-  }
-
-  const profile = getProfile();
-  summary.innerHTML = `
-    <article class="account-mini-panel">
-      <strong>${profile.address || DEFAULT_PROFILE.address}</strong>
-      <span>${profile.city || DEFAULT_PROFILE.city}</span>
-      <span>CEP ${profile.zip || DEFAULT_PROFILE.zip}</span>
-    </article>
-  `;
-}
-
-function renderAccountWalletPage() {
-  const wallet = document.querySelector("[data-account-wallet-page]");
-  const couponCount = document.querySelector("[data-account-wallet-coupon-count]");
-  const savings = document.querySelector("[data-account-wallet-savings]");
-  const access = document.querySelector("[data-account-wallet-access]");
-
-  if (!wallet && !couponCount && !savings && !access) {
-    return;
-  }
-
-  if (!getIsAuthenticated()) {
-    if (couponCount) {
-      couponCount.textContent = "0";
-    }
-
-    if (savings) {
-      savings.textContent = money.format(0);
-    }
-
-    if (access) {
-      access.textContent = "Entrar para liberar";
-    }
-
-    if (wallet) {
-      wallet.innerHTML = emptyState(
-        "Carteira indisponivel",
-        "Entre com sua conta para visualizar cupons e beneficios liberados.",
-        '<a class="primary-btn" href="login.html">Entrar agora</a>'
-      );
-    }
-    return;
-  }
-
-  const coupons = [
-    {
-      code: "AXION15",
-      title: "15% em campanhas selecionadas",
-      description: "Ideal para utilidades, iluminacao e itens com selo promocional na semana.",
-      meta: "Uso unico &bull; valido por 7 dias"
-    },
-    {
-      code: "FRETE600",
-      title: "Frete gratis acima de R$ 600",
-      description: "Ative automaticamente em pedidos com ticket maior para economizar no fechamento.",
-      meta: "Sul e Sudeste &bull; regras no checkout"
-    },
-    {
-      code: "SETUP10",
-      title: "10% em combinacoes de setup",
-      description: "Aproveite em compras com carregadores, cabos, escritorio e iluminacao.",
-      meta: "Campanha de categoria &bull; por tempo limitado"
-    }
-  ];
-
-  if (couponCount) {
-    couponCount.textContent = String(coupons.length);
-  }
-
-  if (savings) {
-    savings.textContent = money.format(45);
-  }
-
-  if (access) {
-    access.textContent = "Promocoes da semana";
-  }
-
-  if (wallet) {
-    wallet.innerHTML = `
-      <div class="coupon-stack">
-        ${coupons.map((coupon) => `
-          <article class="coupon-tile">
-            <div class="coupon-tile__code">${coupon.code}</div>
-            <div class="coupon-tile__body">
-              <strong>${coupon.title}</strong>
-              <p>${coupon.description}</p>
-              <span>${coupon.meta}</span>
-            </div>
-          </article>
-        `).join("")}
-      </div>
-    `;
-  }
-}
-
-function renderAccountSupportPage() {
-  const support = document.querySelector("[data-account-support-page]");
-  const primary = document.querySelector("[data-account-support-primary]");
-  const hours = document.querySelector("[data-account-support-hours]");
-  const sla = document.querySelector("[data-account-support-sla]");
-
-  if (!support && !primary && !hours && !sla) {
-    return;
-  }
-
-  if (primary) {
-    primary.textContent = "WhatsApp";
-  }
-
-  if (hours) {
-    hours.textContent = "Seg a sex, 9h-18h";
-  }
-
-  if (sla) {
-    sla.textContent = "Ate 15 min";
-  }
-
-  if (support) {
-    support.innerHTML = `
-      <div class="support-grid">
-        <a class="support-card" href="https://wa.me/5519989994528?text=Ol%C3%A1%2C%20Preciso%20de%20ajuda%20%21" target="_blank" rel="noopener noreferrer">
-          <span class="support-card__eyebrow">Atendimento imediato</span>
-          <strong>Falar no WhatsApp da loja</strong>
-          <p>Canal mais rapido para tirar duvidas sobre pedido, pagamento, entrega e disponibilidade.</p>
-        </a>
-        <a class="support-card" href="account-orders.html">
-          <span class="support-card__eyebrow">Apoio de compra</span>
-          <strong>Revisar pedidos recentes</strong>
-          <p>Veja status, pagamento e resumo do pedido antes de abrir um atendimento.</p>
-        </a>
-        <a class="support-card" href="account-protocols.html">
-          <span class="support-card__eyebrow">Acompanhamento</span>
-          <strong>Ver protocolos da conta</strong>
-          <p>Concentre trocas, suporte e qualquer solicitacao em uma pagina dedicada.</p>
-        </a>
-      </div>
-      <article class="account-mini-panel">
-        <strong>Como atendemos na JL AXION</strong>
-        <span>Usamos WhatsApp como canal principal para resolver duvidas com mais agilidade e manter o historico mais facil de acompanhar.</span>
-        <span>Para atendimento ficar ainda mais rapido, tenha em maos o numero do pedido ou o e-mail usado na compra.</span>
-      </article>
-    `;
-  }
-}
-
-function renderAll() {
-  updateCounts();
-  updateProfileText();
-  renderLoginPage();
-  renderHomeCollections();
-  renderHomeProducts();
-  renderHomeShelves();
-  renderPromotionProducts();
-  renderCartPage();
-  renderFavoritePage();
-  renderAccountPage();
-  renderAccountOrdersPage();
-  renderAccountProfilePage();
-  renderAccountAddressesPage();
-  renderAccountWalletPage();
-  renderAccountSupportPage();
-  renderAccountProtocolsPage();
-  renderAccountReviewsPage();
-  renderAccountDrawsPage();
-  renderCategoryPage();
-  renderCheckoutPage();
-  renderProductPage();
-}
-
-function buildAccountOrderHighlightMarkup(order) {
-  if (!order) {
-    return emptyState(
-      "Nenhum pedido por enquanto",
-      "Quando voce finalizar a compra no checkout, o resumo do pedido mais recente aparecera aqui.",
-      '<a class="primary-btn" href="index.html">Explorar a vitrine</a>'
-    );
-  }
-
-  return `
-    <article class="account-order-highlight">
-      <div class="account-order-highlight__head">
-        <div>
-          <strong>Pedido: ${order.id}</strong>
-          <span>${order.placedAt} â€¢ ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</span>
+          <span>${order.placedAt} • ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</span>
         </div>
         <span class="status-chip${order.statusTone === "success" ? " status-chip--success" : ""}${order.statusTone === "warning" ? " status-chip--warning" : ""}">${order.status}</span>
       </div>
@@ -4712,7 +3486,7 @@ function buildAccountOrdersListMarkup(orders, limit = orders.length) {
     <article class="order-item">
       <div>
         <strong>${order.id}</strong>
-        <p>${order.placedAt} â€¢ ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
+        <p>${order.placedAt} • ${order.itemCount} ${order.itemCount === 1 ? "item" : "itens"}</p>
         <p>${order.summary}</p>
       </div>
       <div class="order-item__side">

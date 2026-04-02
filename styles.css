@@ -10522,3 +10522,273 @@ html[data-theme="light"] .site-header__lower {
     display: none;
   }
 }
+
+/* Native app refinement 20260402 */
+body.native-app {
+  background:
+    radial-gradient(circle at top, rgba(47, 129, 255, 0.12), transparent 32%),
+    linear-gradient(180deg, #08111b 0%, #09131f 48%, #0a1522 100%);
+}
+
+body.native-app .site-topbar-spacer {
+  height: var(--site-topbar-height, 86px);
+}
+
+body.native-app .page {
+  padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px));
+}
+
+body.native-app .site-header {
+  background: linear-gradient(180deg, rgba(8, 17, 27, 0.96), rgba(9, 19, 31, 0.94));
+  border-bottom: 1px solid rgba(120, 159, 214, 0.12);
+  box-shadow: 0 14px 28px rgba(3, 8, 15, 0.34);
+}
+
+body.native-app .site-header__inner {
+  gap: 10px;
+  padding: 10px 0 12px;
+}
+
+body.native-app .site-header__main {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "brand actions"
+    "search search";
+  gap: 10px;
+  align-items: center;
+}
+
+body.native-app .brand-cluster {
+  grid-area: brand;
+  padding-left: 0;
+  gap: 10px;
+}
+
+body.native-app .brand__logo {
+  max-width: 158px;
+  max-height: 42px;
+}
+
+body.native-app .header-actions {
+  grid-area: actions;
+  gap: 8px;
+  justify-self: end;
+}
+
+body.native-app .header-actions .action-link {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 15px;
+}
+
+body.native-app .header-actions .action-link > span:not(.count-badge),
+body.native-app .header-actions .theme-toggle__copy,
+body.native-app .header-actions .account-trigger__copy,
+body.native-app .header-actions .account-trigger__caret {
+  display: none !important;
+}
+
+body.native-app .header-actions .count-badge {
+  position: absolute;
+  top: -4px;
+  right: -2px;
+}
+
+body.native-app .site-header__search {
+  grid-area: search;
+  width: 100%;
+  max-width: none;
+}
+
+body.native-app .site-search {
+  min-height: 48px;
+  border-radius: 18px;
+  padding: 0 10px 0 14px;
+  background:
+    linear-gradient(180deg, rgba(18, 29, 45, 0.98), rgba(13, 23, 36, 0.99)),
+    rgba(13, 23, 36, 0.98);
+}
+
+body.native-app .site-search__input {
+  font-size: 16px;
+  padding: 12px 0;
+}
+
+body.native-app .site-search__submit {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+}
+
+body.native-app .site-search__submit-label {
+  display: none;
+}
+
+body.native-app .commerce-hero__main,
+body.native-app .promo-hero__main,
+body.native-app .offer-hub,
+body.native-app .campaign-strip {
+  gap: 14px;
+}
+
+body.native-app .commerce-hero__copy h1,
+body.native-app .promo-hero__copy h1 {
+  font-size: clamp(1.52rem, 6.8vw, 2.08rem);
+  line-height: 1.04;
+}
+
+body.native-app .commerce-hero__copy p,
+body.native-app .promo-hero__copy p {
+  font-size: 0.92rem;
+  line-height: 1.46;
+}
+
+body.native-app .hero-perks,
+body.native-app .category-row--filters,
+body.native-app .shop-nav {
+  display: flex !important;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 8px;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+body.native-app .hero-perks::-webkit-scrollbar,
+body.native-app .category-row--filters::-webkit-scrollbar,
+body.native-app .shop-nav::-webkit-scrollbar {
+  display: none;
+}
+
+body.native-app .hero-perks > *,
+body.native-app .category-row--filters > *,
+body.native-app .shop-nav > * {
+  flex: 0 0 auto;
+}
+
+body.native-app .department-grid--commerce,
+body.native-app .product-grid--commerce {
+  display: grid !important;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(212px, 72vw);
+  grid-template-columns: none;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 8px;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+}
+
+body.native-app .department-grid--commerce::-webkit-scrollbar,
+body.native-app .product-grid--commerce::-webkit-scrollbar {
+  display: none;
+}
+
+body.native-app .department-grid--commerce > *,
+body.native-app .product-grid--commerce > * {
+  width: 100%;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+body.native-app .department-card--commerce,
+body.native-app .product-card--commerce {
+  min-height: 100%;
+  padding: 14px;
+  border-radius: 20px;
+}
+
+body.native-app .native-bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  transform: translateX(-50%);
+  z-index: 65;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  width: min(calc(100vw - 14px), 430px);
+  padding: 8px;
+  border-radius: 24px;
+  background: rgba(9, 18, 29, 0.92);
+  border: 1px solid rgba(112, 149, 206, 0.14);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(18px);
+}
+
+body.native-app .native-bottom-nav__link {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-height: 58px;
+  padding: 8px 4px 6px;
+  border-radius: 18px;
+  color: rgba(214, 228, 244, 0.78);
+  text-decoration: none;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+body.native-app .native-bottom-nav__link .icon {
+  width: 19px;
+  height: 19px;
+}
+
+body.native-app .native-bottom-nav__link span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+body.native-app .native-bottom-nav__link .count-badge {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  min-width: 17px;
+  height: 17px;
+  font-size: 0.62rem;
+}
+
+body.native-app .native-bottom-nav__link.is-active {
+  background: linear-gradient(180deg, rgba(47, 129, 255, 0.2), rgba(26, 85, 158, 0.14));
+  color: #ffffff;
+}
+
+body.native-app .native-bottom-nav__link:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 560px) {
+  body.native-app .brand__logo {
+    max-width: 146px;
+    max-height: 39px;
+  }
+
+  body.native-app .department-grid--commerce,
+  body.native-app .product-grid--commerce {
+    grid-auto-columns: minmax(198px, 76vw);
+  }
+
+  body.native-app .native-bottom-nav {
+    width: min(calc(100vw - 10px), 420px);
+    gap: 4px;
+    padding: 7px;
+    border-radius: 22px;
+  }
+
+  body.native-app .native-bottom-nav__link {
+    min-height: 56px;
+    padding: 8px 2px 5px;
+  }
+
+  body.native-app .native-bottom-nav__link span {
+    font-size: 0.66rem;
+  }
+}

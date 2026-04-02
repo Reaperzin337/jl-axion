@@ -2885,6 +2885,17 @@ function icon(name) {
         <path d="M12 3.7v2.25M12 18.05v2.25M20.3 12h-2.25M5.95 12H3.7M17.87 6.13l-1.59 1.59M7.72 16.28l-1.59 1.59M17.87 17.87l-1.59-1.59M7.72 7.72 6.13 6.13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
       </svg>
     `,
+    home: `
+      <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4.9 10.55 12 4.95l7.1 5.6v7.35a1.3 1.3 0 0 1-1.3 1.3h-3.25v-5.1h-5.1v5.1H6.2a1.3 1.3 0 0 1-1.3-1.3v-7.35Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+      </svg>
+    `,
+    tag: `
+      <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4.75 11.05V6.6c0-.72.58-1.3 1.3-1.3h4.46c.34 0 .67.14.91.38l7.27 7.27a1.3 1.3 0 0 1 0 1.84l-3.9 3.9a1.3 1.3 0 0 1-1.84 0L5.13 11.96a1.3 1.3 0 0 1-.38-.91Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <circle cx="8.3" cy="8.3" r="1.2" fill="currentColor"/>
+      </svg>
+    `,
     moon: `
       <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M17.5 14.9a6.45 6.45 0 0 1-7.97-8.39 7.7 7.7 0 1 0 7.97 8.39Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
@@ -2935,6 +2946,16 @@ function renderShell() {
   const accountInitial = greetingName.charAt(0).toUpperCase();
   const nextThemeLabel = runtimeData.theme === "light" ? "Tema escuro" : "Tema claro";
   const currentThemeLabel = runtimeData.theme === "light" ? "Claro" : "Escuro";
+  const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const activeNativeTab = currentPage.startsWith("promotions")
+    ? "promotions"
+    : currentPage.startsWith("favorites")
+      ? "favorites"
+      : currentPage.startsWith("cart") || currentPage.startsWith("checkout")
+        ? "cart"
+        : currentPage.startsWith("account") || currentPage.startsWith("login")
+          ? "account"
+          : "home";
   const themeActionMarkup = `
     <button
       type="button"
@@ -3003,6 +3024,59 @@ function renderShell() {
         <span data-account-entry-label>${escapeHtml(accountLabel)}</span>
       </a>
     `;
+  const headerActionsMarkup = runtimeData.isNativeApp
+    ? `
+      <a class="action-link action-link--icon-only" href="favorites.html" aria-label="Favoritos">
+        ${icon("heart")}
+        <span class="count-badge" data-favorites-count>0</span>
+      </a>
+      <a class="action-link action-link--icon-only" href="cart.html" aria-label="Carrinho">
+        ${icon("cart")}
+        <span class="count-badge" data-cart-count>0</span>
+      </a>
+    `
+    : `
+      ${themeActionMarkup}
+      <a class="action-link" href="favorites.html">
+        ${icon("heart")}
+        <span>Favoritos</span>
+        <span class="count-badge" data-favorites-count>0</span>
+      </a>
+      <a class="action-link" href="cart.html">
+        ${icon("cart")}
+        <span>Carrinho</span>
+        <span class="count-badge" data-cart-count>0</span>
+      </a>
+      ${accountActionMarkup}
+    `;
+  const nativeBottomNavMarkup = runtimeData.isNativeApp
+    ? `
+      <nav class="native-bottom-nav" aria-label="Navegacao principal do app">
+        <a class="native-bottom-nav__link${activeNativeTab === "home" ? " is-active" : ""}" href="index.html">
+          ${icon("home")}
+          <span>Inicio</span>
+        </a>
+        <a class="native-bottom-nav__link${activeNativeTab === "promotions" ? " is-active" : ""}" href="promotions.html">
+          ${icon("tag")}
+          <span>Ofertas</span>
+        </a>
+        <a class="native-bottom-nav__link${activeNativeTab === "favorites" ? " is-active" : ""}" href="favorites.html">
+          ${icon("heart")}
+          <span>Favoritos</span>
+          <span class="count-badge" data-favorites-count>0</span>
+        </a>
+        <a class="native-bottom-nav__link${activeNativeTab === "cart" ? " is-active" : ""}" href="cart.html">
+          ${icon("cart")}
+          <span>Carrinho</span>
+          <span class="count-badge" data-cart-count>0</span>
+        </a>
+        <a class="native-bottom-nav__link${activeNativeTab === "account" ? " is-active" : ""}" href="${accountHref}">
+          ${icon("user")}
+          <span>${isAuthenticated ? "Conta" : "Entrar"}</span>
+        </a>
+      </nav>
+    `
+    : "";
   const footerMarkup = `
     <footer class="site-footer" data-global-footer>
       <div class="site-footer__inner">
@@ -3075,18 +3149,7 @@ function renderShell() {
           </form>
 
           <div class="header-actions">
-            ${themeActionMarkup}
-            <a class="action-link" href="favorites.html">
-              ${icon("heart")}
-              <span>Favoritos</span>
-              <span class="count-badge" data-favorites-count>0</span>
-            </a>
-            <a class="action-link" href="cart.html">
-              ${icon("cart")}
-              <span>Carrinho</span>
-              <span class="count-badge" data-cart-count>0</span>
-            </a>
-            ${accountActionMarkup}
+            ${headerActionsMarkup}
           </div>
         </div>
 
@@ -3176,6 +3239,7 @@ function renderShell() {
       <span class="whatsapp-float__icon" aria-hidden="true">${icon("whatsapp")}</span>
       <span class="whatsapp-float__status" aria-hidden="true"></span>
     </a>
+    ${nativeBottomNavMarkup}
   `;
 
   mountGlobalFooter(footerMarkup);

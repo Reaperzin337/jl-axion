@@ -579,7 +579,8 @@ function updateThemeColor(theme = runtimeData.theme) {
 
 function syncThemeControls() {
   const nextTheme = runtimeData.theme === "light" ? "dark" : "light";
-  const iconMarkup = icon(nextTheme === "light" ? "sun" : "moon");
+  const currentTheme = runtimeData.theme === "light" ? "light" : "dark";
+  const iconMarkup = icon(currentTheme === "light" ? "sun" : "moon");
 
   document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
     button.setAttribute("aria-label", nextTheme === "light" ? "Ativar tema claro" : "Ativar tema escuro");
@@ -593,7 +594,12 @@ function syncThemeControls() {
 
     const label = button.querySelector("[data-theme-label]");
     if (label) {
-      label.textContent = nextTheme === "light" ? "Tema claro" : "Tema escuro";
+      label.textContent = "Tema";
+    }
+
+    const state = button.querySelector("[data-theme-state]");
+    if (state) {
+      state.textContent = currentTheme === "light" ? "Claro" : "Escuro";
     }
   });
 }
@@ -2928,6 +2934,7 @@ function renderShell() {
   const accountEmail = isAuthenticated ? (viewerProfile.email || DEFAULT_PROFILE.email) : "";
   const accountInitial = greetingName.charAt(0).toUpperCase();
   const nextThemeLabel = runtimeData.theme === "light" ? "Tema escuro" : "Tema claro";
+  const currentThemeLabel = runtimeData.theme === "light" ? "Claro" : "Escuro";
   const themeActionMarkup = `
     <button
       type="button"
@@ -2937,8 +2944,11 @@ function renderShell() {
       aria-pressed="${runtimeData.theme === "light"}"
       aria-label="${nextThemeLabel}"
     >
-      <span class="theme-toggle__icon" data-theme-icon>${icon(runtimeData.theme === "light" ? "moon" : "sun")}</span>
-      <span class="theme-toggle__label" data-theme-label>${nextThemeLabel}</span>
+      <span class="theme-toggle__icon" data-theme-icon>${icon(runtimeData.theme === "light" ? "sun" : "moon")}</span>
+      <span class="theme-toggle__copy">
+        <span class="theme-toggle__label" data-theme-label>Tema</span>
+        <span class="theme-toggle__state" data-theme-state>${currentThemeLabel}</span>
+      </span>
     </button>
   `;
   const drawerAccountEntry = isAuthenticated

@@ -9487,6 +9487,65 @@ html[data-theme="light"] .whatsapp-float {
   border-color: rgba(29, 147, 255, 0.16);
 }
 
+html[data-theme="light"] .page-hero,
+html[data-theme="light"] .page-hero--premium,
+html[data-theme="light"] .membership-card,
+html[data-theme="light"] .content-card--accent,
+html[data-theme="light"] body[data-page="category"] .content-card,
+html[data-theme="light"] body[data-page="cart"] .content-card,
+html[data-theme="light"] body[data-page="checkout"] .summary-card,
+html[data-theme="light"] body[data-page="product"] .summary-card {
+  background:
+    radial-gradient(circle at 84% 14%, rgba(84, 182, 255, 0.12), transparent 20%),
+    radial-gradient(circle at 14% 86%, rgba(243, 140, 36, 0.1), transparent 18%),
+    linear-gradient(160deg, rgba(14, 27, 44, 0.98), rgba(10, 20, 33, 0.98));
+  border-color: rgba(90, 141, 212, 0.18);
+  box-shadow: 0 20px 42px rgba(13, 28, 47, 0.16);
+}
+
+html[data-theme="light"] .page-hero h1,
+html[data-theme="light"] .page-hero h2,
+html[data-theme="light"] .page-hero p,
+html[data-theme="light"] .page-hero strong,
+html[data-theme="light"] .membership-card h2,
+html[data-theme="light"] .membership-card strong,
+html[data-theme="light"] .membership-card span,
+html[data-theme="light"] .content-card--accent h2,
+html[data-theme="light"] .content-card--accent h3,
+html[data-theme="light"] .content-card--accent p,
+html[data-theme="light"] body[data-page="category"] .content-card h2,
+html[data-theme="light"] body[data-page="category"] .content-card h3,
+html[data-theme="light"] body[data-page="category"] .content-card p,
+html[data-theme="light"] body[data-page="cart"] .content-card h2,
+html[data-theme="light"] body[data-page="cart"] .content-card h3,
+html[data-theme="light"] body[data-page="cart"] .content-card p {
+  color: #f3f8ff;
+}
+
+html[data-theme="light"] .page-hero p,
+html[data-theme="light"] .membership-card span,
+html[data-theme="light"] .content-card--accent p,
+html[data-theme="light"] body[data-page="category"] .content-card p,
+html[data-theme="light"] body[data-page="cart"] .content-card p {
+  color: #b3c3d8;
+}
+
+html[data-theme="light"] .page-hero .eyebrow,
+html[data-theme="light"] .membership-card .eyebrow,
+html[data-theme="light"] .content-card--accent .eyebrow,
+html[data-theme="light"] body[data-page="category"] .content-card .eyebrow,
+html[data-theme="light"] body[data-page="cart"] .content-card .eyebrow {
+  color: #ffaf55;
+}
+
+html[data-theme="light"] body.native-app .page-hero,
+html[data-theme="light"] body.native-app .page-hero--premium,
+html[data-theme="light"] body.native-app .content-card,
+html[data-theme="light"] body.native-app .membership-card,
+html[data-theme="light"] body.native-app .summary-card {
+  box-shadow: 0 16px 30px rgba(13, 28, 47, 0.12);
+}
+
 .action-link--theme {
   gap: 10px;
 }
@@ -10791,4 +10850,55 @@ body.native-app .native-bottom-nav__link:active {
   body.native-app .native-bottom-nav__link span {
     font-size: 0.66rem;
   }
+}
+
+html[data-theme="light"] body.native-app .page-hero,
+html[data-theme="light"] body.native-app .page-hero--premium,
+html[data-theme="light"] body.native-app .auth-stage,
+html[data-theme="light"] body.native-app .membership-card,
+html[data-theme="light"] body.native-app .content-card--accent,
+html[data-theme="light"] body.native-app[data-page="category"] .content-card,
+html[data-theme="light"] body.native-app[data-page="cart"] .content-card,
+html[data-theme="light"] body.native-app .summary-card {
+  background:
+    radial-gradient(circle at 84% 14%, rgba(84, 182, 255, 0.12), transparent 20%),
+    radial-gradient(circle at 14% 86%, rgba(243, 140, 36, 0.1), transparent 18%),
+    linear-gradient(160deg, rgba(14, 27, 44, 0.98), rgba(10, 20, 33, 0.98)) !important;
+  border-color: rgba(90, 141, 212, 0.18) !important;
+  box-shadow: 0 16px 30px rgba(13, 28, 47, 0.12) !important;
+}
+
+html[data-theme="light"] body.native-app .page-hero h1,
+html[data-theme="light"] body.native-app .page-hero h2,
+html[data-theme="light"] body.native-app .page-hero strong,
+html[data-theme="light"] body.native-app .auth-stage h1,
+html[data-theme="light"] body.native-app .content-card--accent h2,
+html[data-theme="light"] body.native-app .content-card--accent h3,
+html[data-theme="light"] body.native-app[data-page="category"] .content-card h2,
+html[data-theme="light"] body.native-app[data-page="category"] .content-card h3,
+html[data-theme="light"] body.native-app[data-page="cart"] .content-card h2,
+html[data-theme="light"] body.native-app[data-page="cart"] .content-card h3,
+html[data-theme="light"] body.native-app .summary-card h2,
+html[data-theme="light"] body.native-app .summary-card h3 {
+  color: #f4f8ff !important;
+}
+
+html[data-theme="light"] body.native-app .page-hero p,
+html[data-theme="light"] body.native-app .auth-stage p,
+html[data-theme="light"] body.native-app .membership-card span,
+html[data-theme="light"] body.native-app .content-card--accent p,
+html[data-theme="light"] body.native-app[data-page="category"] .content-card p,
+html[data-theme="light"] body.native-app[data-page="cart"] .content-card p,
+html[data-theme="light"] body.native-app .summary-card p {
+  color: #b3c3d8 !important;
+}
+
+html[data-theme="light"] body.native-app .page-hero .eyebrow,
+html[data-theme="light"] body.native-app .auth-stage .eyebrow,
+html[data-theme="light"] body.native-app .membership-card .eyebrow,
+html[data-theme="light"] body.native-app .content-card--accent .eyebrow,
+html[data-theme="light"] body.native-app[data-page="category"] .content-card .eyebrow,
+html[data-theme="light"] body.native-app[data-page="cart"] .content-card .eyebrow,
+html[data-theme="light"] body.native-app .summary-card .eyebrow {
+  color: #ffaf55 !important;
 }

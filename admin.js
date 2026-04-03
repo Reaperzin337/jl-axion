@@ -14,7 +14,13 @@ const adminState = {
     dropshippingProducts: 0,
     pendingTransfers: 0
   },
-  search: ""
+  search: "",
+  ai: {
+    enabled: false,
+    provider: "gemini",
+    model: "",
+    result: null
+  }
 };
 
 const ORDER_STATUSES = [
@@ -76,12 +82,18 @@ function cacheAdminElements() {
   adminElements.suppliers = document.querySelector("[data-admin-suppliers]");
   adminElements.orders = document.querySelector("[data-admin-orders]");
   adminElements.logout = document.querySelector("[data-admin-logout]");
+  adminElements.aiForm = document.querySelector("[data-admin-ai-form]");
+  adminElements.aiSubmit = document.querySelector("[data-admin-ai-submit]");
+  adminElements.aiStatus = document.querySelector("[data-admin-ai-status]");
+  adminElements.aiResult = document.querySelector("[data-admin-ai-result]");
+  adminElements.aiActions = document.querySelector("[data-admin-ai-actions]");
 }
 
 function bindAdminEvents() {
   adminElements.authRoot.addEventListener("submit", handleAuthSubmit);
   adminElements.productForm.addEventListener("submit", handleProductSubmit);
   adminElements.supplierForm.addEventListener("submit", handleSupplierSubmit);
+  adminElements.aiForm.addEventListener("submit", handleAiSubmit);
   adminElements.productSearch.addEventListener("input", handleSearchInput);
   adminElements.dashboard.addEventListener("click", handleDashboardClick);
   adminElements.logout.addEventListener("click", handleLogout);
@@ -196,9 +208,81 @@ function renderAdminData() {
   renderStats();
   renderCategoryOptions();
   renderSupplierOptions();
+  renderAiPanel();
   renderProducts();
   renderSuppliers();
   renderOrders();
+}
+
+function renderAiPanel() {
+  if (!adminElements.aiStatus || !adminElements.aiResult || !adminElements.aiActions) {
+    return;
+  }
+
+  const isReady = Boolean(adminState.ai.enabled);
+  adminElements.aiStatus.className = `admin-ai-status ${isReady ? "is-ready" : "is-pending"}`;
+  adminElements.aiStatus.innerHTML = isReady
+    ? `
+      <strong>Gemini ativo</strong>
+      <span>${escapeHtml(adminState.ai.model || "Modelo padrao")} pronto para gerar copy no painel.</span>
+    `
+    : `
+      <strong>Gemini em configuracao</strong>
+      <span>Adicione GEMINI_API_KEY na Railway ou no .env para liberar o copiloto da loja.</span>
+    `;
+
+  if (!adminState.ai.result) {
+    adminElements.aiResult.className = "admin-ai-result admin-ai-result--empty";
+    adminElements.aiResult.innerHTML = `
+      <strong>Copiloto pronto</strong>
+      <p>Use o formulario ao lado para gerar textos comerciais da JL AXION com foco em conversao, clareza e linguagem de varejo tech.</p>
+    `;
+    adminElements.aiActions.hidden = true;
+    return;
+  }
+
+  const result = adminState.ai.result;
+  const bulletItems = result.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const fullText = [
+    `Headline: ${result.headline}`,
+    `Subheadline: ${result.subheadline}`,
+    `Descricao curta: ${result.shortDescription}`,
+    `Bullets:`,
+    ...result.bullets.map((item) => `- ${item}`),
+    `Badge: ${result.badge}`,
+    `CTA: ${result.cta}`,
+    `Notas admin: ${result.adminNotes}`
+  ].join("\n");
+
+  adminElements.aiResult.className = "admin-ai-result";
+  adminElements.aiResult.dataset.copyPayload = fullText;
+  adminElements.aiResult.innerHTML = `
+    <div class="admin-ai-block">
+      <span class="eyebrow">Headline</span>
+      <strong>${escapeHtml(result.headline)}</strong>
+      <p>${escapeHtml(result.subheadline)}</p>
+    </div>
+    <div class="admin-ai-block">
+      <span class="eyebrow">Descricao curta</span>
+      <p>${escapeHtml(result.shortDescription)}</p>
+    </div>
+    <div class="admin-ai-block">
+      <span class="eyebrow">Bullets</span>
+      <ul class="feature-list compact-list admin-ai-list">${bulletItems}</ul>
+    </div>
+    <div class="admin-ai-metrics">
+      <article class="micro-card">
+        <strong>${escapeHtml(result.badge || "Sem selo")}</strong>
+        <span>Badge sugerido</span>
+      </article>
+      <article class="micro-card">
+        <strong>${escapeHtml(result.cta || "Sem CTA")}</strong>
+        <span>CTA sugerido</span>
+      </article>
+    </div>
+    <div class="summary-note">${escapeHtml(result.adminNotes || "Sem observacoes extras.")}</div>
+  `;
+  adminElements.aiActions.hidden = false;
 }
 
 function renderStats() {
@@ -692,6 +776,16 @@ async function handleDashboardClick(event) {
     return;
   }
 
+  if (adminAction === "copy-ai-result") {
+    await copyAiResult();
+    return;
+  }
+
+  if (adminAction === "apply-ai-to-product") {
+    applyAiResultToProductForm();
+    return;
+  }
+
   if (adminAction === "edit-product") {
     const product = adminState.products.find((item) => item.id === productId);
 
@@ -732,6 +826,81 @@ async function handleDashboardClick(event) {
   if (adminAction === "copy-transfer") {
     await copyTransferSummary(orderId);
   }
+}
+
+async function handleAiSubmit(event) {
+  const form = event.target.closest("[data-admin-ai-form]");
+
+  if (!form) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const formData = new FormData(form);
+  const payload = Object.fromEntries(formData.entries());
+
+  setFormLoading(adminElements.aiSubmit, true, "Gerando...");
+
+  try {
+    const response = await apiRequest("/api/admin/ai/generate-copy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    adminState.ai.result = response.result || null;
+    renderAiPanel();
+    showFeedback(response.message || "Copy gerada com Gemini.", "success");
+  } catch (error) {
+    showFeedback(error.message || "Nao foi possivel gerar copy com Gemini.", "warning");
+  } finally {
+    setFormLoading(adminElements.aiSubmit, false);
+  }
+}
+
+async function copyAiResult() {
+  if (!adminState.ai.result) {
+    showFeedback("Gere uma copy antes de copiar o resultado.", "warning");
+    return;
+  }
+
+  const payload = adminElements.aiResult?.dataset.copyPayload || "";
+
+  try {
+    await navigator.clipboard.writeText(payload);
+    showFeedback("Resultado da IA copiado para a area de transferencia.", "success");
+  } catch (_error) {
+    showFeedback("Nao foi possivel copiar automaticamente. Tente novamente.", "warning");
+  }
+}
+
+function applyAiResultToProductForm() {
+  if (!adminState.ai.result) {
+    showFeedback("Gere uma copy antes de aplicar no cadastro do produto.", "warning");
+    return;
+  }
+
+  const { headline, shortDescription, badge } = adminState.ai.result;
+  const nameField = adminElements.productForm.elements.namedItem("name");
+  const descriptionField = adminElements.productForm.elements.namedItem("description");
+  const badgeField = adminElements.productForm.elements.namedItem("badge");
+
+  if (nameField && !String(nameField.value || "").trim()) {
+    nameField.value = headline;
+  }
+
+  if (descriptionField) {
+    descriptionField.value = shortDescription;
+  }
+
+  if (badgeField && badge) {
+    badgeField.value = badge;
+  }
+
+  showFeedback("Resultado da IA aplicado no formulario do produto.", "success");
 }
 
 async function deleteProduct(productId) {
@@ -967,6 +1136,13 @@ function applyAdminPayload(payload = {}) {
       ...payload.stats
     };
   }
+
+  if (payload.features?.ai && typeof payload.features.ai === "object") {
+    adminState.ai = {
+      ...adminState.ai,
+      ...payload.features.ai
+    };
+  }
 }
 
 function upsertById(collection, item) {
@@ -1156,4 +1332,17 @@ function escapeHtml(value) {
 
 function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, "&#96;");
+}
+
+function setFormLoading(button, isLoading, loadingText = "Salvando...") {
+  if (!button) {
+    return;
+  }
+
+  if (!button.dataset.originalText) {
+    button.dataset.originalText = button.textContent;
+  }
+
+  button.disabled = isLoading;
+  button.textContent = isLoading ? loadingText : button.dataset.originalText;
 }

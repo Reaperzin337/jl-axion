@@ -8,6 +8,7 @@ Loja premium de utilidades e tecnologia com frontend multipagina, backend em Exp
 - Backend com sessao, catalogo, favoritos, carrinho, perfil e pedidos
 - Alternancia entre tema escuro e tema claro direto no shell da loja
 - Login tradicional e estrutura pronta para login com Google
+- Copiloto Gemini pronto no admin para gerar copy comercial
 - Painel admin em `/admin.html` para gerenciar produtos, fornecedores e pedidos
 - Projeto preparado para deploy com Docker e variaveis de ambiente
 - Base de dropshipping com fornecedor, SKU externo, custo e repasse manual
@@ -94,6 +95,8 @@ Observacoes:
 - `ADMIN_EMAIL`: e-mail da conta admin seed
 - `ADMIN_PASSWORD`: senha da conta admin seed
 - `GOOGLE_CLIENT_ID`: Client ID do Google Identity Services para habilitar login com Google
+- `GEMINI_API_KEY`: chave da Gemini API para habilitar o copiloto no painel admin
+- `GEMINI_MODEL`: modelo usado na geracao de copy, como `gemini-2.5-flash`
 
 ## Login com Google
 
@@ -105,6 +108,26 @@ Para ativar o botao do Google na tela de acesso:
 4. reinicie o servidor
 
 Sem esse `client_id`, a tela continua funcionando normalmente com e-mail e senha, mas o acesso via Google fica oculto.
+
+## Gemini no painel admin
+
+O painel admin ja possui uma area de IA pronta para gerar:
+
+- headline comercial
+- subheadline
+- descricao curta
+- bullets de venda
+- selo/badge
+- CTA
+
+Para ativar:
+
+1. gere uma chave no Google AI Studio
+2. preencha `GEMINI_API_KEY` no `.env` ou nas variaveis da Railway
+3. opcionalmente ajuste `GEMINI_MODEL`
+4. reinicie o servidor ou rode novo deploy
+
+Sem essa chave, o painel continua funcionando normalmente e a area de IA aparece apenas como "em configuracao".
 
 ## Estrutura principal
 

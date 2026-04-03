@@ -1783,7 +1783,7 @@ function renderCartPage() {
     `;
 
     if (recommendations) {
-      recommendations.innerHTML = PRODUCTS.slice(0, 3).map((product) => productCard(product, { compact: true })).join("");
+      recommendations.innerHTML = PRODUCTS.slice(0, 3).map((product) => recommendationRailCard(product)).join("");
     }
 
     return;
@@ -1839,7 +1839,11 @@ function renderCartPage() {
 
   if (recommendations) {
     const excludedIds = cartProducts.map((item) => item.product.id);
-    recommendations.innerHTML = PRODUCTS.filter((product) => !excludedIds.includes(product.id)).slice(0, 3).map((product) => productCard(product, { compact: true })).join("");
+    recommendations.innerHTML = PRODUCTS
+      .filter((product) => !excludedIds.includes(product.id))
+      .slice(0, 3)
+      .map((product) => recommendationRailCard(product))
+      .join("");
   }
 }
 
@@ -1865,7 +1869,11 @@ function renderFavoritePage() {
   }
 
   if (recommendations) {
-    recommendations.innerHTML = PRODUCTS.filter((product) => !favorites.includes(product.id)).slice(0, 3).map((product) => productCard(product, { compact: true })).join("");
+    recommendations.innerHTML = PRODUCTS
+      .filter((product) => !favorites.includes(product.id))
+      .slice(0, 3)
+      .map((product) => recommendationRailCard(product))
+      .join("");
   }
 }
 
@@ -2381,7 +2389,7 @@ function renderProductPage() {
     </div>
   `;
 
-  relatedContainer.innerHTML = relatedProducts.map((item) => productCard(item)).join("");
+  relatedContainer.innerHTML = relatedProducts.map((item) => recommendationRailCard(item)).join("");
 }
 
 function getProductHighlights(product) {
@@ -3418,6 +3426,33 @@ function favoriteCard(product) {
         </div>
       </div>
     </article>
+  `;
+}
+
+function recommendationRailCard(product) {
+  const detailsHref = `product.html?id=${encodeURIComponent(product.id)}`;
+  const pixPrice = getPixPrice(product);
+  const [primarySignal] = getProductSignals(product);
+
+  return `
+    <a class="app-rail-card" href="${detailsHref}" aria-label="Abrir produto ${product.name}">
+      <div class="app-rail-card__media">
+        <span class="app-rail-card__badge">${product.badge}</span>
+        <img src="${product.image}" alt="${product.name}">
+      </div>
+      <div class="app-rail-card__body">
+        <span class="app-rail-card__category">${product.category}</span>
+        <strong>${product.name}</strong>
+        <p>${product.description}</p>
+        <div class="app-rail-card__footer">
+          <div class="app-rail-card__price">
+            <span>${money.format(product.price)}</span>
+            <small>${pixPrice} no PIX</small>
+          </div>
+          <span class="app-rail-card__cta">${primarySignal}</span>
+        </div>
+      </div>
+    </a>
   `;
 }
 

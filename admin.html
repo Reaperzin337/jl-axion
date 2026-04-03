@@ -73,6 +73,76 @@
         </article>
       </div>
 
+      <article class="content-card admin-panel admin-ai-panel">
+        <div class="section-heading section-heading--stacked">
+          <div>
+            <span class="eyebrow">Copiloto Gemini</span>
+            <h2>Gerar copy comercial para produto, campanha e vitrine</h2>
+          </div>
+          <p class="admin-panel__lead">Use a IA no painel para acelerar descricoes, headlines, CTA e bullets da JL AXION sem expor chave no frontend.</p>
+        </div>
+
+        <div class="admin-ai-grid">
+          <form class="form-grid admin-ai-form" data-admin-ai-form>
+            <label class="field">
+              <span>Tipo de copy</span>
+              <select class="input" name="taskType">
+                <option value="product_copy">Produto</option>
+                <option value="campaign_copy">Campanha</option>
+                <option value="category_copy">Categoria</option>
+                <option value="support_macro">Atendimento</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Produto ou tema</span>
+              <input class="input" type="text" name="productName" placeholder="Ex.: HaloCharge Pad 3 em 1">
+            </label>
+
+            <label class="field">
+              <span>Categoria</span>
+              <input class="input" type="text" name="category" placeholder="Ex.: Carregadores">
+            </label>
+
+            <label class="field">
+              <span>Preco</span>
+              <input class="input" type="text" name="price" placeholder="Ex.: R$ 189,90">
+            </label>
+
+            <label class="field field--full">
+              <span>Publico</span>
+              <input class="input" type="text" name="audience" placeholder="Ex.: cliente que quer casa organizada, setup limpo e tecnologia acessivel">
+            </label>
+
+            <label class="field field--full">
+              <span>Beneficios principais</span>
+              <textarea class="input admin-textarea admin-textarea--compact" name="benefits" placeholder="Liste os beneficios, diferenciais e uso real do item ou campanha."></textarea>
+            </label>
+
+            <label class="field field--full">
+              <span>Observacoes extras</span>
+              <textarea class="input admin-textarea admin-textarea--compact" name="notes" placeholder="Tom, oferta, foco da campanha, urgencia ou detalhes que a IA deve respeitar."></textarea>
+            </label>
+
+            <div class="admin-inline-actions">
+              <button type="submit" class="primary-btn" data-admin-ai-submit>Gerar copy com Gemini</button>
+            </div>
+          </form>
+
+          <div class="content-card admin-ai-result-card">
+            <div class="admin-ai-status" data-admin-ai-status></div>
+            <div class="admin-ai-result admin-ai-result--empty" data-admin-ai-result>
+              <strong>Copiloto pronto</strong>
+              <p>Quando a chave Gemini estiver configurada, a IA gera headline, subheadline, descricao curta, bullets, selo e CTA para acelerar a operacao da loja.</p>
+            </div>
+            <div class="admin-inline-actions admin-ai-actions" hidden data-admin-ai-actions>
+              <button type="button" class="secondary-btn" data-admin-action="copy-ai-result">Copiar resultado</button>
+              <button type="button" class="ghost-btn" data-admin-action="apply-ai-to-product">Aplicar no produto</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
       <div class="admin-grid">
         <article class="content-card admin-panel">
           <div class="section-heading section-heading--stacked">

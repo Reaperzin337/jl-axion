@@ -10,6 +10,7 @@ const sqlite3 = require("sqlite3");
 const SQLiteStore = require("connect-sqlite3")(session);
 const { open } = require("sqlite");
 const { OAuth2Client } = require("google-auth-library");
+const { GoogleGenAI } = require("@google/genai");
 
 const ROOT_DIR = __dirname;
 const DATA_DIR = process.env.DATA_DIR
@@ -29,6 +30,10 @@ const ROOT_FILE_CACHE_CONTROL = "no-store, max-age=0";
 const GOOGLE_CLIENT_ID = String(process.env.GOOGLE_CLIENT_ID || "").trim();
 const HAS_VALID_GOOGLE_CLIENT_ID = /\.apps\.googleusercontent\.com$/i.test(GOOGLE_CLIENT_ID);
 const googleClient = HAS_VALID_GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
+const GEMINI_API_KEY = String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "").trim();
+const GEMINI_MODEL = String(process.env.GEMINI_MODEL || "gemini-2.5-flash").trim();
+const HAS_VALID_GEMINI_API_KEY = GEMINI_API_KEY.length > 20;
+const geminiClient = HAS_VALID_GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
 
 const HTML_FILES = new Set([
   "index.html",
@@ -781,20 +786,53 @@ async function startServer() {
     }
   });
 
-  app.get("/api/admin/bootstrap", requireAdmin, async (req, res, next) => {
-    try {
-      res.json({
-        user: await getProfile(req.currentUserId),
-        products: await getProducts(),
-        categories: await getCategories(),
-        suppliers: await getSuppliers(),
-        orders: await getAllOrders(),
-        stats: await getAdminStats()
-      });
-    } catch (error) {
-      next(error);
-    }
-  });
+    app.get("/api/admin/bootstrap", requireAdmin, async (req, res, next) => {
+      try {
+        res.json({
+          user: await getProfile(req.currentUserId),
+          products: await getProducts(),
+          categories: await getCategories(),
+          suppliers: await getSuppliers(),
+          orders: await getAllOrders(),
+          stats: await getAdminStats(),
+          features: {
+            ai: {
+              enabled: Boolean(HAS_VALID_GEMINI_API_KEY),
+              provider: "gemini",
+              model: GEMINI_MODEL
+            }
+          }
+        });
+      } catch (error) {
+        next(error);
+      }
+    });
+
+    app.post("/api/admin/ai/generate-copy", requireAdmin, async (req, res, next) => {
+      try {
+        if (!geminiClient || !HAS_VALID_GEMINI_API_KEY) {
+          res.status(503).json({
+            message: "Gemini ainda nao esta configurado no backend. Adicione GEMINI_API_KEY para ativar."
+          });
+          return;
+        }
+
+        const input = normalizeAiCopyInput(req.body);
+        const generated = await generateAdminCopy(input);
+
+        res.json({
+          message: "Copy gerada com Gemini.",
+          result: generated,
+          meta: {
+            provider: "gemini",
+            model: GEMINI_MODEL,
+            taskType: input.taskType
+          }
+        });
+      } catch (error) {
+        next(error);
+      }
+    });
 
   app.get("/api/profile", async (req, res, next) => {
     try {
@@ -1821,12 +1859,17 @@ async function buildBootstrapResponse(req) {
       isAdmin: profile.role === "admin",
       userId: req.currentUserId
     },
-    features: {
-      googleAuth: {
-        enabled: Boolean(HAS_VALID_GOOGLE_CLIENT_ID),
-        clientId: GOOGLE_CLIENT_ID
-      }
-    },
+      features: {
+        googleAuth: {
+          enabled: Boolean(HAS_VALID_GOOGLE_CLIENT_ID),
+          clientId: GOOGLE_CLIENT_ID
+        },
+        ai: {
+          enabled: Boolean(HAS_VALID_GEMINI_API_KEY),
+          provider: "gemini",
+          model: GEMINI_MODEL
+        }
+      },
     products: await getProducts(),
     categories: await getCategories(),
     profile,
@@ -2059,6 +2102,114 @@ async function establishSession(req, userId, isAuthenticated) {
   req.session.userId = userId;
   req.session.isAuthenticated = isAuthenticated;
   req.session.revision = SESSION_REVISION;
+}
+
+function normalizeAiCopyInput(input = {}) {
+  return {
+    taskType: String(input.taskType || "product_copy").trim() || "product_copy",
+    productName: String(input.productName || "").trim(),
+    category: String(input.category || "").trim(),
+    price: String(input.price || "").trim(),
+    audience: String(input.audience || "").trim() || "cliente de varejo tech que busca praticidade, setup e casa organizada",
+    benefits: String(input.benefits || "").trim(),
+    notes: String(input.notes || "").trim(),
+    tone: "varejo tech premium, claro, comercial e confiavel"
+  };
+}
+
+function buildGeminiCopyPrompt(input) {
+  return [
+    "Voce e um redator senior de e-commerce da marca JL AXION.",
+    "Escreva em portugues do Brasil.",
+    "A marca vende utilidades e tecnologia para casa, setup, energia e rotina pratica.",
+    "O tom deve ser premium, claro, comercial, sem exagero e sem frases genericas.",
+    "Responda apenas em JSON valido, sem markdown, sem comentarios, sem texto extra.",
+    "",
+    "Formato obrigatorio:",
+    JSON.stringify({
+      headline: "titulo curto e comercial",
+      subheadline: "apoio curto e convincente",
+      shortDescription: "paragrafo curto e util",
+      bullets: ["beneficio 1", "beneficio 2", "beneficio 3"],
+      badge: "selo curto",
+      cta: "cta curto",
+      adminNotes: "observacao curta para o operador"
+    }, null, 2),
+    "",
+    `Tipo de tarefa: ${input.taskType}`,
+    `Produto ou tema: ${input.productName || "nao informado"}`,
+    `Categoria: ${input.category || "nao informada"}`,
+    `Preco: ${input.price || "nao informado"}`,
+    `Publico: ${input.audience}`,
+    `Beneficios principais: ${input.benefits || "nao informados"}`,
+    `Observacoes extras: ${input.notes || "nenhuma"}`,
+    `Tom desejado: ${input.tone}`,
+    "",
+    "Regras:",
+    "- headline com no maximo 10 palavras",
+    "- subheadline com no maximo 18 palavras",
+    "- shortDescription com no maximo 280 caracteres",
+    "- bullets com exatamente 3 itens",
+    "- badge com no maximo 4 palavras",
+    "- cta com no maximo 5 palavras",
+    "- foque em conversao, clareza e utilidade real"
+  ].join("\n");
+}
+
+function extractJsonObject(rawText) {
+  const cleaned = String(rawText || "").trim();
+
+  if (!cleaned) {
+    throw new Error("Gemini nao retornou conteudo para esta solicitacao.");
+  }
+
+  const fenced = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = fenced ? fenced[1].trim() : cleaned;
+
+  try {
+    return JSON.parse(candidate);
+  } catch (_error) {
+    const firstBrace = candidate.indexOf("{");
+    const lastBrace = candidate.lastIndexOf("}");
+
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      return JSON.parse(candidate.slice(firstBrace, lastBrace + 1));
+    }
+
+    throw new Error("Gemini retornou um formato invalido. Tente novamente.");
+  }
+}
+
+function sanitizeAiCopyResult(payload) {
+  const bullets = Array.isArray(payload?.bullets)
+    ? payload.bullets.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 3)
+    : [];
+
+  return {
+    headline: String(payload?.headline || "").trim(),
+    subheadline: String(payload?.subheadline || "").trim(),
+    shortDescription: String(payload?.shortDescription || "").trim(),
+    bullets,
+    badge: String(payload?.badge || "").trim(),
+    cta: String(payload?.cta || "").trim(),
+    adminNotes: String(payload?.adminNotes || "").trim()
+  };
+}
+
+async function generateAdminCopy(input) {
+  const response = await geminiClient.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: buildGeminiCopyPrompt(input)
+  });
+
+  const parsed = extractJsonObject(response.text);
+  const sanitized = sanitizeAiCopyResult(parsed);
+
+  if (!sanitized.headline || !sanitized.shortDescription || sanitized.bullets.length < 3) {
+    throw new Error("Gemini retornou uma copy incompleta. Tente gerar novamente.");
+  }
+
+  return sanitized;
 }
 
 function normalizeProductInput(input, existing = {}) {

@@ -31,7 +31,7 @@ const GOOGLE_CLIENT_ID = String(process.env.GOOGLE_CLIENT_ID || "").trim();
 const HAS_VALID_GOOGLE_CLIENT_ID = /\.apps\.googleusercontent\.com$/i.test(GOOGLE_CLIENT_ID);
 const googleClient = HAS_VALID_GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 const GEMINI_API_KEY = String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "").trim();
-const GEMINI_MODEL = String(process.env.GEMINI_MODEL || "gemini-2.5-flash").trim();
+const GEMINI_MODEL = normalizeGeminiModelName(String(process.env.GEMINI_MODEL || "gemini-2.5-flash").trim());
 const HAS_VALID_GEMINI_API_KEY = GEMINI_API_KEY.length > 20;
 const geminiClient = HAS_VALID_GEMINI_API_KEY ? new GoogleGenAI({ apiKey: GEMINI_API_KEY }) : null;
 
@@ -830,7 +830,8 @@ async function startServer() {
           }
         });
       } catch (error) {
-        next(error);
+        const aiError = formatGeminiError(error);
+        res.status(aiError.status).json({ message: aiError.message });
       }
     });
 
@@ -2104,6 +2105,110 @@ async function establishSession(req, userId, isAuthenticated) {
   req.session.revision = SESSION_REVISION;
 }
 
+function normalizeGeminiModelName(modelName) {
+  const value = String(modelName || "").trim();
+
+  if (!value) {
+    return "gemini-2.5-flash";
+  }
+
+  const aliases = new Map([
+    ["gemini-3-flash", "gemini-3-flash-preview"],
+    ["gemini-3-flash-latest", "gemini-3-flash-preview"],
+    ["gemini-3-pro", "gemini-2.5-pro"],
+    ["gemini-2.5-flash-latest", "gemini-2.5-flash"],
+    ["gemini-2.5-pro-latest", "gemini-2.5-pro"]
+  ]);
+
+  return aliases.get(value) || value;
+}
+
+function resolveGeminiModelCandidates(modelName) {
+  const normalized = normalizeGeminiModelName(modelName);
+  const candidates = [normalized];
+
+  if (normalized !== "gemini-2.5-flash") {
+    candidates.push("gemini-2.5-flash");
+  }
+
+  return [...new Set(candidates)];
+}
+
+function extractGeminiText(response) {
+  if (typeof response?.text === "string") {
+    return response.text;
+  }
+
+  if (typeof response?.text === "function") {
+    return response.text();
+  }
+
+  if (Array.isArray(response?.candidates)) {
+    return response.candidates
+      .flatMap((candidate) => candidate?.content?.parts || [])
+      .map((part) => String(part?.text || "").trim())
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  return "";
+}
+
+function isRetryableGeminiModelError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    message.includes("model") ||
+    message.includes("not found") ||
+    message.includes("unsupported") ||
+    message.includes("404")
+  );
+}
+
+function formatGeminiError(error) {
+  const message = String(error?.message || "").trim();
+  const lower = message.toLowerCase();
+
+  if (!message) {
+    return {
+      status: 502,
+      message: "O Gemini nao respondeu como esperado. Tente novamente em instantes."
+    };
+  }
+
+  if (lower.includes("api key") || lower.includes("permission") || lower.includes("forbidden") || lower.includes("401") || lower.includes("403")) {
+    return {
+      status: 502,
+      message: "A chave do Gemini foi reconhecida, mas o acesso nao foi autorizado. Revise a GEMINI_API_KEY e o projeto do Google AI Studio."
+    };
+  }
+
+  if (lower.includes("quota") || lower.includes("429") || lower.includes("resource exhausted")) {
+    return {
+      status: 429,
+      message: "O Gemini atingiu o limite de uso agora. Aguarde um pouco e tente novamente."
+    };
+  }
+
+  if (lower.includes("model") || lower.includes("not found") || lower.includes("unsupported")) {
+    return {
+      status: 502,
+      message: "O modelo configurado do Gemini nao respondeu. Ajuste GEMINI_MODEL para um valor suportado, como gemini-2.5-flash."
+    };
+  }
+
+  if (lower.includes("json") || lower.includes("formato invalido") || lower.includes("copy incompleta")) {
+    return {
+      status: 502,
+      message
+    };
+  }
+
+  return {
+    status: 502,
+    message: "O Gemini respondeu com erro no backend. Tente novamente e, se persistir, revise o modelo e a chave configurados."
+  };
+}
+
 function normalizeAiCopyInput(input = {}) {
   return {
     taskType: String(input.taskType || "product_copy").trim() || "product_copy",
@@ -2197,19 +2302,35 @@ function sanitizeAiCopyResult(payload) {
 }
 
 async function generateAdminCopy(input) {
-  const response = await geminiClient.models.generateContent({
-    model: GEMINI_MODEL,
-    contents: buildGeminiCopyPrompt(input)
-  });
+  const prompt = buildGeminiCopyPrompt(input);
+  const modelCandidates = resolveGeminiModelCandidates(GEMINI_MODEL);
+  let lastError = null;
 
-  const parsed = extractJsonObject(response.text);
-  const sanitized = sanitizeAiCopyResult(parsed);
+  for (const modelName of modelCandidates) {
+    try {
+      const response = await geminiClient.models.generateContent({
+        model: modelName,
+        contents: prompt
+      });
 
-  if (!sanitized.headline || !sanitized.shortDescription || sanitized.bullets.length < 3) {
-    throw new Error("Gemini retornou uma copy incompleta. Tente gerar novamente.");
+      const parsed = extractJsonObject(extractGeminiText(response));
+      const sanitized = sanitizeAiCopyResult(parsed);
+
+      if (!sanitized.headline || !sanitized.shortDescription || sanitized.bullets.length < 3) {
+        throw new Error("Gemini retornou uma copy incompleta. Tente gerar novamente.");
+      }
+
+      return sanitized;
+    } catch (error) {
+      lastError = error;
+
+      if (!isRetryableGeminiModelError(error)) {
+        break;
+      }
+    }
   }
 
-  return sanitized;
+  throw lastError || new Error("Nao foi possivel gerar copy com Gemini no momento.");
 }
 
 function normalizeProductInput(input, existing = {}) {

@@ -1286,54 +1286,73 @@ async function handleGoogleCredentialResponse(response) {
 }
 
 function renderGoogleLogin() {
-  const wrapper = document.querySelector("[data-google-login]");
-  const buttonHost = document.querySelector("[data-google-button]");
-  const status = document.querySelector("[data-google-status]");
+  const wrappers = Array.from(document.querySelectorAll("[data-google-login]"));
 
-  if (!wrapper || !buttonHost) {
+  if (!wrappers.length) {
     return;
   }
 
   const canUseGoogle = runtimeData.useBackend && runtimeData.googleAuthEnabled && isValidGoogleClientId(runtimeData.googleClientId);
   const showGoogleSection = !getIsAuthenticated() && runtimeData.useBackend;
-  wrapper.hidden = !showGoogleSection;
+  const authRoot = document.querySelector("[data-auth-root]");
+  const currentMode = authRoot?.dataset.authMode === "register" ? "register" : "login";
 
-  if (!showGoogleSection) {
-    buttonHost.innerHTML = "";
-    buttonHost.removeAttribute("data-google-rendered");
+  wrappers.forEach((wrapper) => {
+    const panel = wrapper.closest("[data-auth-panel]");
+    const panelMode = panel?.dataset.authPanel === "register" ? "register" : "login";
+    const buttonHost = wrapper.querySelector("[data-google-button]");
+    const status = wrapper.querySelector("[data-google-status]");
+    const title = wrapper.querySelector("[data-google-title]");
+    const description = wrapper.querySelector("[data-google-description]");
+    const isActivePanel = panelMode === currentMode;
+
+    wrapper.hidden = !showGoogleSection || !isActivePanel;
+
+    if (title) {
+      title.textContent = panelMode === "register" ? "Criar conta com Google" : "Entrar com Google";
+    }
+
+    if (description) {
+      description.textContent = panelMode === "register"
+        ? "Continue com Google para criar sua conta JL AXION automaticamente no primeiro acesso."
+        : "Use sua conta Google para liberar sua area JL AXION em segundos.";
+    }
+
+    if (!buttonHost) {
+      return;
+    }
+
+    if (!showGoogleSection || !isActivePanel) {
+      buttonHost.innerHTML = "";
+      buttonHost.removeAttribute("data-google-rendered");
+      if (status) {
+        status.hidden = true;
+        status.textContent = "";
+      }
+      return;
+    }
+
+    if (!canUseGoogle) {
+      buttonHost.innerHTML = '<button type="button" class="secondary-btn auth-google__fallback" disabled>Google em configuracao</button>';
+      buttonHost.removeAttribute("data-google-rendered");
+      if (status) {
+        status.hidden = false;
+        status.textContent = "Assim que o Client ID da loja for conectado, essa opcao fica ativa automaticamente.";
+      }
+      return;
+    }
+
     if (status) {
       status.hidden = true;
       status.textContent = "";
     }
-    return;
-  }
-
-  if (!canUseGoogle) {
-    buttonHost.innerHTML = '<button type="button" class="secondary-btn auth-google__fallback" disabled>Google em configuracao</button>';
-    buttonHost.removeAttribute("data-google-rendered");
-    if (status) {
-      status.hidden = false;
-      status.textContent = "Assim que o Client ID da loja for conectado, essa opcao fica ativa automaticamente.";
-    }
-    return;
-  }
-
-  if (status) {
-    status.hidden = true;
-    status.textContent = "";
-  }
+  });
 
   if (!window.google?.accounts?.id) {
     return;
   }
 
   const renderKey = `${runtimeData.googleClientId}:${runtimeData.theme}`;
-
-  if (buttonHost.dataset.googleRendered === renderKey) {
-    return;
-  }
-
-  buttonHost.innerHTML = "";
 
   window.google.accounts.id.initialize({
     client_id: runtimeData.googleClientId,
@@ -1343,17 +1362,34 @@ function renderGoogleLogin() {
     cancel_on_tap_outside: true
   });
 
-  window.google.accounts.id.renderButton(buttonHost, {
-    type: "standard",
-    theme: runtimeData.theme === "light" ? "outline" : "filled_black",
-    size: "large",
-    shape: "pill",
-    text: "continue_with",
-    logo_alignment: "left",
-    width: Math.max(260, Math.min(buttonHost.clientWidth || 360, 420))
-  });
+  wrappers.forEach((wrapper) => {
+    const panel = wrapper.closest("[data-auth-panel]");
+    const panelMode = panel?.dataset.authPanel === "register" ? "register" : "login";
+    const buttonHost = wrapper.querySelector("[data-google-button]");
 
-  buttonHost.dataset.googleRendered = renderKey;
+    if (!buttonHost || wrapper.hidden) {
+      return;
+    }
+
+    const wrapperRenderKey = `${renderKey}:${panelMode}`;
+
+    if (buttonHost.dataset.googleRendered === wrapperRenderKey) {
+      return;
+    }
+
+    buttonHost.innerHTML = "";
+    window.google.accounts.id.renderButton(buttonHost, {
+      type: "standard",
+      theme: runtimeData.theme === "light" ? "outline" : "filled_black",
+      size: "large",
+      shape: "pill",
+      text: panelMode === "register" ? "signup_with" : "continue_with",
+      logo_alignment: "left",
+      width: Math.max(260, Math.min(buttonHost.clientWidth || 360, 420))
+    });
+
+    buttonHost.dataset.googleRendered = wrapperRenderKey;
+  });
 }
 
 function bindActions() {
@@ -1532,6 +1568,8 @@ function setAuthMode(mode) {
   authRoot.querySelectorAll("[data-auth-panel]").forEach((panel) => {
     panel.hidden = panel.dataset.authPanel !== nextMode;
   });
+
+  renderGoogleLogin();
 }
 
 function refreshShellUi() {
@@ -1783,7 +1821,10 @@ function renderCartPage() {
     `;
 
     if (recommendations) {
-      recommendations.innerHTML = PRODUCTS.slice(0, 3).map((product) => recommendationRailCard(product)).join("");
+      recommendations.innerHTML = PRODUCTS
+        .slice(0, 3)
+        .map((product) => productCard(product, { compact: true }))
+        .join("");
     }
 
     return;
@@ -1872,7 +1913,7 @@ function renderFavoritePage() {
     recommendations.innerHTML = PRODUCTS
       .filter((product) => !favorites.includes(product.id))
       .slice(0, 3)
-      .map((product) => recommendationRailCard(product))
+      .map((product) => productCard(product, { compact: true }))
       .join("");
   }
 }
@@ -2389,7 +2430,9 @@ function renderProductPage() {
     </div>
   `;
 
-  relatedContainer.innerHTML = relatedProducts.map((item) => recommendationRailCard(item)).join("");
+  relatedContainer.innerHTML = relatedProducts
+    .map((item) => productCard(item, { compact: true }))
+    .join("");
 }
 
 function getProductHighlights(product) {

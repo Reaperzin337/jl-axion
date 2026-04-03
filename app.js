@@ -379,6 +379,8 @@ let menuEscapeBound = false;
 let googleRenderRetryTimer = 0;
 let googleRenderRetryCount = 0;
 const MAX_GOOGLE_RENDER_RETRIES = 18;
+let nativeGoogleInitialized = false;
+let nativeGoogleInitializedClientId = "";
 
 document.addEventListener("DOMContentLoaded", async () => {
   applyTheme(document.documentElement.dataset.theme || getStoredTheme() || getSystemTheme(), {
@@ -789,7 +791,10 @@ async function signOut() {
 
     runtimeData.isAuthenticated = false;
     runtimeData.userId = null;
+    nativeGoogleInitialized = false;
+    nativeGoogleInitializedClientId = "";
     window.google?.accounts?.id?.disableAutoSelect?.();
+    await getNativeGoogleSignInPlugin()?.signOut?.().catch(() => undefined);
     refreshShellUi();
     showToast("Sessao encerrada.");
     window.setTimeout(() => {
@@ -1277,14 +1282,67 @@ function bindForms() {
   }
 }
 
-async function handleGoogleCredentialResponse(response) {
-  const credential = String(response?.credential || "").trim();
-
-  if (!credential) {
-    showToast("Nao foi possivel concluir o login com Google.");
-    return;
+function getNativeGoogleSignInPlugin() {
+  if (!runtimeData.isNativeApp) {
+    return null;
   }
 
+  return window.Capacitor?.Plugins?.GoogleSignIn || null;
+}
+
+async function ensureNativeGoogleSignInReady() {
+  const plugin = getNativeGoogleSignInPlugin();
+
+  if (!plugin) {
+    throw new Error("NATIVE_GOOGLE_PLUGIN_UNAVAILABLE");
+  }
+
+  if (!runtimeData.googleAuthEnabled || !isValidGoogleClientId(runtimeData.googleClientId)) {
+    throw new Error("NATIVE_GOOGLE_NOT_CONFIGURED");
+  }
+
+  if (nativeGoogleInitialized && nativeGoogleInitializedClientId === runtimeData.googleClientId) {
+    return plugin;
+  }
+
+  await plugin.initialize({
+    clientId: runtimeData.googleClientId
+  });
+
+  nativeGoogleInitialized = true;
+  nativeGoogleInitializedClientId = runtimeData.googleClientId;
+  return plugin;
+}
+
+function getNativeGoogleErrorMessage(error) {
+  const code = String(error?.code || "").trim().toUpperCase();
+  const message = String(error?.message || "").trim();
+  const normalizedMessage = message.toUpperCase();
+
+  if (code === "SIGN_IN_CANCELED" || normalizedMessage.includes("SIGN_IN_CANCELED")) {
+    return "";
+  }
+
+  if (code === "NATIVE_GOOGLE_PLUGIN_UNAVAILABLE") {
+    return "Esta build do app ainda nao recebeu o login Google nativo. Reinstale a versao mais nova da JL AXION.";
+  }
+
+  if (code === "NATIVE_GOOGLE_NOT_CONFIGURED") {
+    return "O Google do app ainda nao foi liberado nesta configuracao.";
+  }
+
+  if (normalizedMessage.includes("DEVELOPER_ERROR") || normalizedMessage.includes("12500")) {
+    return "O Google do app precisa da configuracao Android no Google Cloud para concluir a entrada.";
+  }
+
+  if (normalizedMessage.includes("NETWORK")) {
+    return "Nao foi possivel falar com o Google agora. Confira sua conexao e tente novamente.";
+  }
+
+  return "Nao foi possivel concluir o login com Google no app agora.";
+}
+
+async function completeGoogleAuthentication(credential, successOptions = {}) {
   try {
     const payload = await apiRequest("/api/auth/google", {
       method: "POST",
@@ -1294,9 +1352,9 @@ async function handleGoogleCredentialResponse(response) {
     applyRuntimePatch(payload);
     await refreshRuntimeData();
     refreshShellUi();
-    queueFlashToast("Login com Google concluido", {
-      title: "Login efetuado com sucesso",
-      description: "Sua conta JL AXION foi liberada com o Google.",
+    queueFlashToast(successOptions.message || "Login com Google concluido", {
+      title: successOptions.title || "Login efetuado com sucesso",
+      description: successOptions.description || "Sua conta JL AXION foi liberada com o Google.",
       tone: "auth-success",
       duration: 4000,
       dismissible: true
@@ -1305,9 +1363,25 @@ async function handleGoogleCredentialResponse(response) {
     window.setTimeout(() => {
       window.location.href = "account.html";
     }, 220);
+    return true;
   } catch (error) {
     showToast(error.message);
+    return false;
   }
+}
+
+async function handleGoogleCredentialResponse(response) {
+  const credential = String(response?.credential || "").trim();
+
+  if (!credential) {
+    showToast("Nao foi possivel concluir o login com Google.");
+    return;
+  }
+
+  await completeGoogleAuthentication(credential, {
+    title: "Login efetuado com sucesso",
+    description: "Sua conta JL AXION foi liberada com o Google."
+  });
 }
 
 function clearGoogleLoginRetry() {
@@ -1353,7 +1427,33 @@ function bindGoogleScriptLoad() {
   });
 }
 
-function launchGoogleLogin() {
+async function launchGoogleLogin() {
+  if (runtimeData.isNativeApp) {
+    try {
+      const plugin = await ensureNativeGoogleSignInReady();
+      const result = await plugin.signIn();
+      const credential = String(result?.idToken || "").trim();
+
+      if (!credential) {
+        throw new Error("NATIVE_GOOGLE_NO_TOKEN");
+      }
+
+      await completeGoogleAuthentication(credential, {
+        title: "Conta Google conectada",
+        description: "Seu acesso JL AXION foi liberado pelo app."
+      });
+      return true;
+    } catch (error) {
+      const message = getNativeGoogleErrorMessage(error);
+
+      if (message) {
+        showToast(message);
+      }
+
+      return false;
+    }
+  }
+
   if (window.google?.accounts?.id) {
     try {
       window.google.accounts.id.prompt();
@@ -1378,6 +1478,7 @@ function renderGoogleLogin(options = {}) {
   }
 
   const canUseGoogle = runtimeData.useBackend && runtimeData.googleAuthEnabled && isValidGoogleClientId(runtimeData.googleClientId);
+  const canUseNativeGoogle = runtimeData.isNativeApp && Boolean(getNativeGoogleSignInPlugin());
   const showGoogleSection = !getIsAuthenticated() && runtimeData.useBackend;
   const authRoot = document.querySelector("[data-auth-root]");
   const currentMode = authRoot?.dataset.authMode === "register" ? "register" : "login";
@@ -1427,6 +1528,19 @@ function renderGoogleLogin(options = {}) {
       return;
     }
 
+    if (runtimeData.isNativeApp) {
+      buttonHost.innerHTML = `<button type="button" class="secondary-btn auth-google__fallback auth-google__launcher" data-action="launch-google-login"${canUseNativeGoogle ? "" : " disabled"}>Continuar com Google</button>`;
+      buttonHost.dataset.googleRendered = `${runtimeData.googleClientId}:${panelMode}:native`;
+
+      if (status) {
+        status.hidden = false;
+        status.textContent = canUseNativeGoogle
+          ? "Use a conta Google do aparelho para entrar ou criar sua conta automaticamente."
+          : "Atualize o app da JL AXION para usar o login Google nativo.";
+      }
+      return;
+    }
+
     if (!window.google?.accounts?.id) {
       buttonHost.innerHTML = `<button type="button" class="secondary-btn auth-google__fallback auth-google__launcher" data-action="launch-google-login">Continuar com Google</button>`;
       buttonHost.removeAttribute("data-google-rendered");
@@ -1443,6 +1557,12 @@ function renderGoogleLogin(options = {}) {
       status.textContent = "";
     }
   });
+
+  if (runtimeData.isNativeApp) {
+    clearGoogleLoginRetry();
+    googleRenderRetryCount = 0;
+    return;
+  }
 
   if (!window.google?.accounts?.id) {
     if (canUseGoogle && (force || !fromRetry)) {
@@ -1541,7 +1661,7 @@ function bindActions() {
 
     if (action === "launch-google-login") {
       event.preventDefault();
-      launchGoogleLogin();
+      await launchGoogleLogin();
       return;
     }
 

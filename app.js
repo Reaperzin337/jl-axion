@@ -1861,7 +1861,7 @@ function renderFavoritePage() {
       '<a class="primary-btn" href="index.html">Explorar vitrine</a>'
     );
   } else {
-    container.innerHTML = favoriteProducts.map((product) => productCard(product)).join("");
+    container.innerHTML = favoriteProducts.map((product) => favoriteCard(product)).join("");
   }
 
   if (recommendations) {
@@ -3370,6 +3370,52 @@ function productCard(product, options = {}) {
       <div class="product-actions">
         <button type="button" class="primary-btn" data-action="add-to-cart" data-id="${product.id}">Comprar</button>
         <a class="secondary-btn" href="${detailsHref}">Detalhes</a>
+      </div>
+    </article>
+  `;
+}
+
+function favoriteCard(product) {
+  const discount = typeof product.oldPrice === "number" && product.oldPrice > product.price
+    ? percentage(product.oldPrice, product.price)
+    : 0;
+  const pixPrice = getPixPrice(product);
+  const detailsHref = `product.html?id=${encodeURIComponent(product.id)}`;
+  const [primarySignal, secondarySignal] = getProductSignals(product);
+
+  return `
+    <article class="favorite-card">
+      <a class="favorite-card__media" href="${detailsHref}" aria-label="Abrir detalhes de ${product.name}">
+        <span class="favorite-card__badge">${discount ? `-${discount}% OFF` : product.badge}</span>
+        <img src="${product.image}" alt="${product.name}">
+      </a>
+
+      <div class="favorite-card__body">
+        <div class="favorite-card__copy">
+          <span class="favorite-card__category">${product.category}</span>
+          <h3><a href="${detailsHref}">${product.name}</a></h3>
+          <p>${product.description}</p>
+        </div>
+
+        <div class="favorite-card__meta">
+          <span class="favorite-card__signal favorite-card__signal--accent">${primarySignal}</span>
+          <span class="favorite-card__signal">${secondarySignal}</span>
+          <span class="favorite-card__signal">${product.shipping || "Envio rapido"}</span>
+        </div>
+
+        <div class="favorite-card__price">
+          <div>
+            <strong>${money.format(product.price)}</strong>
+            ${product.oldPrice ? `<del>${money.format(product.oldPrice)}</del>` : ""}
+          </div>
+          <span>${pixPrice} no PIX</span>
+        </div>
+
+        <div class="favorite-card__actions">
+          <button type="button" class="primary-btn" data-action="add-to-cart" data-id="${product.id}">Levar ao carrinho</button>
+          <a class="secondary-btn" href="${detailsHref}">Ver detalhes</a>
+          <button type="button" class="ghost-btn" data-action="toggle-favorite" data-id="${product.id}">Remover</button>
+        </div>
       </div>
     </article>
   `;

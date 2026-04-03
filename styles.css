@@ -11658,3 +11658,79 @@ body.native-app[data-page="checkout"] .checkout-summary-card {
     grid-template-columns: 1fr;
   }
 }
+
+/* Performance and login polish 20260403c */
+.site-topbar,
+.site-header,
+.site-header__lower,
+.drawer-panel,
+.action-link,
+.menu-toggle,
+.nav-link,
+.shop-nav__link,
+.shop-nav__pill {
+  backdrop-filter: blur(8px);
+}
+
+.site-header,
+.site-header__lower,
+.drawer-panel {
+  box-shadow: 0 10px 24px rgba(6, 12, 22, 0.18);
+}
+
+.menu-toggle,
+.action-link,
+.nav-link,
+.shop-nav__link,
+.shop-nav__pill {
+  box-shadow: none;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.menu-toggle:hover,
+.action-link:hover,
+.nav-link:hover,
+.shop-nav__link:hover,
+.shop-nav__pill:hover {
+  transform: translateY(-1px);
+}
+
+.auth-google__button {
+  display: grid;
+  align-items: center;
+}
+
+.auth-google__button > div,
+.auth-google__button iframe,
+.auth-google__launcher {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.auth-google__launcher {
+  justify-content: center;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+html[data-theme="light"] .site-topbar,
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .site-header__lower,
+html[data-theme="light"] .drawer-panel {
+  box-shadow: 0 10px 22px rgba(48, 84, 126, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-toggle,
+  .action-link,
+  .nav-link,
+  .shop-nav__link,
+  .shop-nav__pill {
+    transition: none;
+  }
+}

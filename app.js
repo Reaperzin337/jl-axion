@@ -375,6 +375,10 @@ const runtimeData = {
 let whatsappScrollBound = false;
 let whatsappLastY = 0;
 let topbarResizeBound = false;
+let menuEscapeBound = false;
+let googleRenderRetryTimer = 0;
+let googleRenderRetryCount = 0;
+const MAX_GOOGLE_RENDER_RETRIES = 18;
 
 document.addEventListener("DOMContentLoaded", async () => {
   applyTheme(document.documentElement.dataset.theme || getStoredTheme() || getSystemTheme(), {
@@ -394,6 +398,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindActions();
   renderAll();
   syncThemeControls();
+  bindGoogleScriptLoad();
   renderGoogleLogin();
 });
 
@@ -986,11 +991,15 @@ function bindMenu() {
     link.addEventListener("click", closeMenu);
   });
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeMenu();
-    }
-  });
+  if (!menuEscapeBound) {
+    menuEscapeBound = true;
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        document.body.classList.remove("menu-open");
+        document.querySelector("[data-menu-drawer]")?.setAttribute("aria-hidden", "true");
+      }
+    });
+  }
 }
 
 function bindSearch() {
@@ -1301,7 +1310,67 @@ async function handleGoogleCredentialResponse(response) {
   }
 }
 
-function renderGoogleLogin() {
+function clearGoogleLoginRetry() {
+  if (googleRenderRetryTimer) {
+    window.clearTimeout(googleRenderRetryTimer);
+    googleRenderRetryTimer = 0;
+  }
+}
+
+function scheduleGoogleLoginRetry() {
+  if (googleRenderRetryCount >= MAX_GOOGLE_RENDER_RETRIES || googleRenderRetryTimer) {
+    return;
+  }
+
+  googleRenderRetryCount += 1;
+  googleRenderRetryTimer = window.setTimeout(() => {
+    googleRenderRetryTimer = 0;
+    renderGoogleLogin({ fromRetry: true });
+  }, 280);
+}
+
+function bindGoogleScriptLoad() {
+  const googleScript = document.querySelector('script[src*="accounts.google.com/gsi/client"]');
+
+  if (!googleScript || googleScript.dataset.bound === "true") {
+    return;
+  }
+
+  googleScript.dataset.bound = "true";
+
+  googleScript.addEventListener("load", () => {
+    googleRenderRetryCount = 0;
+    clearGoogleLoginRetry();
+    renderGoogleLogin({ force: true });
+  });
+
+  googleScript.addEventListener("error", () => {
+    clearGoogleLoginRetry();
+    document.querySelectorAll("[data-google-status]").forEach((status) => {
+      status.hidden = false;
+      status.textContent = "Nao foi possivel carregar o Google agora. Tente novamente em instantes.";
+    });
+  });
+}
+
+function launchGoogleLogin() {
+  if (window.google?.accounts?.id) {
+    try {
+      window.google.accounts.id.prompt();
+      return true;
+    } catch (error) {
+      renderGoogleLogin({ force: true });
+      return false;
+    }
+  }
+
+  renderGoogleLogin({ force: true });
+  showToast("Carregando acesso Google...");
+  return false;
+}
+
+function renderGoogleLogin(options = {}) {
+  const { force = false, fromRetry = false } = options;
   const wrappers = Array.from(document.querySelectorAll("[data-google-login]"));
 
   if (!wrappers.length) {
@@ -1358,15 +1427,32 @@ function renderGoogleLogin() {
       return;
     }
 
-    if (status) {
+    if (!window.google?.accounts?.id) {
+      buttonHost.innerHTML = `<button type="button" class="secondary-btn auth-google__fallback auth-google__launcher" data-action="launch-google-login">Continuar com Google</button>`;
+      buttonHost.removeAttribute("data-google-rendered");
+
+      if (status) {
+        status.hidden = false;
+        status.textContent = "O carregamento do Google esta quase pronto. Se o botao oficial nao aparecer, toque para tentar novamente.";
+      }
+      return;
+    }
+
+    if (status && !fromRetry) {
       status.hidden = true;
       status.textContent = "";
     }
   });
 
   if (!window.google?.accounts?.id) {
+    if (canUseGoogle && (force || !fromRetry)) {
+      scheduleGoogleLoginRetry();
+    }
     return;
   }
+
+  clearGoogleLoginRetry();
+  googleRenderRetryCount = 0;
 
   const renderKey = `${runtimeData.googleClientId}:${runtimeData.theme}`;
 
@@ -1450,6 +1536,12 @@ function bindActions() {
     if (action === "toggle-theme") {
       event.preventDefault();
       toggleTheme();
+      return;
+    }
+
+    if (action === "launch-google-login") {
+      event.preventDefault();
+      launchGoogleLogin();
       return;
     }
 

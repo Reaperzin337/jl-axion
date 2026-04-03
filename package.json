@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "agent:gemini": "node scripts/agente-gemini.js",
     "mobile:build": "node scripts/build-mobile-shell.mjs",
     "mobile:copy": "npm run mobile:build && npx cap copy",
     "mobile:sync": "npm run mobile:build && npx cap sync",
@@ -24,6 +25,7 @@
     "@google/genai": "^1.48.0",
     "bcryptjs": "^3.0.3",
     "connect-sqlite3": "^0.9.16",
+    "dotenv": "^17.4.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.1",
     "express-session": "^1.19.0",

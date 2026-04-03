@@ -127,6 +127,31 @@ Para ativar:
 3. opcionalmente ajuste `GEMINI_MODEL`
 4. reinicie o servidor ou rode novo deploy
 
+## Agente Gemini local para editar arquivos
+
+Se voce quiser usar o Gemini como um "agente" local para reescrever um arquivo inteiro com base em uma instrucao, o projeto ja vem com este comando:
+
+```bash
+npm run agent:gemini -- "styles.css" "Refine o header mobile e deixe a barra de busca mais equilibrada."
+```
+
+Como funciona:
+
+1. le o arquivo atual
+2. envia o conteudo completo para o Gemini com uma instrucao sua
+3. recebe o arquivo final completo
+4. salva um backup em `arquivo.ext.bak`
+5. sobrescreve o arquivo original com a nova versao
+
+Requisitos:
+
+- `GEMINI_API_KEY` configurada no `.env` ou nas variaveis do ambiente
+- opcionalmente `GEMINI_MODEL`
+
+Observacao:
+
+- por seguranca, o script so aceita arquivos dentro da pasta do projeto JL AXION
+
 Sem essa chave, o painel continua funcionando normalmente e a area de IA aparece apenas como "em configuracao".
 
 ## Estrutura principal

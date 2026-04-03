@@ -3,6 +3,10 @@
   "appName": "JL AXION",
   "webDir": "mobile-web",
   "backgroundColor": "#09111a",
+  "server": {
+    "url": "https://jlaxion.com.br",
+    "cleartext": false
+  },
   "android": {
     "allowMixedContent": false
   }

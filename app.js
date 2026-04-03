@@ -426,9 +426,25 @@ function seedData() {
 }
 
 function isNativeAppRuntime() {
+  try {
+    if (window.Capacitor?.isNativePlatform?.()) {
+      return true;
+    }
+
+    if (typeof window.Capacitor?.getPlatform === "function") {
+      const platform = window.Capacitor.getPlatform();
+      if (platform === "android" || platform === "ios") {
+        return true;
+      }
+    }
+  } catch (error) {
+    // Fallbacks below handle environments without Capacitor bridge.
+  }
+
   const userAgent = window.navigator.userAgent || "";
   const hostname = window.location.hostname || "";
-  return /Android|iPhone|iPad|iPod/i.test(userAgent) && hostname === "localhost";
+  const isWebViewLike = /\bwv\b/i.test(userAgent) || /Version\/4\.0/i.test(userAgent);
+  return /Android|iPhone|iPad|iPod/i.test(userAgent) && (hostname === "localhost" || isWebViewLike);
 }
 
 function applyEnvironmentClasses() {

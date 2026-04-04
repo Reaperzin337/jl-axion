@@ -10,6 +10,13 @@ const STORAGE_KEYS = {
   theme: "jlaxion-theme"
 };
 
+const RUNTIME_STYLESHEETS = [
+  {
+    id: "header-polish-styles",
+    href: "header-polish.css?v=20260404a"
+  }
+];
+
 let PRODUCTS = [
   {
     id: "pulse-lamp",
@@ -383,6 +390,7 @@ let nativeGoogleInitialized = false;
 let nativeGoogleInitializedClientId = "";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  ensureRuntimeStylesheets();
   applyTheme(document.documentElement.dataset.theme || getStoredTheme() || getSystemTheme(), {
     persist: Boolean(getStoredTheme())
   });
@@ -403,6 +411,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindGoogleScriptLoad();
   renderGoogleLogin();
 });
+
+function ensureRuntimeStylesheets() {
+  if (!document.head) {
+    return;
+  }
+
+  RUNTIME_STYLESHEETS.forEach((asset) => {
+    if (document.getElementById(asset.id)) {
+      return;
+    }
+
+    const link = document.createElement("link");
+    link.id = asset.id;
+    link.rel = "stylesheet";
+    link.href = asset.href;
+    document.head.appendChild(link);
+  });
+}
 
 function seedData() {
   if (!readStorage(STORAGE_KEYS.cart)) {
@@ -1917,6 +1943,12 @@ function updateProfileText() {
   const firstName = getGreetingName();
   const fullName = getFullProfileName();
   const isAuthenticated = getIsAuthenticated();
+  const headerLocationLine = (profile.address || "").trim() || "Informe seu CEP";
+  const headerLocationMeta = (profile.zip || "").trim()
+    ? `CEP ${String(profile.zip).trim()}`
+    : isAuthenticated
+      ? "Atualize o endereco"
+      : "Calcular frete";
 
   document.querySelectorAll("[data-profile-name]").forEach((element) => {
     element.textContent = firstName;
@@ -1940,6 +1972,18 @@ function updateProfileText() {
 
   document.querySelectorAll("[data-profile-initial]").forEach((element) => {
     element.textContent = firstName.charAt(0).toUpperCase();
+  });
+
+  document.querySelectorAll("[data-header-location-line]").forEach((element) => {
+    element.textContent = headerLocationLine;
+  });
+
+  document.querySelectorAll("[data-header-location-meta]").forEach((element) => {
+    element.textContent = headerLocationMeta;
+  });
+
+  document.querySelectorAll("[data-header-location-link]").forEach((element) => {
+    element.setAttribute("href", isAuthenticated ? "account-addresses.html" : "login.html");
   });
 }
 
@@ -3225,6 +3269,18 @@ function renderShell() {
   const accountInitial = greetingName.charAt(0).toUpperCase();
   const nextThemeLabel = runtimeData.theme === "light" ? "Tema escuro" : "Tema claro";
   const currentThemeLabel = runtimeData.theme === "light" ? "Claro" : "Escuro";
+  const shippingAddress = String(viewerProfile.address || "").trim();
+  const shippingZip = String(viewerProfile.zip || "").trim();
+  const headerLocationLine = shippingAddress || "Informe seu CEP";
+  const headerLocationMeta = shippingZip
+    ? `CEP ${shippingZip}`
+    : isAuthenticated
+      ? "Atualize o endereco"
+      : "Calcular frete";
+  const headerLocationHref = isAuthenticated ? "account-addresses.html" : "login.html";
+  const headerLocationTitle = shippingAddress
+    ? `${headerLocationLine} | ${headerLocationMeta}`
+    : headerLocationMeta;
   const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
   const activeNativeTab = currentPage.startsWith("promotions")
     ? "promotions"
@@ -3405,6 +3461,18 @@ function renderShell() {
             <a class="brand" href="index.html" aria-label="Ir para a home da JL AXION">
               <img class="brand__logo" src="assets/jl-axion-lockup.svg?v=20260330i" alt="JL AXION">
             </a>
+
+            <a
+              class="header-location"
+              href="${headerLocationHref}"
+              data-header-location-link
+              aria-label="Definir endereco de entrega"
+              title="${escapeAttribute(headerLocationTitle)}"
+            >
+              <span class="header-location__eyebrow">Enviar para</span>
+              <strong data-header-location-line>${escapeHtml(headerLocationLine)}</strong>
+              <span data-header-location-meta>${escapeHtml(headerLocationMeta)}</span>
+            </a>
           </div>
 
           <form class="site-header__search" data-site-search-form role="search" aria-label="Buscar produtos na JL AXION">
@@ -3440,10 +3508,6 @@ function renderShell() {
               <a class="shop-nav__link" href="${buildCategoryHref(category)}">${category}</a>
             `).join("")}
           </nav>
-          <div class="header-note">
-            <strong>Preco forte, campanhas claras e descoberta rapida</strong>
-            <span>Busca protagonista, departamentos organizados e vitrine mais proxima de varejo tech real.</span>
-          </div>
         </div>
       </div>
       </header>
